@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<block>
+  <name>OOK decoder</name>
+  <key>habets_ook_decode_bb</key>
+  <category>[habets]</category>
+  <import>import habets</import>
+  <make>habets.ook_decode_bb($omega, $offset, $zeroes)</make>
+  <param>
+    <name>Omega</name>
+    <key>omega</key>
+    <type>int</type>
+  </param>
+
+  <param>
+    <name>Offset</name>
+    <key>offset</key>
+    <type>int</type>
+  </param>
+
+  <param>
+    <name>Zeroes</name>
+    <key>zeroes</key>
+    <type>int</type>
+  </param>
+
+  <sink>
+    <name>in</name>
+    <type>byte</type>
+  </sink>
+  <source>
+    <name>pdus</name>
+    <type>message</type>
+  </source>
+</block>

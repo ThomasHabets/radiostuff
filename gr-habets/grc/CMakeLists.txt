@@ -18,5 +18,6 @@
 # Boston, MA 02110-1301, USA.
 
 install(FILES
-    habets_ook_decode_bb.xml DESTINATION share/gnuradio/grc/blocks
+    habets_ook_decode_bb.xml
+    habets_pn_decode_bb.xml DESTINATION share/gnuradio/grc/blocks
 )

@@ -31,4 +31,5 @@ except ImportError:
 	pass
 
 # import any pure python here
+from pn_decode_bb import pn_decode_bb
 #

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<block>
+  <name>Positive/Negative decoder</name>
+  <key>habets_pn_decode_bb</key>
+  <category>[habets]</category>
+  <import>import habets</import>
+  <make>habets.pn_decode_bb($prefix)</make>
+  <param>
+    <name>Prefix</name>
+    <key>prefix</key>
+    <type>int_vector</type>
+  </param>
+  <sink>
+    <name>in</name>
+    <type>byte</type>
+  </sink>
+  <source>
+    <name>pdus</name>
+    <type>message</type>
+  </source>
+</block>

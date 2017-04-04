@@ -2,6 +2,7 @@
 
 import numpy as np
 import sys
+import time
 
 def show_packet(packet):
     if len(packet) == 0:
@@ -13,7 +14,7 @@ def show_packet(packet):
             payload = packet[i:]
             break
     if payload:
-        print [hex(x) for x in np.packbits(np.array(payload))]
+        print time.time(), ' '.join([hex(x) for x in np.packbits(np.array(payload))])
     else:
         print packet
 

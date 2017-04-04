@@ -1,0 +1,9 @@
+#!/bin/sh
+
+grep -h '0x55 0x45 0xba 0x91 0x0 0x[35]1' "$@" \
+    | awk '{print int($1) " " $7}' \
+    | sed -r 's/(0x..).$/\1/' \
+    | sort -n \
+    | uniq \
+    | sed 's/0x31$/1/;s/0x51$/0/' \
+	  > onoff.data

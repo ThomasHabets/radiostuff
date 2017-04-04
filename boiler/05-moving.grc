@@ -46,7 +46,7 @@
     </param>
     <param>
       <key>id</key>
-      <value>top_block</value>
+      <value>b05_moving</value>
     </param>
     <param>
       <key>max_nouts</key>
@@ -249,7 +249,7 @@
     </param>
     <param>
       <key>threshold</key>
-      <value>-42</value>
+      <value>-37</value>
     </param>
   </block>
   <block>
@@ -516,7 +516,7 @@
     </param>
     <param>
       <key>ctrlpanel</key>
-      <value>False</value>
+      <value>True</value>
     </param>
     <param>
       <key>affinity</key>

@@ -179,7 +179,7 @@
     </param>
     <param>
       <key>threshold</key>
-      <value>-40</value>
+      <value>-37</value>
     </param>
   </block>
   <block>
@@ -454,7 +454,7 @@
     </param>
     <param>
       <key>ctrlpanel</key>
-      <value>False</value>
+      <value>True</value>
     </param>
     <param>
       <key>affinity</key>
@@ -757,7 +757,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(780, 248)</value>
+      <value>(796, 248)</value>
     </param>
     <param>
       <key>gui_hint</key>

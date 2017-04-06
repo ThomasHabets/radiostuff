@@ -128,7 +128,7 @@
     </param>
     <param>
       <key>id</key>
-      <value>deci1</value>
+      <value>deci</value>
     </param>
     <param>
       <key>value</key>
@@ -272,7 +272,7 @@
     </param>
     <param>
       <key>decim</key>
-      <value>deci1</value>
+      <value>deci</value>
     </param>
     <param>
       <key>_enabled</key>
@@ -418,7 +418,7 @@
     </param>
     <param>
       <key>length</key>
-      <value>int(samp_rate/deci1/baud)</value>
+      <value>int(samp_rate/deci/baud)</value>
     </param>
     <param>
       <key>max_iter</key>
@@ -434,7 +434,7 @@
     </param>
     <param>
       <key>scale</key>
-      <value>1/(1.0*samp_rate/deci1/baud)</value>
+      <value>1/(1.0*samp_rate/deci/baud)</value>
     </param>
     <param>
       <key>type</key>
@@ -804,11 +804,11 @@
     </param>
     <param>
       <key>size</key>
-      <value>int(0.05*samp_rate/deci1)</value>
+      <value>int(0.05*samp_rate/deci)</value>
     </param>
     <param>
       <key>srate</key>
-      <value>samp_rate/deci1</value>
+      <value>samp_rate/deci</value>
     </param>
     <param>
       <key>tr_chan</key>

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<block>
+  <name>Packet size filter</name>
+  <key>habets_packet_size_filter</key>
+  <category>[habets]</category>
+  <import>import habets</import>
+  <make>habets.packet_size_filter($min_size, $max_size)</make>
+  <param>
+    <name>Min size</name>
+    <key>min_size</key>
+    <type>int</type>
+  </param>
+
+  <param>
+    <name>Max size</name>
+    <key>max_size</key>
+    <type>int</type>
+  </param>
+
+  <sink>
+    <name>pdus</name>
+    <type>message</type>
+  </sink>
+  <source>
+    <name>pdus</name>
+    <type>message</type>
+  </source>
+</block>

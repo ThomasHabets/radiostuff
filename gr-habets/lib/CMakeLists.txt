@@ -27,6 +27,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 list(APPEND habets_sources
     ook_decode_bb_impl.cc
+    packet_size_filter_impl.cc
 )
 
 set(habets_sources "${habets_sources}" PARENT_SCOPE)

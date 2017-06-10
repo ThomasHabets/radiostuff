@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2017 <+YOU OR YOUR COMPANY+>.
+ * Copyright 2017 Thomas Habets <thomas@habets.se>
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +29,10 @@ namespace gr {
   namespace habets {
 
     /*!
-     * \brief <+description of block+>
+     * \brief Decode OOK
      * \ingroup habets
      *
+     * More description here. Lalala.
      */
     class HABETS_API ook_decode_bb : virtual public gr::sync_block
     {
@@ -39,12 +40,14 @@ namespace gr {
       typedef boost::shared_ptr<ook_decode_bb> sptr;
 
       /*!
-       * \brief Return a shared_ptr to a new instance of habets::ook_decode_bb.
+       * \brief Decode stream of bits into PDUs.
        *
-       * To avoid accidental use of raw pointers, habets::ook_decode_bb's
-       * constructor is in a private implementation
-       * class. habets::ook_decode_bb::make is the public interface for
-       * creating new instances.
+       * Incoming bytes that are zero become zeroes, and everything
+       * else becomes ones.
+       *
+       * \param omega Estimated width of a bit, in samples. \n
+       * \param offset Index of sample into bit that is used. \n
+       * \param zeroes How many samples of zeroes that mean "end of packet".
        */
       static sptr make(int omega, int offset, int zeroes);
     };

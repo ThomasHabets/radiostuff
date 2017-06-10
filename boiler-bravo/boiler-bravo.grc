@@ -769,7 +769,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(296, 568)</value>
+      <value>(136, 512)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -882,7 +882,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(144, 712)</value>
+      <value>(48, 712)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1198,6 +1198,53 @@
     <param>
       <key>zeroes</key>
       <value>1000/deci</value>
+    </param>
+  </block>
+  <block>
+    <key>habets_packet_size_filter</key>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(256, 724)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>180</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>habets_packet_size_filter_0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>max_size</key>
+      <value>10000</value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>min_size</key>
+      <value>4</value>
     </param>
   </block>
   <block>
@@ -4055,12 +4102,18 @@
   </connection>
   <connection>
     <source_block_id>habets_ook_decode_bb_0</source_block_id>
+    <sink_block_id>habets_packet_size_filter_0</sink_block_id>
+    <source_key>pdus</source_key>
+    <sink_key>pdus</sink_key>
+  </connection>
+  <connection>
+    <source_block_id>habets_packet_size_filter_0</source_block_id>
     <sink_block_id>blocks_message_debug_0</sink_block_id>
     <source_key>pdus</source_key>
     <sink_key>print_pdu</sink_key>
   </connection>
   <connection>
-    <source_block_id>habets_ook_decode_bb_0</source_block_id>
+    <source_block_id>habets_packet_size_filter_0</source_block_id>
     <sink_block_id>blocks_socket_pdu_0</sink_block_id>
     <source_key>pdus</source_key>
     <sink_key>pdus</sink_key>

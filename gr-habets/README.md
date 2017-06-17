@@ -5,7 +5,8 @@ https://github.com/ThomasHabets/radiostuff/gr-habets
 ## Installing
 
 ```
-apt-get install gnuradio-dev swig
+export CXXFLAGS=-std=c++11
+apt-get install gnuradio-dev swig doxygen
 mkdir build
 cd build
 cmake ..

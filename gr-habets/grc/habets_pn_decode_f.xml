@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<block>
+  <name>Positive/negative decoder</name>
+  <key>habets_pn_decode_f</key>
+  <category>[habets]</category>
+  <import>import habets</import>
+  <make>habets.pn_decode_f($sps, $offset, $epsilon, $nulls)</make>
+
+  <param>
+    <name>Samples per symbol</name>
+    <key>sps</key>
+    <type>int</type>
+  </param>
+
+  <param>
+    <name>Offset</name>
+    <key>offset</key>
+    <type>int</type>
+  </param>
+
+  <param>
+    <name>Epsilon</name>
+    <key>epsilon</key>
+    <type>float</type>
+  </param>
+
+  <param>
+    <name>Nulls</name>
+    <key>nulls</key>
+    <type>int</type>
+  </param>
+
+  <sink>
+    <name>in</name>
+    <type>float</type>
+  </sink>
+
+  <source>
+    <name>pdus</name>
+    <type>message</type>
+  </source>
+</block>

@@ -23,5 +23,6 @@
 install(FILES
     api.h
     ook_decode_b.h
-    packet_size_filter.h DESTINATION include/habets
+    packet_size_filter.h
+    pn_decode_f.h DESTINATION include/habets
 )

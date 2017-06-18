@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <block>
-  <name>Positive/Negative decoder</name>
+  <name>Positive/Negative identity decoder</name>
   <key>habets_pn_decode_identity_b</key>
   <category>[habets]</category>
   <import>import habets</import>

@@ -10,6 +10,7 @@
 %{
 #include "habets/ook_decode_b.h"
 #include "habets/packet_size_filter.h"
+#include "habets/pn_decode_f.h"
 %}
 
 
@@ -17,3 +18,5 @@
 GR_SWIG_BLOCK_MAGIC2(habets, ook_decode_b);
 %include "habets/packet_size_filter.h"
 GR_SWIG_BLOCK_MAGIC2(habets, packet_size_filter);
+%include "habets/pn_decode_f.h"
+GR_SWIG_BLOCK_MAGIC2(habets, pn_decode_f);

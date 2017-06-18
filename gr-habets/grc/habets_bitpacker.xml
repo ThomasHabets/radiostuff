@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<block>
+  <name>Bitpacker</name>
+  <key>habets_bitpacker</key>
+  <category>[habets]</category>
+  <import>import habets</import>
+  <make>habets.bitpacker()</make>
+  <sink>
+    <name>pdus</name>
+    <type>message</type>
+  </sink>
+  <source>
+    <name>pdus</name>
+    <type>message</type>
+  </source>
+</block>

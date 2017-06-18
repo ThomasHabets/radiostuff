@@ -29,6 +29,7 @@ list(APPEND habets_sources
     ook_decode_b_impl.cc
     packet_size_filter_impl.cc
     pn_decode_f_impl.cc
+    bitpacker_impl.cc
 )
 
 set(habets_sources "${habets_sources}" PARENT_SCOPE)

@@ -24,9 +24,9 @@ import time
 from gnuradio import gr, gr_unittest
 from gnuradio.gr import pmt
 from gnuradio import blocks
-from pn_decode_bb import pn_decode_bb
+from pn_decode_identity_b import pn_decode_identity_b
 
-class qa_pn_decode_bb (gr_unittest.TestCase):
+class qa_pn_decode_identity_b (gr_unittest.TestCase):
 
     def setUp (self):
         self.tb = gr.top_block ()
@@ -52,7 +52,7 @@ class qa_pn_decode_bb (gr_unittest.TestCase):
                 ),
         ):
             src = blocks.vector_source_b(src_data)
-            decode = pn_decode_bb([0])
+            decode = pn_decode_identity_b([0])
             dbg = blocks.message_debug()
             self.tb.connect(src, decode)
             self.tb.msg_connect(decode, "pdus", dbg, "store")
@@ -76,4 +76,4 @@ class qa_pn_decode_bb (gr_unittest.TestCase):
 
 
 if __name__ == '__main__':
-    gr_unittest.run(qa_pn_decode_bb, "qa_pn_decode_bb.xml")
+    gr_unittest.run(qa_pn_decode_identity_b, "qa_pn_decode_identity_b.xml")

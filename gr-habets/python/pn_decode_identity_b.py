@@ -39,13 +39,13 @@ def bits_to_bytes(bits):
             return
         yield bits_to_byte(b)
 
-class pn_decode_bb(gr.basic_block):
+class pn_decode_identity_b(gr.basic_block):
     """
-    docstring for block pn_decode_bb
+    docstring for block pn_decode_identity_b
     """
     def __init__(self, prefix):
         gr.basic_block.__init__(self,
-            name="pn_decode_bb",
+            name="pn_decode_identity_b",
             in_sig=[numpy.byte],
             out_sig=[])
         self.message_port_register_out(pmt.intern("pdus"))

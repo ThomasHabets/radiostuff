@@ -587,7 +587,7 @@
     </param>
   </block>
   <block>
-    <key>habets_pn_decode_bb</key>
+    <key>habets_pn_decode_identity_b</key>
     <param>
       <key>alias</key>
       <value></value>
@@ -614,7 +614,7 @@
     </param>
     <param>
       <key>id</key>
-      <value>habets_pn_decode_bb_0</value>
+      <value>habets_pn_decode_identity_b_0</value>
     </param>
     <param>
       <key>maxoutbuf</key>
@@ -2056,7 +2056,7 @@
   </connection>
   <connection>
     <source_block_id>blocks_float_to_char_0</source_block_id>
-    <sink_block_id>habets_pn_decode_bb_0</sink_block_id>
+    <sink_block_id>habets_pn_decode_identity_b_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>
@@ -2073,13 +2073,13 @@
     <sink_key>0</sink_key>
   </connection>
   <connection>
-    <source_block_id>habets_pn_decode_bb_0</source_block_id>
+    <source_block_id>habets_pn_decode_identity_b_0</source_block_id>
     <sink_block_id>blocks_message_debug_0</sink_block_id>
     <source_key>pdus</source_key>
     <sink_key>print_pdu</sink_key>
   </connection>
   <connection>
-    <source_block_id>habets_pn_decode_bb_0</source_block_id>
+    <source_block_id>habets_pn_decode_identity_b_0</source_block_id>
     <sink_block_id>blocks_socket_pdu_0</sink_block_id>
     <source_key>pdus</source_key>
     <sink_key>pdus</sink_key>

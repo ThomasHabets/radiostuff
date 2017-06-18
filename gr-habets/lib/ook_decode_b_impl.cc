@@ -24,7 +24,7 @@
 
 #include <gnuradio/blocks/pdu.h>
 #include <gnuradio/io_signature.h>
-#include "ook_decode_bb_impl.h"
+#include "ook_decode_b_impl.h"
 
 
 namespace gr {
@@ -71,17 +71,17 @@ namespace gr {
       return ret;
     }
 
-    ook_decode_bb::sptr
-    ook_decode_bb::make(int omega, int offset, int zeroes)
+    ook_decode_b::sptr
+    ook_decode_b::make(int omega, int offset, int zeroes)
     {
       return gnuradio::get_initial_sptr
-        (new ook_decode_bb_impl(omega, offset, zeroes));
+        (new ook_decode_b_impl(omega, offset, zeroes));
     }
 
     /*
      */
-    ook_decode_bb_impl::ook_decode_bb_impl(int omega, int offset, int zeroes)
-      : gr::sync_block("ook_decode_bb",
+    ook_decode_b_impl::ook_decode_b_impl(int omega, int offset, int zeroes)
+      : gr::sync_block("ook_decode_b",
               gr::io_signature::make(1, 1, sizeof(char)),
                        gr::io_signature::make(0, 0, 0)),
         omega_(omega), offset_(offset), zeroes_(zeroes)
@@ -91,7 +91,7 @@ namespace gr {
     }
 
     void
-    ook_decode_bb_impl::reset()
+    ook_decode_b_impl::reset()
     {
       current_bits_.clear();
       current_zeroes_ = 0;
@@ -102,12 +102,12 @@ namespace gr {
     /*
      * Our virtual destructor.
      */
-    ook_decode_bb_impl::~ook_decode_bb_impl()
+    ook_decode_b_impl::~ook_decode_b_impl()
     {
     }
 
     int
-    ook_decode_bb_impl::work(int noutput_items,
+    ook_decode_b_impl::work(int noutput_items,
         gr_vector_const_void_star &input_items,
         gr_vector_void_star &output_items)
     {

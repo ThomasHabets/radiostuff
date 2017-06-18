@@ -20,8 +20,8 @@
 
 #include <gnuradio/attributes.h>
 #include <cppunit/TestAssert.h>
-#include "qa_ook_decode_bb.h"
-#include <habets/ook_decode_bb.h>
+#include "qa_ook_decode_b.h"
+#include <habets/ook_decode_b.h>
 
 namespace gr {
   namespace habets {
@@ -29,7 +29,7 @@ namespace gr {
     std::vector<uint8_t> bits_to_bytes(const std::vector<char>&);
 
     void
-    qa_ook_decode_bb::bits_to_byte()
+    qa_ook_decode_b::bits_to_byte()
     {
       std::vector<char> bits;
       CPPUNIT_ASSERT_EQUAL(uint8_t(0), gr::habets::bits_to_byte(&bits[0], &bits[bits.size()]));
@@ -60,7 +60,7 @@ namespace gr {
     }
 
     void
-    qa_ook_decode_bb::bits_to_bytes()
+    qa_ook_decode_b::bits_to_bytes()
     {
       std::vector<char> bits(9);
       bits[0] = 1;

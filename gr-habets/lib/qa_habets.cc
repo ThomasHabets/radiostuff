@@ -26,12 +26,12 @@
  */
 
 #include "qa_habets.h"
-#include "qa_ook_decode_bb.h"
+#include "qa_ook_decode_b.h"
 
 CppUnit::TestSuite *
 qa_habets::suite()
 {
   CppUnit::TestSuite *s = new CppUnit::TestSuite("habets");
-  s->addTest(gr::habets::qa_ook_decode_bb::suite());
+  s->addTest(gr::habets::qa_ook_decode_b::suite());
   return s;
 }

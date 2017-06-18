@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef _QA_OOK_DECODE_BB_H_
-#define _QA_OOK_DECODE_BB_H_
+#ifndef _QA_OOK_DECODE_B_H_
+#define _QA_OOK_DECODE_B_H_
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/TestCase.h>
@@ -27,9 +27,9 @@
 namespace gr {
   namespace habets {
 
-    class qa_ook_decode_bb : public CppUnit::TestCase {
+    class qa_ook_decode_b : public CppUnit::TestCase {
     public:
-      CPPUNIT_TEST_SUITE(qa_ook_decode_bb);
+      CPPUNIT_TEST_SUITE(qa_ook_decode_b);
       CPPUNIT_TEST(bits_to_byte);
       CPPUNIT_TEST(bits_to_bytes);
       CPPUNIT_TEST_SUITE_END();
@@ -42,7 +42,7 @@ namespace gr {
   } /* namespace ask */
 } /* namespace gr */
 
-#endif /* _QA_OOK_DECODE_BB_H_ */
+#endif /* _QA_OOK_DECODE_B_H_ */
 /* ---- Emacs Variables ----
  * Local Variables:
  * c-basic-offset: 2

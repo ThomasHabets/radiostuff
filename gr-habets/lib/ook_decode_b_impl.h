@@ -18,15 +18,15 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_HABETS_OOK_DECODE_BB_IMPL_H
-#define INCLUDED_HABETS_OOK_DECODE_BB_IMPL_H
+#ifndef INCLUDED_HABETS_OOK_DECODE_B_IMPL_H
+#define INCLUDED_HABETS_OOK_DECODE_B_IMPL_H
 
-#include <habets/ook_decode_bb.h>
+#include <habets/ook_decode_b.h>
 
 namespace gr {
   namespace habets {
 
-    class ook_decode_bb_impl : public ook_decode_bb {
+    class ook_decode_b_impl : public ook_decode_b {
     private:
       // Expected bit spacing in samples.
       const int omega_;
@@ -54,8 +54,8 @@ namespace gr {
       void reset();
 
     public:
-      ook_decode_bb_impl(int omega, int offset, int zeroes);
-      ~ook_decode_bb_impl();
+      ook_decode_b_impl(int omega, int offset, int zeroes);
+      ~ook_decode_b_impl();
 
       int work(int noutput_items,
                gr_vector_const_void_star &input_items,
@@ -65,7 +65,7 @@ namespace gr {
   } // namespace habets
 } // namespace gr
 
-#endif /* INCLUDED_HABETS_OOK_DECODE_BB_IMPL_H */
+#endif /* INCLUDED_HABETS_OOK_DECODE_B_IMPL_H */
 /* ---- Emacs Variables ----
  * Local Variables:
  * c-basic-offset: 2

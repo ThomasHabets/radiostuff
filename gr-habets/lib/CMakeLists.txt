@@ -26,7 +26,7 @@ include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 
 list(APPEND habets_sources
-    ook_decode_bb_impl.cc
+    ook_decode_b_impl.cc
     packet_size_filter_impl.cc
 )
 
@@ -62,8 +62,8 @@ include_directories(${CPPUNIT_INCLUDE_DIRS})
 list(APPEND test_habets_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/test_habets.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/qa_habets.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/ook_decode_bb_impl.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/qa_ook_decode_bb.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/ook_decode_b_impl.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/qa_ook_decode_b.cc
 )
 # TODO: Impl should not be in that list.
 

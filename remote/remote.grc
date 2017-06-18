@@ -570,7 +570,7 @@
     </param>
   </block>
   <block>
-    <key>habets_ook_decode_bb</key>
+    <key>habets_ook_decode_b</key>
     <param>
       <key>alias</key>
       <value></value>
@@ -597,7 +597,7 @@
     </param>
     <param>
       <key>id</key>
-      <value>habets_ook_decode_bb_0</value>
+      <value>habets_ook_decode_b_0</value>
     </param>
     <param>
       <key>maxoutbuf</key>
@@ -2503,18 +2503,18 @@
   </connection>
   <connection>
     <source_block_id>digital_binary_slicer_fb_1</source_block_id>
-    <sink_block_id>habets_ook_decode_bb_0</sink_block_id>
+    <sink_block_id>habets_ook_decode_b_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>
   <connection>
-    <source_block_id>habets_ook_decode_bb_0</source_block_id>
+    <source_block_id>habets_ook_decode_b_0</source_block_id>
     <sink_block_id>blocks_message_debug_0</sink_block_id>
     <source_key>pdus</source_key>
     <sink_key>print_pdu</sink_key>
   </connection>
   <connection>
-    <source_block_id>habets_ook_decode_bb_0</source_block_id>
+    <source_block_id>habets_ook_decode_b_0</source_block_id>
     <sink_block_id>blocks_socket_pdu_0_0</sink_block_id>
     <source_key>pdus</source_key>
     <sink_key>pdus</sink_key>

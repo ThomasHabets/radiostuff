@@ -26,7 +26,7 @@ from gnuradio import blocks
 import time
 import habets_swig as habets
 
-class qa_ook_decode_bb (gr_unittest.TestCase):
+class qa_ook_decode_b (gr_unittest.TestCase):
 
     def setUp (self):
         self.tb = gr.top_block ()
@@ -45,7 +45,7 @@ class qa_ook_decode_bb (gr_unittest.TestCase):
             ),
         ):
             src = blocks.vector_source_b(src_data)
-            decode = habets.ook_decode_bb(3, 1, 100)
+            decode = habets.ook_decode_b(3, 1, 100)
             dbg = blocks.message_debug()
             self.tb.connect(src, decode)
             self.tb.msg_connect(decode, "pdus", dbg, "store")
@@ -68,4 +68,4 @@ class qa_ook_decode_bb (gr_unittest.TestCase):
                 raise
 
 if __name__ == '__main__':
-    gr_unittest.run(qa_ook_decode_bb, "qa_ook_decode_bb.xml")
+    gr_unittest.run(qa_ook_decode_b, "qa_ook_decode_b.xml")

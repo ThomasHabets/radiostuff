@@ -22,6 +22,6 @@
 ########################################################################
 install(FILES
     api.h
-    ook_decode_bb.h
+    ook_decode_b.h
     packet_size_filter.h DESTINATION include/habets
 )

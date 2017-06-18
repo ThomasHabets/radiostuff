@@ -19,8 +19,8 @@
  */
 
 
-#ifndef INCLUDED_HABETS_OOK_DECODE_BB_H
-#define INCLUDED_HABETS_OOK_DECODE_BB_H
+#ifndef INCLUDED_HABETS_OOK_DECODE_B_H
+#define INCLUDED_HABETS_OOK_DECODE_B_H
 
 #include <habets/api.h>
 #include <gnuradio/sync_block.h>
@@ -34,10 +34,10 @@ namespace gr {
      *
      * More description here. Lalala.
      */
-    class HABETS_API ook_decode_bb : virtual public gr::sync_block
+    class HABETS_API ook_decode_b : virtual public gr::sync_block
     {
      public:
-      typedef boost::shared_ptr<ook_decode_bb> sptr;
+      typedef boost::shared_ptr<ook_decode_b> sptr;
 
       /*!
        * \brief Decode stream of bits into PDUs.
@@ -55,5 +55,5 @@ namespace gr {
   } // namespace habets
 } // namespace gr
 
-#endif /* INCLUDED_HABETS_OOK_DECODE_BB_H */
+#endif /* INCLUDED_HABETS_OOK_DECODE_B_H */
 

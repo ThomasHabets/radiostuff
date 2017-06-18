@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <block>
   <name>OOK decoder</name>
-  <key>habets_ook_decode_bb</key>
+  <key>habets_ook_decode_b</key>
   <category>[habets]</category>
   <import>import habets</import>
-  <make>habets.ook_decode_bb($omega, $offset, $zeroes)</make>
+  <make>habets.ook_decode_b($omega, $offset, $zeroes)</make>
   <param>
     <name>Omega</name>
     <key>omega</key>

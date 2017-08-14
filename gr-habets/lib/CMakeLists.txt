@@ -77,6 +77,7 @@ target_link_libraries(
   ${Boost_LIBRARIES}
   ${CPPUNIT_LIBRARIES}
   gnuradio-habets
+  gnuradio-pmt
 )
 
 GR_ADD_TEST(test_habets test-habets)

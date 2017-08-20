@@ -48,3 +48,4 @@ GR_ADD_TEST(qa_pn_decode_f ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_p
 GR_ADD_TEST(qa_bitpacker ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_bitpacker.py)
 GR_ADD_TEST(qa_pn_source_f ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_pn_source_f.py)
 GR_ADD_TEST(qa_file_pdu_generator ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_file_pdu_generator.py)
+GR_ADD_TEST(qa_bitunpacker ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_bitunpacker.py)

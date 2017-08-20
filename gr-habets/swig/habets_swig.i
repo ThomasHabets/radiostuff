@@ -14,6 +14,7 @@
 #include "habets/bitpacker.h"
 #include "habets/pn_source_f.h"
 #include "habets/file_pdu_generator.h"
+#include "habets/bitunpacker.h"
 %}
 
 
@@ -29,3 +30,5 @@ GR_SWIG_BLOCK_MAGIC2(habets, bitpacker);
 GR_SWIG_BLOCK_MAGIC2(habets, pn_source_f);
 %include "habets/file_pdu_generator.h"
 GR_SWIG_BLOCK_MAGIC2(habets, file_pdu_generator);
+%include "habets/bitunpacker.h"
+GR_SWIG_BLOCK_MAGIC2(habets, bitunpacker);

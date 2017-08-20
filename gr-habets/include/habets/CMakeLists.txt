@@ -27,5 +27,6 @@ install(FILES
     pn_decode_f.h
     bitpacker.h
     pn_source_f.h
-    file_pdu_generator.h DESTINATION include/habets
+    file_pdu_generator.h
+    bitunpacker.h DESTINATION include/habets
 )

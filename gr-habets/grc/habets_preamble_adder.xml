@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<block>
+  <name>preamble_adder</name>
+  <key>habets_preamble_adder</key>
+  <category>[habets]</category>
+  <import>import habets</import>
+  <make>habets.preamble_adder($preamble)</make>
+  <param>
+    <name>Preamble</name>
+    <key>preamble</key>
+    <type>int_vector</type>
+  </param>
+  <sink>
+    <name>in</name>
+    <type>message</type>
+  </sink>
+
+  <source>
+    <name>out</name>
+    <type>message</type>
+  </source>
+</block>

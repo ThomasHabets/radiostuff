@@ -37,13 +37,13 @@ class preamble_stripper(gr.basic_block):
         self.message_port_register_in(pmt.intern('in'))
         self.set_msg_handler(pmt.intern('in'), self._handle_msg)
         self.prefix = prefix
-        self.search = 8
+        self.search = len(prefix)*2
 
     def _handle_msg(self, msg_pmt):
         bits = pmt.u8vector_elements(pmt.cdr(msg_pmt))
         
         found = None
-        for i in range(self.search):
+        for i in range(self.search-1, -1, -1):
             candidate = list(bits[i:i+len(self.prefix)])
             if candidate == self.prefix:
                 found = i

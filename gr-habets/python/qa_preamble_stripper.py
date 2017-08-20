@@ -52,6 +52,14 @@ class qa_preamble_stripper (gr_unittest.TestCase):
                     [0,1,0,1,0,0,1],
                     [0,0,1],
                 ),
+                ( # Garbage beginning.
+                    [1,1,0,1,0,1,0,0,1],
+                    [0,0,1],
+                ),
+                ( # Pick last preamble.
+                    [0,1,0,1,0,1,0,0,1],
+                    [0,0,1],
+                ),
         ):
             if not expected_result:
                 continue
@@ -77,7 +85,7 @@ class qa_preamble_stripper (gr_unittest.TestCase):
                 print "--"
                 print "Source:", src_data
                 print "Want:  ", expected_result
-                print "Got:   ", res
+                print "Got:   ", list(res)
                 raise
 
 

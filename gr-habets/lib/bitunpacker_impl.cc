@@ -56,8 +56,6 @@ namespace gr {
 		  gr::io_signature::make(0,0,0),
                   gr::io_signature::make(0,0,0))
     {
-      std::cerr << "Setup\n";
-      std::cout << "Setup\n";
       message_port_register_in(pmt::intern("in"));
       set_msg_handler(pmt::intern("in"), [this](pmt::pmt_t msg) {
           pmt::pmt_t meta = pmt::car(msg);
@@ -67,7 +65,6 @@ namespace gr {
           const std::vector<uint8_t> out = bytes_to_bits(std::vector<uint8_t>(&bits[0], &bits[len]));
           const pmt::pmt_t vecpmt(pmt::make_blob(&out[0], out.size()));
           const pmt::pmt_t pdu(pmt::cons(meta, vecpmt));
-          std::cerr << "Publish a PDU\n";
           message_port_pub(pmt::intern("out"), pdu);
       });
       message_port_register_out(pmt::intern("out"));

@@ -55,12 +55,17 @@ class qa_preamble_stripper (gr_unittest.TestCase):
         ):
             if not expected_result:
                 continue
-            src = blocks.vector_source_f([float(x) for x in src_data])
             strip = preamble_stripper(prefix=[0,1,0,1])
             dbg = blocks.message_debug()
             self.tb.msg_connect(strip, "out", dbg, "store")
             self.tb.start()
-            strip.to_basic_block()._post(pmt.intern("in"), pmt.cons(pmt.PMT_NIL, pmt.init_u8vector(len(src_data), src_data)))
+            strip.to_basic_block()._post(
+                pmt.intern("in"),
+                pmt.cons(
+                    pmt.PMT_NIL,
+                    pmt.init_u8vector(len(src_data), src_data)
+                )
+            )
             while dbg.num_messages() < 1:
                 time.sleep(0.1)
             self.tb.stop()

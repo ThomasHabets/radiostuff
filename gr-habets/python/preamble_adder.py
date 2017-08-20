@@ -19,35 +19,31 @@
 # Boston, MA 02110-1301, USA.
 # 
 
-import numpy
 from gnuradio import gr
 from gnuradio.gr import pmt
 
 class preamble_adder(gr.basic_block):
     """
-    docstring for block preamble_adder
+    Add a preamble to a PDU.
     """
     def __init__(self, preamble):
         gr.basic_block.__init__(self,
             name="preamble_adder",
             in_sig=[],
             out_sig=[])
-        self.message_port_register_out(pmt.intern('out'))
-        self.message_port_register_in(pmt.intern('in'))
-        self.set_msg_handler(pmt.intern('in'), self._handle_msg)
+        self.message_port_register_out(pmt.intern("out"))
+        self.message_port_register_in(pmt.intern("in"))
+        self.set_msg_handler(pmt.intern("in"), self._handle_msg)
         self.preamble = preamble
 
     def _handle_msg(self, msg_pmt):
         bits = list(self.preamble) + list(pmt.u8vector_elements(pmt.cdr(msg_pmt)))
-        vec = pmt.make_u8vector(len(bits), 0)
-        for n, b in enumerate(bits):
-            pmt.u8vector_set(vec, n, b)
-        self.message_port_pub(pmt.intern('out'), pmt.cons(pmt.PMT_NIL, vec))
+        vec = pmt.init_u8vector(len(bits), bits)
+        self.message_port_pub(pmt.intern("out"), pmt.cons(pmt.PMT_NIL, vec))
         
     def forecast(self, noutput_items, ninput_items_required):
-        #setup size of input_items[i] for work call
-        for i in range(len(ninput_items_required)):
-            ninput_items_required[i] = noutput_items
+        # Does not consume streams.
+        pass
 
     def general_work(self, input_items, output_items):
         return 0

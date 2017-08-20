@@ -19,8 +19,12 @@
 # Boston, MA 02110-1301, USA.
 # 
 
-from gnuradio import gr, gr_unittest
+import time
+
 from gnuradio import blocks
+from gnuradio import gr, gr_unittest
+from gnuradio.gr import pmt
+
 from preamble_adder import preamble_adder
 
 class qa_preamble_adder (gr_unittest.TestCase):
@@ -32,10 +36,50 @@ class qa_preamble_adder (gr_unittest.TestCase):
         self.tb = None
 
     def test_001_t (self):
-        # set up fg
-        self.tb.run ()
-        # check data
+        for src_data, expected_result in (
+                (
+                    [],
+                    [0,1,0,1],
+                ),
+                (
+                    [0],
+                    [0,1,0,1,0],
+                ),
+                (
+                    [1],
+                    [0,1,0,1,1],
+                ),
+                (
+                    [0,1,0,1,0,0,1],
+                    [0,1,0,1,0,1,0,1,0,0,1],
+                ),
+        ):
+            adder = preamble_adder(preamble=[0,1,0,1])
+            dbg = blocks.message_debug()
+            self.tb.msg_connect(adder, "out", dbg, "store")
+            self.tb.start()
+            vec = pmt.init_u8vector(len(src_data), src_data)
+            adder.to_basic_block()._post(
+                pmt.intern("in"),
+                pmt.cons(
+                    pmt.PMT_NIL,
+                    pmt.init_u8vector(len(src_data), src_data),
+                )
+            )
+            while dbg.num_messages() < 1:
+                time.sleep(0.1)
+            self.tb.stop()
+            self.tb.wait()
+            res = pmt.to_python(pmt.cdr(dbg.get_message(0)))
+            try:
+                self.assertFloatTuplesAlmostEqual(expected_result, res, 1)
+            except AssertionError:
+                print "--"
+                print "Source:", src_data
+                print "Want:  ", expected_result
+                print "Got:   ", res
+                raise
 
-
+            
 if __name__ == '__main__':
     gr_unittest.run(qa_preamble_adder, "qa_preamble_adder.xml")

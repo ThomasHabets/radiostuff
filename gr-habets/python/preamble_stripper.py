@@ -19,13 +19,14 @@
 # Boston, MA 02110-1301, USA.
 # 
 
-import numpy
 from gnuradio import gr
 from gnuradio.gr import pmt
 
 class preamble_stripper(gr.basic_block):
     """
-    docstring for block preamble_stripper
+    Strip preamble.
+
+    TODO: put search length into parameters.
     """
     def __init__(self, prefix):
         gr.basic_block.__init__(self,
@@ -49,15 +50,13 @@ class preamble_stripper(gr.basic_block):
                 break
         if found is None:
             return
-        vec = pmt.make_u8vector(len(bits)-found-len(self.prefix), 0)
-        for n, b in enumerate(bits[found+len(self.prefix):]):
-            pmt.u8vector_set(vec, n, b)
+        bits = bits[found+len(self.prefix):]
+        vec = pmt.init_u8vector(len(bits), bits)
         self.message_port_pub(pmt.intern('out'), pmt.cons(pmt.PMT_NIL, vec))
 
     def forecast(self, noutput_items, ninput_items_required):
-        #setup size of input_items[i] for work call
-        for i in range(len(ninput_items_required)):
-            ninput_items_required[i] = noutput_items
+        # Does not consume streams.
+        pass
 
     def general_work(self, input_items, output_items):
         return 0

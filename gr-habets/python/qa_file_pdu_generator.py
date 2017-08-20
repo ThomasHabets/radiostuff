@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # 
-# Copyright 2017 <+YOU OR YOUR COMPANY+>.
+# Copyright 2017 Thomas Habets <thomas@habets.se>
 # 
 # This is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ class qa_file_pdu_generator (gr_unittest.TestCase):
         self.tb = None
 
     def test_001_t (self):
+        # TODO: implement me.
         # set up fg
         self.tb.run ()
         # check data

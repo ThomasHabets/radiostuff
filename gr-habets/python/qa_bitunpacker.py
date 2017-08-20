@@ -19,8 +19,11 @@
 # Boston, MA 02110-1301, USA.
 # 
 
+import time
+
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
+from gnuradio.gr import pmt
 import habets_swig as habets
 
 class qa_bitunpacker (gr_unittest.TestCase):
@@ -32,9 +35,56 @@ class qa_bitunpacker (gr_unittest.TestCase):
         self.tb = None
 
     def test_001_t (self):
-        # set up fg
-        self.tb.run ()
-        # check data
+        for src_data, expected_result in (
+                (
+                    [],
+                    [],
+                ),
+                (
+                    [0],
+                    [0,0,0,0,0,0,0,0],
+                ),
+                (
+                    [128],
+                    [1,0,0,0,0,0,0,0],
+                ),
+                (
+                    [2],
+                    [0,0,0,0,0,0,1,0],
+                ),
+                (
+                    [128],
+                    [1,0,0,0,0,0,0,0],
+                ),
+                (
+                    [128, 64],
+                    [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0],
+                ),
+        ):
+            pack = habets.bitunpacker()
+            dbg = blocks.message_debug()
+            self.tb.msg_connect(pack, "out", dbg, "store")
+            self.tb.start()
+            pack.to_basic_block()._post(
+                pmt.intern("in"),
+                pmt.cons(
+                    pmt.PMT_NIL,
+                    pmt.init_u8vector(len(src_data), src_data)
+                )
+            )
+            while dbg.num_messages() < 1:
+                time.sleep(0.1)
+            self.tb.stop()
+            self.tb.wait()
+            res = pmt.to_python(pmt.cdr(dbg.get_message(0)))
+            try:
+                self.assertFloatTuplesAlmostEqual(expected_result, res, 1)
+            except AssertionError:
+                print "--"
+                print "Source:", src_data
+                print "Want:  ", expected_result
+                print "Got:   ", list(res)
+                raise
 
 
 if __name__ == '__main__':

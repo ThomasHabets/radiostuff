@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # 
-# Copyright 2017 <+YOU OR YOUR COMPANY+>.
+# Copyright 2017 Thomas Habets <thomas@habets.se>
 # 
 # This is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,7 +41,9 @@ def bits_to_bytes(bits):
 
 class pn_decode_identity_b(gr.basic_block):
     """
-    docstring for block pn_decode_identity_b
+    Turn -1/1 into PDUs. One bit per sample. 0 indicates end of packet.
+
+    The general case is done by pn_decode_f.
     """
     def __init__(self, prefix):
         gr.basic_block.__init__(self,

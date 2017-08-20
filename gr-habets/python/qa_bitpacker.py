@@ -62,12 +62,17 @@ class qa_bitpacker (gr_unittest.TestCase):
                     [128, 64],
                 ),
         ):
-            src = blocks.vector_source_f([float(x) for x in src_data])
             pack = habets.bitpacker()
             dbg = blocks.message_debug()
             self.tb.msg_connect(pack, "pdus", dbg, "store")
             self.tb.start()
-            pack.to_basic_block()._post(pmt.intern("pdus"), pmt.cons(pmt.PMT_NIL, pmt.init_u8vector(len(src_data), src_data)))
+            pack.to_basic_block()._post(
+                pmt.intern("pdus"),
+                pmt.cons(
+                    pmt.PMT_NIL,
+                    pmt.init_u8vector(len(src_data), src_data)
+                )
+            )
             while dbg.num_messages() < 1:
                 time.sleep(0.1)
             self.tb.stop()

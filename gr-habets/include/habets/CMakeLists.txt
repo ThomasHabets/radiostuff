@@ -26,5 +26,6 @@ install(FILES
     packet_size_filter.h
     pn_decode_f.h
     bitpacker.h
-    pn_source_f.h DESTINATION include/habets
+    pn_source_f.h
+    file_pdu_generator.h DESTINATION include/habets
 )

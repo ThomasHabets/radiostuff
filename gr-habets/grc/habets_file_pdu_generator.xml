@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<block>
+  <name>File PDU generator</name>
+  <key>habets_file_pdu_generator</key>
+  <category>[habets]</category>
+  <import>import habets</import>
+  <make>habets.file_pdu_generator($filename)</make>
+  <param>
+    <name>File</name>
+    <key>filename</key>
+    <type>file_open</type>
+  </param>
+  <sink>
+    <name>trigger</name>
+    <type>message</type>
+  </sink>
+  <source>
+    <name>pdus</name>
+    <type>message</type>
+  </source>
+</block>

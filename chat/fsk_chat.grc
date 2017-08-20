@@ -186,7 +186,7 @@
     </param>
     <param>
       <key>value</key>
-      <value>868950000</value>
+      <value>867950000</value>
     </param>
   </block>
   <block>
@@ -287,7 +287,7 @@
     </param>
     <param>
       <key>value</key>
-      <value>0</value>
+      <value>20</value>
     </param>
     <param>
       <key>_enabled</key>
@@ -295,7 +295,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(560, 88)</value>
+      <value>(672, 304)</value>
     </param>
     <param>
       <key>gui_hint</key>
@@ -354,7 +354,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(216, 196)</value>
+      <value>(512, 596)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -439,7 +439,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(256, 320)</value>
+      <value>(184, 208)</value>
     </param>
     <param>
       <key>gui_hint</key>
@@ -1280,6 +1280,57 @@
     <param>
       <key>low</key>
       <value>0.1</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>blocks_tuntap_pdu</key>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>istunflag</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(288, 572)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>blocks_tuntap_pdu_0</value>
+    </param>
+    <param>
+      <key>ifn</key>
+      <value>grtun0</value>
+    </param>
+    <param>
+      <key>mtu</key>
+      <value>10000</value>
     </param>
     <param>
       <key>maxoutbuf</key>
@@ -4124,7 +4175,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(452, 288)</value>
+      <value>(492, 288)</value>
     </param>
     <param>
       <key>gui_hint</key>
@@ -5500,7 +5551,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(536, 296)</value>
+      <value>(568, 296)</value>
     </param>
     <param>
       <key>gui_hint</key>
@@ -8213,6 +8264,12 @@
     <sink_key>0</sink_key>
   </connection>
   <connection>
+    <source_block_id>blocks_tuntap_pdu_0</source_block_id>
+    <sink_block_id>habets_bitunpacker_0</sink_block_id>
+    <source_key>pdus</source_key>
+    <sink_key>in</sink_key>
+  </connection>
+  <connection>
     <source_block_id>freq_xlating_fir_filter_xxx_0</source_block_id>
     <sink_block_id>analog_simple_squelch_cc_0</sink_block_id>
     <source_key>0</source_key>
@@ -8245,6 +8302,12 @@
   <connection>
     <source_block_id>habets_packet_size_filter_0</source_block_id>
     <sink_block_id>blocks_socket_pdu_1</sink_block_id>
+    <source_key>pdus</source_key>
+    <sink_key>pdus</sink_key>
+  </connection>
+  <connection>
+    <source_block_id>habets_packet_size_filter_0</source_block_id>
+    <sink_block_id>blocks_tuntap_pdu_0</sink_block_id>
     <source_key>pdus</source_key>
     <sink_key>pdus</sink_key>
   </connection>

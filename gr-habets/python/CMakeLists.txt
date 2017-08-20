@@ -46,3 +46,4 @@ GR_ADD_TEST(qa_pn_decode_identity_b ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_
 GR_ADD_TEST(qa_packet_size_filter ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_packet_size_filter.py)
 GR_ADD_TEST(qa_pn_decode_f ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_pn_decode_f.py)
 GR_ADD_TEST(qa_bitpacker ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_bitpacker.py)
+GR_ADD_TEST(qa_pn_source_f ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_pn_source_f.py)

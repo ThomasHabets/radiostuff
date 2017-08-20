@@ -22,5 +22,6 @@ install(FILES
     habets_pn_decode_identity_b.xml
     habets_packet_size_filter.xml
     habets_pn_decode_f.xml
-    habets_bitpacker.xml DESTINATION share/gnuradio/grc/blocks
+    habets_bitpacker.xml
+    habets_pn_source_f.xml DESTINATION share/gnuradio/grc/blocks
 )

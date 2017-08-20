@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<block>
+  <name>Positive/Negative source</name>
+  <key>habets_pn_source_f</key>
+  <category>[habets]</category>
+  <import>import habets</import>
+  <make>habets.pn_source_f()</make>
+  <sink>
+    <name>pdus</name>
+    <type>message</type>
+  </sink>
+  <source>
+    <name>out</name>
+    <type>float</type>
+  </source>
+</block>

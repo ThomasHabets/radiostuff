@@ -25,5 +25,6 @@ install(FILES
     ook_decode_b.h
     packet_size_filter.h
     pn_decode_f.h
-    bitpacker.h DESTINATION include/habets
+    bitpacker.h
+    pn_source_f.h DESTINATION include/habets
 )

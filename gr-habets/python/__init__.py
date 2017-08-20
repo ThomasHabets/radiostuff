@@ -32,4 +32,5 @@ except ImportError:
 
 # import any pure python here
 from pn_decode_identity_b import pn_decode_identity_b
+from preamble_stripper import preamble_stripper
 #

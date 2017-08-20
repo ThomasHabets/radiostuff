@@ -31,7 +31,8 @@ endif()
 GR_PYTHON_INSTALL(
     FILES
     __init__.py
-    pn_decode_identity_b.py DESTINATION ${GR_PYTHON_DIR}/habets
+    pn_decode_identity_b.py
+    preamble_stripper.py DESTINATION ${GR_PYTHON_DIR}/habets
 )
 
 ########################################################################
@@ -49,3 +50,4 @@ GR_ADD_TEST(qa_bitpacker ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_bit
 GR_ADD_TEST(qa_pn_source_f ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_pn_source_f.py)
 GR_ADD_TEST(qa_file_pdu_generator ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_file_pdu_generator.py)
 GR_ADD_TEST(qa_bitunpacker ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_bitunpacker.py)
+GR_ADD_TEST(qa_preamble_stripper ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_preamble_stripper.py)

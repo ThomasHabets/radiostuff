@@ -27,24 +27,27 @@
 #include <gnuradio/io_signature.h>
 #include "packetize_burst_impl.h"
 
+static const bool debug = false;
+
 namespace gr {
   namespace habets {
 
     packetize_burst::sptr
-    packetize_burst::make(const char* tag)
+    packetize_burst::make(const char* tag, int max_noutput_items)
     {
       return gnuradio::get_initial_sptr
-        (new packetize_burst_impl(tag));
+        (new packetize_burst_impl(tag, max_noutput_items));
     }
 
     /*
      * The private constructor
      */
-    packetize_burst_impl::packetize_burst_impl(const char* tag)
+    packetize_burst_impl::packetize_burst_impl(const char* tag, int max_noutput_items)
       : gr::sync_block("packetize_burst",
 		       gr::io_signature::make(1, 1, sizeof(float)),
 		       gr::io_signature::make(0, 0, 0)),
-	tag_(tag)
+	tag_(tag),
+	max_noutput_items_(max_noutput_items)
     {
       message_port_register_out(PDU_PORT_ID);
     }
@@ -63,10 +66,17 @@ namespace gr {
     {
       const float* in = static_cast<const float*>(input_items[0]);
 
+      if (max_noutput_items_ > 0) {
+	noutput_items = max_noutput_items_;
+      }
+
       std::vector<tag_t> tags;
       get_tags_in_window(tags, 0, 0, noutput_items);
       auto relative_offset = nitems_read(0);
-      //std::cerr << "Relative offset: " << nitems_read(0) << std::endl;
+      if (debug) {
+	std::cerr << "at " << nitems_read(0) << " want " << noutput_items << std::endl;
+      }
+
       // Common case: not capturing packet now, and no tags.
       if (buffer_.empty() && tags.empty()) {
 	return noutput_items;
@@ -79,7 +89,9 @@ namespace gr {
 	  continue;
 	}
 	if (pmt::to_bool(t.value)) {
-	  //std::cerr << "start of packet at abs offset " << t.offset << std::endl;
+	  if (debug) {
+	    std::cerr << "start of packet at abs offset " << t.offset << std::endl;
+	  }
 	  // Start of packet. Add first sample and treat rest as "middle of packet".
 	  buffer_.push_back(in[t.offset - relative_offset]);
 	  const auto c = t.offset - relative_offset + 1;
@@ -87,31 +99,29 @@ namespace gr {
 	  return c;
 	} else {
 	  // End of packet.
-	  //std::cerr << "end of packet at offset " << t.offset << std::endl;
+	  if (debug) {
+	    std::cerr << "End of packet at offset " << t.offset << std::endl;
+	  }
 	  const auto eat_samples = t.offset - relative_offset + 1;
 	  if (!buffer_.empty()) {
-	    for (int n = 0; n < eat_samples; n++) {
-	      buffer_.push_back(in[n]);
-	    }
+	    std::copy(&in[0], &in[eat_samples], std::back_inserter(buffer_));
 	  }
 	  const pmt::pmt_t vecpmt(pmt::make_blob(&buffer_[0], sizeof(float)*buffer_.size()));
 	  const pmt::pmt_t pdu(pmt::cons(pmt::PMT_NIL, vecpmt));
 	  
 	  message_port_pub(PDU_PORT_ID, pdu);
-	  //std::cerr << "Sent packet of size " << buffer_.size() << std::endl;
+	  if (debug) {
+	    std::cerr << "Sent packet of size " << buffer_.size() << std::endl;
+	  }
 	  buffer_.clear();
 	  return eat_samples;
 	}
       }
 
       // No burst tag seen.
-      
       if (!buffer_.empty()) {
 	// Middle of packet.
-	//std::cerr << "middle of packet" << std::endl;
-	for (int n = 0; n < noutput_items; n++) {
-	  buffer_.push_back(in[n]);
-	}
+	std::copy(&in[0], &in[noutput_items], std::back_inserter(buffer_));
       }
       return noutput_items;
     }

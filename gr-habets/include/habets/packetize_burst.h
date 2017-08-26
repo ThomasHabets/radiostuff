@@ -46,7 +46,7 @@ namespace gr {
        * class. habets::packetize_burst::make is the public interface for
        * creating new instances.
        */
-      static sptr make(const char* tag);
+      static sptr make(const char* tag, int max_noutput_items=-1);
     };
 
   } // namespace habets

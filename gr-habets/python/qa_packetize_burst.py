@@ -49,13 +49,13 @@ class qa_packetize_burst (gr_unittest.TestCase):
         for name, src_data, tags, packets in (
                 (
                     "One packet exactly",
-                    [1, 0],
+                    [1, -1, 0],
                     [
                         make_tag(0, 'burst', True),
-                        make_tag(1, 'burst', False),
+                        make_tag(2, 'burst', False),
                     ],
                     [
-                        [1, 0],
+                        [1, -1, 0],
                     ],
                 ),
                 (
@@ -97,9 +97,20 @@ class qa_packetize_burst (gr_unittest.TestCase):
                         [-1, -2],
                     ],
                 ),
+                (
+                    "A huge packet",
+                    [-1] + range(2000),
+                    [
+                        make_tag(1, 'burst', True),
+                        make_tag(2000, 'burst', False),
+                    ],
+                    [
+                        range(2000),
+                    ],
+                ),
         ):
             src = blocks.vector_source_f(src_data, tags=tags)
-            p = habets.packetize_burst('burst')
+            p = habets.packetize_burst('burst', 100)
             dbg = blocks.message_debug()
             self.tb.connect(src, p)
             self.tb.msg_connect(p, "pdus", dbg, "store")

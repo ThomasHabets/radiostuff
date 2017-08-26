@@ -30,11 +30,12 @@ namespace gr {
     {
      private:
       const std::string tag_;
+      const int max_noutput_items_;
       std::vector<float> buffer_;
       // Nothing to declare in this block.
 
      public:
-      packetize_burst_impl(const char* tag);
+      packetize_burst_impl(const char* tag, int max_noutput_items);
       ~packetize_burst_impl();
 
       // Where all the action really happens

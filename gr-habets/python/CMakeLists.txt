@@ -33,7 +33,9 @@ GR_PYTHON_INSTALL(
     __init__.py
     pn_decode_identity_b.py
     preamble_stripper.py
-    preamble_adder.py DESTINATION ${GR_PYTHON_DIR}/habets
+    preamble_adder.py
+    wpcr.py
+    magic_decoder.py DESTINATION ${GR_PYTHON_DIR}/habets
 )
 
 ########################################################################
@@ -54,3 +56,4 @@ GR_ADD_TEST(qa_bitunpacker ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_b
 GR_ADD_TEST(qa_preamble_stripper ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_preamble_stripper.py)
 GR_ADD_TEST(qa_preamble_adder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_preamble_adder.py)
 GR_ADD_TEST(qa_packetize_burst ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_packetize_burst.py)
+GR_ADD_TEST(qa_magic_decoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_magic_decoder.py)

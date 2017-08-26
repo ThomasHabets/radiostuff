@@ -28,5 +28,6 @@ install(FILES
     habets_bitunpacker.xml
     habets_preamble_stripper.xml
     habets_preamble_adder.xml
-    habets_packetize_burst.xml DESTINATION share/gnuradio/grc/blocks
+    habets_packetize_burst.xml
+    habets_magic_decoder.xml DESTINATION share/gnuradio/grc/blocks
 )

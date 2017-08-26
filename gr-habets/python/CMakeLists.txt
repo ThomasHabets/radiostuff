@@ -53,3 +53,4 @@ GR_ADD_TEST(qa_file_pdu_generator ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DI
 GR_ADD_TEST(qa_bitunpacker ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_bitunpacker.py)
 GR_ADD_TEST(qa_preamble_stripper ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_preamble_stripper.py)
 GR_ADD_TEST(qa_preamble_adder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_preamble_adder.py)
+GR_ADD_TEST(qa_packetize_burst ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_packetize_burst.py)

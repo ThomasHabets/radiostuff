@@ -33,6 +33,7 @@ list(APPEND habets_sources
     pn_source_f_impl.cc
     file_pdu_generator_impl.cc
     bitunpacker_impl.cc
+    packetize_burst_impl.cc
 )
 
 set(habets_sources "${habets_sources}" PARENT_SCOPE)

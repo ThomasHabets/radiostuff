@@ -27,5 +27,6 @@ install(FILES
     habets_file_pdu_generator.xml
     habets_bitunpacker.xml
     habets_preamble_stripper.xml
-    habets_preamble_adder.xml DESTINATION share/gnuradio/grc/blocks
+    habets_preamble_adder.xml
+    habets_packetize_burst.xml DESTINATION share/gnuradio/grc/blocks
 )

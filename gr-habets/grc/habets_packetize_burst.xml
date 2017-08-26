@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<block>
+  <name>Packetize burst</name>
+  <key>habets_packetize_burst</key>
+  <category>[habets]</category>
+  <import>import habets</import>
+  <make>habets.packetize_burst($tag)</make>
+  <param>
+    <name>Tag</name>
+    <key>tag</key>
+    <type>string</type>
+  </param>
+
+  <sink>
+    <name>in</name>
+    <type>float</type>
+  </sink>
+
+  <source>
+    <name>pdus</name>
+    <type>message</type>
+  </source>
+</block>

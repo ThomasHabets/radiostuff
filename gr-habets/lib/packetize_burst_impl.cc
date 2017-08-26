@@ -66,8 +66,10 @@ namespace gr {
     {
       const float* in = static_cast<const float*>(input_items[0]);
 
+      // For testing: set maximum amount of output to write (and
+      // therefore also input to read).
       if (max_noutput_items_ > 0) {
-	noutput_items = max_noutput_items_;
+	noutput_items = std::min(max_noutput_items_, noutput_items);
       }
 
       std::vector<tag_t> tags;
@@ -92,10 +94,11 @@ namespace gr {
 	  if (debug) {
 	    std::cerr << "start of packet at abs offset " << t.offset << std::endl;
 	  }
-	  // Start of packet. Add first sample and treat rest as "middle of packet".
+	  // Start of packet. Add first sample and handle the rest in "middle of packet".
+	  // We could add middle of packet here, but would need to handle the case where
+	  // both start of packet and end of packet is in the same window.
 	  buffer_.push_back(in[t.offset - relative_offset]);
 	  const auto c = t.offset - relative_offset + 1;
-	  //std::cerr << "start of packet. returning " << c << std::endl;
 	  return c;
 	} else {
 	  // End of packet.
@@ -119,6 +122,7 @@ namespace gr {
       }
 
       // No burst tag seen.
+
       if (!buffer_.empty()) {
 	// Middle of packet.
 	std::copy(&in[0], &in[noutput_items], std::back_inserter(buffer_));

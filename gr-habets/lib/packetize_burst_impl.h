@@ -29,8 +29,12 @@ namespace gr {
     class packetize_burst_impl : public packetize_burst
     {
      private:
+      // Tag to trigger off of.
       const std::string tag_;
+
+      // For testing only: only consume this much.
       const int max_noutput_items_;
+
       std::vector<float> buffer_;
       // Nothing to declare in this block.
 

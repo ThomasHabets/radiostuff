@@ -59,6 +59,17 @@ class qa_packetize_burst (gr_unittest.TestCase):
                     ],
                 ),
                 (
+                    "Surprising tag order",
+                    [1, -1, 0],
+                    [
+                        make_tag(2, 'burst', False),
+                        make_tag(0, 'burst', True),
+                    ],
+                    [
+                        [1, -1, 0],
+                    ],
+                ),
+                (
                     "One packet with spacing",
                     [0,1,0,0],
                     [

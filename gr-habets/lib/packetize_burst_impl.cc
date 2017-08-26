@@ -84,7 +84,8 @@ namespace gr {
 	return noutput_items;
       }
 
-      // TODO: verify assumption that tags are sorted by offset.
+      // API apparently doesn't guarantee tag order.
+      std::sort(tags.begin(), tags.end(), tag_t::offset_compare);
       
       for (const auto& t : tags) {
 	if (pmt::symbol_to_string(t.key) != tag_) {

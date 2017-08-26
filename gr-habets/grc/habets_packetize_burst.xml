@@ -5,9 +5,11 @@
   <category>[habets]</category>
   <import>import habets</import>
   <make>habets.packetize_burst($tag)</make>
+
   <param>
     <name>Tag</name>
     <key>tag</key>
+    <value>burst</value>
     <type>string</type>
   </param>
 

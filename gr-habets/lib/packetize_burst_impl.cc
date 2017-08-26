@@ -35,17 +35,18 @@ namespace gr {
     packetize_burst::sptr
     packetize_burst::make(const char* tag, int max_noutput_items)
     {
-      return gnuradio::get_initial_sptr
-        (new packetize_burst_impl(tag, max_noutput_items));
+      return gnuradio::get_initial_sptr(
+          new packetize_burst_impl(tag, max_noutput_items));
     }
 
     /*
      * The private constructor
      */
     packetize_burst_impl::packetize_burst_impl(const char* tag, int max_noutput_items)
-      : gr::sync_block("packetize_burst",
-		       gr::io_signature::make(1, 1, sizeof(float)),
-		       gr::io_signature::make(0, 0, 0)),
+      : gr::sync_block(
+          "packetize_burst",
+          gr::io_signature::make(1, 1, sizeof(float)),
+          gr::io_signature::make(0, 0, 0)),
 	tag_(tag),
 	max_noutput_items_(max_noutput_items)
     {
@@ -60,7 +61,8 @@ namespace gr {
     }
 
     int
-    packetize_burst_impl::work(int noutput_items,
+    packetize_burst_impl::work(
+        int noutput_items,
         gr_vector_const_void_star &input_items,
         gr_vector_void_star &output_items)
     {
@@ -106,7 +108,8 @@ namespace gr {
 	  if (debug) {
 	    std::cerr << "End of packet at offset " << t.offset << std::endl;
 	  }
-	  const auto eat_samples = t.offset - relative_offset + 1;
+	  const auto eat_samples = std::min(
+            t.offset - relative_offset + 1, static_cast<unsigned long>(noutput_items));
 	  if (!buffer_.empty()) {
 	    std::copy(&in[0], &in[eat_samples], std::back_inserter(buffer_));
 	  }
@@ -132,4 +135,11 @@ namespace gr {
     }
   } /* namespace habets */
 } /* namespace gr */
-
+/* ---- Emacs Variables ----
+ * Local Variables:
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * End:
+ *
+ * vim: ts=8 sw=8
+ */

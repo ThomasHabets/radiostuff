@@ -52,7 +52,7 @@ class preamble_stripper(gr.basic_block):
             return
         bits = bits[found+len(self.prefix):]
         vec = pmt.init_u8vector(len(bits), bits)
-        self.message_port_pub(pmt.intern('out'), pmt.cons(pmt.PMT_NIL, vec))
+        self.message_port_pub(pmt.intern('out'), pmt.cons(pmt.car(msg_pmt), vec))
 
     def forecast(self, noutput_items, ninput_items_required):
         # Does not consume streams.

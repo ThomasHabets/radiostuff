@@ -3,3 +3,7 @@ data/
 boiler-bravo/boiler_bravo.py
 chat/fsk_chat.py
 top_block.py
+amateur/amateur_record.py
+amateur/amateur_playback.py
+*.raw
+attic

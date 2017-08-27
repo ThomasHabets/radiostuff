@@ -86,7 +86,13 @@ def wpcr(a):
         print("clock phase in cycles between 1st and 2nd samples: %f" % (clock_phase))
         print("clock phase in cycles at 1st sample: %f" % (clock_phase - cycles_per_sample/2))
         print("symbol count: %d" % (len(symbols)))
-    return symbols
+    return {
+        'samples_per_symbol': 1.0/cycles_per_sample,
+        'clocks_per_sample': cycles_per_sample,
+        'clock_phase_1st_to_2nd_sample': clock_phase,
+        'clock_phase_1st_sample': (clock_phase - cycles_per_sample/2),
+        'symbol_count': len(symbols),
+    }, symbols
 
 # convert soft symbols into bits (assuming binary symbols)
 def slice_bits(symbols):

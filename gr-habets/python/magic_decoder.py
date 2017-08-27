@@ -36,18 +36,26 @@ class magic_decoder(gr.basic_block):
             name="magic_decoder",
             in_sig=[],
             out_sig=[])
-        self.message_port_register_out(pmt.intern("out"))
-        self.message_port_register_in(pmt.intern("in"))
-        self.set_msg_handler(pmt.intern("in"), self._handle_msg)
+        self.port_out = pmt.intern("out")
+        self.port_in = pmt.intern("in")
+        self.port_info = pmt.intern("info")
+        self.message_port_register_out(self.port_out)
+        self.message_port_register_out(self.port_info)
+        self.message_port_register_in(self.port_in)
+        self.set_msg_handler(self.port_in, self._handle_msg)
        
     def _handle_msg(self, msg_pmt):
+        meta = pmt.car(msg_pmt)
         bs = pmt.u8vector_elements(pmt.cdr(msg_pmt))
         fs = numpy.frombuffer(''.join([chr(x) for x in bs]), dtype=numpy.float32)
         #print "Got msg of size %d" % len(fs)
         #print midpoint(fs)
-        bits = slice_bits(wpcr(fs))
+        misc, data = wpcr(fs)
+        bits = slice_bits(data)
         vec = pmt.init_u8vector(len(bits), [int(x) for x in bits])
-        self.message_port_pub(pmt.intern("out"), pmt.cons(pmt.PMT_NIL, vec))
+        meta = pmt.dict_add(meta, pmt.intern("magic_decoder"), pmt.to_pmt(misc))
+        self.message_port_pub(self.port_out, pmt.cons(meta, vec))
+        self.message_port_pub(self.port_info, meta)
 
     def forecast(self, noutput_items, ninput_items_required):
         #setup size of input_items[i] for work call

@@ -242,7 +242,7 @@
     </param>
     <param>
       <key>value</key>
-      <value>14285000</value>
+      <value>14285000*0 + 14070000</value>
     </param>
     <param>
       <key>_enabled</key>
@@ -710,7 +710,7 @@
     </param>
     <param>
       <key>value</key>
-      <value>-1</value>
+      <value>1</value>
     </param>
     <param>
       <key>_enabled</key>
@@ -962,7 +962,7 @@
     </param>
     <param>
       <key>value</key>
-      <value>1</value>
+      <value>5</value>
     </param>
     <param>
       <key>_enabled</key>
@@ -1084,7 +1084,7 @@
     </param>
     <param>
       <key>_enabled</key>
-      <value>True</value>
+      <value>1</value>
     </param>
     <param>
       <key>_coordinate</key>
@@ -1722,6 +1722,53 @@
     <param>
       <key>vlen</key>
       <value>1</value>
+    </param>
+  </block>
+  <block>
+    <key>blocks_wavfile_sink</key>
+    <param>
+      <key>bits_per_sample</key>
+      <value>16</value>
+    </param>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>file</key>
+      <value>20M-psk31.wav</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(664, 828)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>180</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>blocks_wavfile_sink_0</value>
+    </param>
+    <param>
+      <key>nchan</key>
+      <value>1</value>
+    </param>
+    <param>
+      <key>samp_rate</key>
+      <value>audio_rate</value>
     </param>
   </block>
   <block>
@@ -5528,6 +5575,12 @@
   <connection>
     <source_block_id>blocks_multiply_const_vxx_1</source_block_id>
     <sink_block_id>audio_sink_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>0</sink_key>
+  </connection>
+  <connection>
+    <source_block_id>blocks_multiply_const_vxx_1</source_block_id>
+    <sink_block_id>blocks_wavfile_sink_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>

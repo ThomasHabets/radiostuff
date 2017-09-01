@@ -1,17 +1,17 @@
 /* -*- c++ -*- */
-/* 
+/*
  * Copyright 2017 Thomas Habets <thomas@habets.se>
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -51,7 +51,7 @@ namespace gr {
           const size_t len = pmt::blob_length(data);
           const uint8_t* bits = static_cast<const uint8_t*>(pmt::blob_data(data));
           for (int c = 0; c < len; c++) {
-            queue_.push(bits[c]);
+            queue_.push(bits[c] ? 1.0 : -1);
           }
       });
     }
@@ -68,19 +68,29 @@ namespace gr {
         gr_vector_const_void_star &input_items,
         gr_vector_void_star &output_items)
     {
-      float* out = (float*) output_items[0];
+      float* out = static_cast<float*>(output_items[0]);
+      const size_t num = output_items.size();
 
-      for (int c = 0; c < output_items.size(); c++) {
-        if (queue_.empty()) {
-          *out++ = 0.0;
-        } else {
-          *out++ = queue_.front() ? 1 : -1;
-          queue_.pop();
-        }
+      // Common case: no data.
+      if (queue_.empty()) {
+        memset(out, 0, sizeof(float) * num);
+        return num;
+      }
+
+      // If there is packet, inject it.
+      const size_t packet_size = queue_.size();
+      for (int c = 0; c < std::min(packet_size, num); c++) {
+        *out++ = queue_.front();
+        queue_.pop();
+      }
+
+      // If more requested, fill up the rest with zeroes.
+      if (num > packet_size) {
+        memset(out, 0, sizeof(float) * (num- packet_size));
       }
 
       // Tell runtime system how many output items we produced.
-      return output_items.size();
+      return num;
     }
 
   } /* namespace habets */

@@ -46,12 +46,12 @@ namespace gr {
     {
       message_port_register_in(PDU_PORT_ID);
       set_msg_handler(PDU_PORT_ID, [this](pmt::pmt_t msg) {
-          pmt::pmt_t meta = pmt::car(msg);
+          // pmt::pmt_t meta = pmt::car(msg);
           pmt::pmt_t data = pmt::cdr(msg);
           const size_t len = pmt::blob_length(data);
           const uint8_t* bits = static_cast<const uint8_t*>(pmt::blob_data(data));
           for (int c = 0; c < len; c++) {
-            queue_.push(bits[c] ? 1.0 : -1);
+            queue_.push_back(bits[c] ? 1.0 : -1);
           }
       });
     }
@@ -64,33 +64,39 @@ namespace gr {
     }
 
     int
-    pn_source_f_impl::work(int noutput_items,
+    pn_source_f_impl::work(const int noutput_items,
         gr_vector_const_void_star &input_items,
         gr_vector_void_star &output_items)
     {
       float* out = static_cast<float*>(output_items[0]);
-      const size_t num = output_items.size();
 
       // Common case: no data.
       if (queue_.empty()) {
-        memset(out, 0, sizeof(float) * num);
-        return num;
+        memset(out, 0, sizeof(float) * noutput_items);
+        return noutput_items;
       }
 
-      // If there is packet, inject it.
-      const size_t packet_size = queue_.size();
-      for (int c = 0; c < std::min(packet_size, num); c++) {
-        *out++ = queue_.front();
-        queue_.pop();
+      // There is packet, inject as much of it as possible.
+      const int packet_size = queue_.size();
+      const int packet_part = std::min(packet_size, noutput_items);
+
+      std::copy(queue_.begin(), queue_.begin() + packet_part, out);
+      out += packet_part;
+
+      // Delete sent bits from queue.
+      if (packet_size == packet_part) {
+        queue_.clear();
+      } else {
+        queue_.erase(queue_.begin(), queue_.begin() + (packet_size - packet_part));
       }
 
-      // If more requested, fill up the rest with zeroes.
-      if (num > packet_size) {
-        memset(out, 0, sizeof(float) * (num- packet_size));
+      // If more requested samples, fill up the rest with zeroes.
+      if (noutput_items > packet_part) {
+        memset(out, 0, sizeof(float) * (noutput_items - packet_size));
       }
 
-      // Tell runtime system how many output items we produced.
-      return num;
+      // We always produce as much as requested.
+      return noutput_items;
     }
 
   } /* namespace habets */

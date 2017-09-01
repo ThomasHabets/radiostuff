@@ -31,7 +31,7 @@ namespace gr {
     class pn_source_f_impl : public pn_source_f
     {
      private:
-      std::queue<float> queue_;
+      std::vector<float> queue_;
 
      public:
       pn_source_f_impl();

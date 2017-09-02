@@ -31,10 +31,11 @@ namespace gr {
     class pn_source_f_impl : public pn_source_f
     {
      private:
+      const int padding_;
       std::vector<float> queue_;
 
      public:
-      pn_source_f_impl();
+      pn_source_f_impl(int padding);
       ~pn_source_f_impl();
 
       // Where all the action really happens
@@ -47,3 +48,9 @@ namespace gr {
 } // namespace gr
 
 #endif /* INCLUDED_HABETS_PN_SOURCE_F_IMPL_H */
+/* ---- Emacs Variables ----
+ * Local Variables:
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * End:
+ */

@@ -30,19 +30,19 @@ namespace gr {
   namespace habets {
 
     pn_source_f::sptr
-    pn_source_f::make()
+    pn_source_f::make(const int padding)
     {
-      return gnuradio::get_initial_sptr
-        (new pn_source_f_impl());
+      return gnuradio::get_initial_sptr(new pn_source_f_impl(padding));
     }
 
     /*
      * The private constructor
      */
-    pn_source_f_impl::pn_source_f_impl()
+    pn_source_f_impl::pn_source_f_impl(const int padding)
       : gr::sync_block("pn_source_f",
               gr::io_signature::make(0, 0, 0),
-              gr::io_signature::make(1, 1, sizeof(float)))
+              gr::io_signature::make(1, 1, sizeof(float))),
+        padding_(padding)
     {
       message_port_register_in(PDU_PORT_ID);
       set_msg_handler(PDU_PORT_ID, [this](pmt::pmt_t msg) {
@@ -50,8 +50,10 @@ namespace gr {
           pmt::pmt_t data = pmt::cdr(msg);
           const size_t len = pmt::blob_length(data);
           const uint8_t* bits = static_cast<const uint8_t*>(pmt::blob_data(data));
+          queue_.reserve(queue_.size() + padding_ + len);
+          queue_.resize(queue_.size() + padding_, 0.0);
           for (int c = 0; c < len; c++) {
-            queue_.push_back(bits[c] ? 1.0 : -1);
+            queue_.push_back(bits[c] ? 1.0 : -1.0);
           }
       });
     }

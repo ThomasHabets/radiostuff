@@ -4,11 +4,20 @@
   <key>habets_pn_source_f</key>
   <category>[habets]</category>
   <import>import habets</import>
-  <make>habets.pn_source_f()</make>
+  <make>habets.pn_source_f($padding)</make>
+
+  <param>
+    <name>Padding</name>
+    <key>padding</key>
+    <value>10</value>
+    <type>int</type>
+  </param>
+
   <sink>
     <name>pdus</name>
     <type>message</type>
   </sink>
+
   <source>
     <name>out</name>
     <type>float</type>

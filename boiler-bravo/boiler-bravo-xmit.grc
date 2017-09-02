@@ -1415,6 +1415,10 @@
   <block>
     <key>habets_pn_source_f</key>
     <param>
+      <key>padding</key>
+      <value>10</value>
+    </param>
+    <param>
       <key>alias</key>
       <value></value>
     </param>

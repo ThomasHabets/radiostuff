@@ -29,5 +29,6 @@ install(FILES
     pn_source_f.h
     file_pdu_generator.h
     bitunpacker.h
-    packetize_burst.h DESTINATION include/habets
+    packetize_burst.h
+    stairclocker.h DESTINATION include/habets
 )

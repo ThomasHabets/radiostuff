@@ -7,3 +7,5 @@ amateur/amateur_record.py
 amateur/amateur_playback.py
 *.raw
 attic
+*.raw
+*.dat

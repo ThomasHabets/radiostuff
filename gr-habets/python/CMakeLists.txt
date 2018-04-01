@@ -57,3 +57,4 @@ GR_ADD_TEST(qa_preamble_stripper ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR
 GR_ADD_TEST(qa_preamble_adder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_preamble_adder.py)
 GR_ADD_TEST(qa_packetize_burst ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_packetize_burst.py)
 GR_ADD_TEST(qa_magic_decoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_magic_decoder.py)
+GR_ADD_TEST(qa_stairclocker ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_stairclocker.py)

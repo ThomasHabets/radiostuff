@@ -16,6 +16,7 @@
 #include "habets/file_pdu_generator.h"
 #include "habets/bitunpacker.h"
 #include "habets/packetize_burst.h"
+#include "habets/stairclocker.h"
 %}
 
 
@@ -35,3 +36,5 @@ GR_SWIG_BLOCK_MAGIC2(habets, file_pdu_generator);
 GR_SWIG_BLOCK_MAGIC2(habets, bitunpacker);
 %include "habets/packetize_burst.h"
 GR_SWIG_BLOCK_MAGIC2(habets, packetize_burst);
+%include "habets/stairclocker.h"
+GR_SWIG_BLOCK_MAGIC2(habets, stairclocker);

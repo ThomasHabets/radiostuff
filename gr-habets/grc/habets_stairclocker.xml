@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<block>
+  <name>StairClocker</name>
+  <key>habets_stairclocker</key>
+  <category>[habets]</category>
+  <import>import habets</import>
+  <make>habets.stairclocker($min_plateu)</make>
+  <param>
+    <name>Min plateu length</name>
+    <key>min_plateu</key>
+    <value>10</value>
+    <type>int</type>
+  </param>
+  <sink>
+    <name>in</name>
+    <type>message</type>
+  </sink>
+
+  <source>
+    <name>out</name>
+    <type>message</type>
+  </source>
+</block>

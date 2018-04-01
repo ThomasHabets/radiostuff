@@ -87,7 +87,7 @@ namespace gr {
         //std::clog << "No stairs in zero-length packet\n";
         return std::vector<float>();
       }
-      std::clog << "Processing " << in.size() << " length packet\n";
+      //std::clog << "Processing " << in.size() << " length packet\n";
       size_t pos = 0;
       float last = in[pos++];
       size_t match = 0;
@@ -95,7 +95,7 @@ namespace gr {
       // Strip preamble.
       for (; pos < in.size(); pos++) {
         if (off(last, in[pos], off_percent)) {
-          std::clog <<  "Discarding " << in[pos] << " for being far from " << last << std::endl;
+          //std::clog <<  "Discarding " << in[pos] << " for being far from " << last << std::endl;
           last = in[pos];
           match = 0;
           continue;
@@ -113,7 +113,7 @@ namespace gr {
         return std::vector<float>();
       }
 
-      std::clog << "Stairs starting at pos: " << pos << std::endl;
+      //std::clog << "Stairs starting at pos: " << pos << std::endl;
 
       // Record stairsamples.
       
@@ -132,22 +132,22 @@ namespace gr {
         if (off(candidate_sum / candidate.size(), in[pos], off_percent)) {
           if (candidate.size() < min_plateu_) {
             if (shortsamples > max_shortsamples) {
-              std::clog << "Short candidate: " << candidate.size() << " Stairs ending at pos: " << pos << std::endl;
+              //std::clog << "Short candidate: " << candidate.size() << " Stairs ending at pos: " << pos << std::endl;
               break;
             } else {
-              std::clog << "  Never mind, that was a shortsample of size " << candidate.size() << " " << candidate_sum / candidate.size() << std::endl;
-              std::clog << "  Adding sample " << in[pos] << std::endl;
+              //std::clog << "  Never mind, that was a shortsample of size " << candidate.size() << " " << candidate_sum / candidate.size() << std::endl;
+              //std::clog << "  Adding sample " << in[pos] << std::endl;
               shortsamples++;
               new_plateu();
               continue;
             }
           }
           shortsamples = 0;
-          std::clog << "Commit plateu of size " << candidate.size() << std::endl;
+          //std::clog << "Commit plateu of size " << candidate.size() << std::endl;
           stairsamples.push_back(candidate);
           new_plateu();
         } else {
-          std::clog << "Adding sample " << in[pos] << std::endl;
+          //std::clog << "Adding sample " << in[pos] << std::endl;
           candidate.push_back(in[pos]);
           candidate_sum += in[pos];
         }
@@ -156,7 +156,7 @@ namespace gr {
         stairsamples.push_back(candidate);
       }
 
-      std::clog << "Stair size: " << stairsamples.size() << std::endl;
+      //std::clog << "Stair size: " << stairsamples.size() << std::endl;
 
       // Find actual stairsize.
       size_t shortest_step = in.size();
@@ -164,14 +164,14 @@ namespace gr {
         shortest_step = std::min(s.size(), shortest_step);
       }
 
-      std::clog << "Step size: " << shortest_step << std::endl;
+      //std::clog << "Step size: " << shortest_step << std::endl;
 
       std::vector<float> ret;
-      std::clog << "Complete stairs\n";
+      //std::clog << "Complete stairs\n";
       for (const auto& s: stairsamples) {
         const float sum = std::accumulate(s.begin(), s.end(), 0.0);
         ret.insert(ret.end(), s.size() / shortest_step, sum / s.size());
-        printf(" %d %f\n", s.size() / shortest_step, sum / s.size());
+        //printf(" %d %f\n", s.size() / shortest_step, sum / s.size());
       }
       return ret;
     }

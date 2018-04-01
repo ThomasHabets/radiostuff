@@ -30,5 +30,6 @@ install(FILES
     habets_preamble_adder.xml
     habets_packetize_burst.xml
     habets_magic_decoder.xml
-    habets_stairclocker.xml DESTINATION share/gnuradio/grc/blocks
+    habets_stairclocker.xml
+    habets_float_streamer.xml DESTINATION share/gnuradio/grc/blocks
 )

@@ -17,6 +17,7 @@
 #include "habets/bitunpacker.h"
 #include "habets/packetize_burst.h"
 #include "habets/stairclocker.h"
+#include "habets/float_streamer.h"
 %}
 
 
@@ -38,3 +39,5 @@ GR_SWIG_BLOCK_MAGIC2(habets, bitunpacker);
 GR_SWIG_BLOCK_MAGIC2(habets, packetize_burst);
 %include "habets/stairclocker.h"
 GR_SWIG_BLOCK_MAGIC2(habets, stairclocker);
+%include "habets/float_streamer.h"
+GR_SWIG_BLOCK_MAGIC2(habets, float_streamer);

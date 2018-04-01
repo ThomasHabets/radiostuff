@@ -30,5 +30,6 @@ install(FILES
     file_pdu_generator.h
     bitunpacker.h
     packetize_burst.h
-    stairclocker.h DESTINATION include/habets
+    stairclocker.h
+    float_streamer.h DESTINATION include/habets
 )

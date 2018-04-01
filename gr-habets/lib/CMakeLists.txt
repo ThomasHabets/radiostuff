@@ -35,6 +35,7 @@ list(APPEND habets_sources
     bitunpacker_impl.cc
     packetize_burst_impl.cc
     stairclocker_impl.cc
+    float_streamer_impl.cc
 )
 
 set(habets_sources "${habets_sources}" PARENT_SCOPE)

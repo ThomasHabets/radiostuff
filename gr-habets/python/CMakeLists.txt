@@ -58,3 +58,4 @@ GR_ADD_TEST(qa_preamble_adder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/q
 GR_ADD_TEST(qa_packetize_burst ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_packetize_burst.py)
 GR_ADD_TEST(qa_magic_decoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_magic_decoder.py)
 GR_ADD_TEST(qa_stairclocker ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_stairclocker.py)
+GR_ADD_TEST(qa_float_streamer ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_float_streamer.py)

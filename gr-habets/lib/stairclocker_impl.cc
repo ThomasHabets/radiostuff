@@ -131,7 +131,11 @@ namespace gr {
             } else {
               //std::clog << "  Never mind, that was a shortsample of size " << candidate.size() << " " << candidate_sum / candidate.size() << std::endl;
               //std::clog << "  Adding sample " << in[pos] << std::endl;
-              shortsamples++;
+              // TODO: Actually limit samples, not groups.
+              shortsamples++;//= candidate.size();
+              if (debug) {
+                std::clog << "Skipping short plateu of size " << candidate.size() << std::endl;
+              }
               new_plateu();
               continue;
             }

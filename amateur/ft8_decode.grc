@@ -1604,11 +1604,15 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(2552, 524)</value>
+      <value>(2584, 476)</value>
     </param>
     <param>
       <key>_rotation</key>
       <value>0</value>
+    </param>
+    <param>
+      <key>group_distance</key>
+      <value>0.02</value>
     </param>
     <param>
       <key>id</key>
@@ -1617,6 +1621,10 @@
     <param>
       <key>maxoutbuf</key>
       <value>0</value>
+    </param>
+    <param>
+      <key>max_shortsamples</key>
+      <value>3</value>
     </param>
     <param>
       <key>minoutbuf</key>

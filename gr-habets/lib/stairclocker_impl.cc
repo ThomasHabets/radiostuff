@@ -28,40 +28,37 @@
 #include <gnuradio/io_signature.h>
 #include "stairclocker_impl.h"
 
+namespace {
+  constexpr bool debug = false;
+}
+
 namespace gr {
   namespace habets {
 
     bool
-    off(float a, float b, float percent)
+    off(float a, float b, float group_distance)
     {
-      return fabs(a - b) > 0.02;
-      if (a == 0.0) {
-        if (b == 0.0) {
-          return 0.0;
-        }
-        float t = a;
-        a = b;
-        b = t;
-      }
-      return fabs((a - b) / a) > (percent / 100.0);
+      return fabs(a - b) > group_distance;
     }
 
     stairclocker::sptr
-    stairclocker::make(int min_size)
+    stairclocker::make(int min_size, int max_shortsamples, float group_distance)
     {
-      return gnuradio::get_initial_sptr(new stairclocker_impl(min_size));
+      return gnuradio::get_initial_sptr(new stairclocker_impl(min_size, max_shortsamples, group_distance));
     }
 
     /*
      * The private constructor
      */
-    stairclocker_impl::stairclocker_impl(int min_size)
+    stairclocker_impl::stairclocker_impl(int min_size, int max_shortsamples, float group_distance)
       : gr::block("stairclocker",
 		  gr::io_signature::make(0,0,0),
 		  gr::io_signature::make(0,0,0)),
 	min_plateu_(min_size),
         port_in_(pmt::intern("in")),
-        port_out_(pmt::intern("out"))
+        port_out_(pmt::intern("out")),
+        max_shortsamples_(max_shortsamples),
+        group_distance_(group_distance)
     {
       message_port_register_in(port_in_);
       set_msg_handler(port_in_, [this](pmt::pmt_t msg) {
@@ -80,9 +77,6 @@ namespace gr {
     std::vector<float>
     stairclocker_impl::process(const std::vector<float>& in) const
     {
-      const int max_shortsamples = 3;
-      const float off_percent = 20.0;
-      
       if (in.size() == 0) {
         //std::clog << "No stairs in zero-length packet\n";
         return std::vector<float>();
@@ -94,7 +88,7 @@ namespace gr {
 
       // Strip preamble.
       for (; pos < in.size(); pos++) {
-        if (off(last, in[pos], off_percent)) {
+        if (off(last, in[pos], group_distance_)) {
           //std::clog <<  "Discarding " << in[pos] << " for being far from " << last << std::endl;
           last = in[pos];
           match = 0;
@@ -129,9 +123,9 @@ namespace gr {
           //std::clog << "New plateu: " << candidate[0] << std::endl;
       };
       for (; pos < in.size(); pos++) {
-        if (off(candidate_sum / candidate.size(), in[pos], off_percent)) {
+        if (off(candidate_sum / candidate.size(), in[pos], group_distance_)) {
           if (candidate.size() < min_plateu_) {
-            if (shortsamples > max_shortsamples) {
+            if (shortsamples > max_shortsamples_) {
               //std::clog << "Short candidate: " << candidate.size() << " Stairs ending at pos: " << pos << std::endl;
               break;
             } else {

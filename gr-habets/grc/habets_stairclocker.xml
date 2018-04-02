@@ -4,13 +4,26 @@
   <key>habets_stairclocker</key>
   <category>[habets]</category>
   <import>import habets</import>
-  <make>habets.stairclocker($min_plateu)</make>
+  <make>habets.stairclocker($min_plateu, $max_shortsamples, $group_distance)</make>
   <param>
     <name>Min plateu length</name>
     <key>min_plateu</key>
     <value>10</value>
     <type>int</type>
   </param>
+  <param>
+    <name>Max shortsamples</name>
+    <key>max_shortsamples</key>
+    <value>3</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Group min distance</name>
+    <key>group_distance</key>
+    <value>0.02</value>
+    <type>float</type>
+  </param>
+
   <sink>
     <name>in</name>
     <type>message</type>

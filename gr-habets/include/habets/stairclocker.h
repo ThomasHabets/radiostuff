@@ -43,13 +43,16 @@ namespace gr {
        *
        * Stairclocker takes a message of floats and extracts one float
        * per plateu.
+       *   min_plateu: Minimum number of samples making up a plateu
+       *   max_shortsamples: Max samples caught between plateus to ignore.
+       *   group_distance: Minimum value distance between plateus.
        *
        * To avoid accidental use of raw pointers, habets::stairclocker's
        * constructor is in a private implementation
        * class. habets::stairclocker::make is the public interface for
        * creating new instances.
        */
-      static sptr make(int min_plateu);
+      static sptr make(int min_plateu, int max_shortsamples, float group_distance);
     };
 
   } // namespace habets

@@ -54,7 +54,7 @@ class qa_stairclocker (gr_unittest.TestCase):
                     [1.0, 1.0, 2.0, 3.0],
                 ),
         ):
-            stair = habets.stairclocker(3)
+            stair = habets.stairclocker(3, 3, 0.02)
             dbg = blocks.message_debug()
             self.tb.msg_connect(stair, "out", dbg, "store")
             self.tb.start()

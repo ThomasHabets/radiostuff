@@ -30,13 +30,15 @@ namespace gr {
     {
      private:
       const int min_plateu_;
+      const int max_shortsamples_;
+      const float group_distance_;
       const pmt::pmt_t port_in_;
       const pmt::pmt_t port_out_;
 
       std::vector<float> process(const std::vector<float>& in) const;
 
      public:
-      stairclocker_impl(int min_plateu);
+      stairclocker_impl(int min_plateu, int max_shortsamples, float group_distance);
       ~stairclocker_impl();
 
       // Where all the action really happens

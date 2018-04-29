@@ -35,4 +35,5 @@ from pn_decode_identity_b import pn_decode_identity_b
 from preamble_stripper import preamble_stripper
 from preamble_adder import preamble_adder
 from magic_decoder import magic_decoder
+from prototype_tagged_stream_to_vector import prototype_tagged_stream_to_vector
 #

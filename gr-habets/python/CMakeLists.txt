@@ -35,7 +35,8 @@ GR_PYTHON_INSTALL(
     preamble_stripper.py
     preamble_adder.py
     wpcr.py
-    magic_decoder.py DESTINATION ${GR_PYTHON_DIR}/habets
+    magic_decoder.py
+    prototype_tagged_stream_to_vector.py DESTINATION ${GR_PYTHON_DIR}/habets
 )
 
 ########################################################################
@@ -59,3 +60,4 @@ GR_ADD_TEST(qa_packetize_burst ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/
 GR_ADD_TEST(qa_magic_decoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_magic_decoder.py)
 GR_ADD_TEST(qa_stairclocker ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_stairclocker.py)
 GR_ADD_TEST(qa_float_streamer ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_float_streamer.py)
+GR_ADD_TEST(qa_prototype_tagged_stream_to_vector ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_prototype_tagged_stream_to_vector.py)

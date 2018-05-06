@@ -1,7 +1,9 @@
 package wxlog
 
 import (
+	"fmt"
 	"net"
+	"regexp"
 	"time"
 )
 
@@ -39,3 +41,13 @@ type JSONLog struct {
 	Comment        string
 }
 
+var locatorRE = regexp.MustCompile(`^[A-Z]{2}[0-9]{2}$`)
+
+func Locator2LatLong(s string) (float64, float64, error) {
+	if !locatorRE.MatchString(s) {
+		return 0, 0, fmt.Errorf("code only supports maidenhead of length 4")
+	}
+	lng := 2.0*float64((s[0]-'A')*10+(s[2]-'0')) - 180
+	lat := 1.0*float64((s[1]-'A')*10+(s[3]-'0')) - 90
+	return float64(lat), float64(lng), nil
+}

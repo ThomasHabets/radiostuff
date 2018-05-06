@@ -24,43 +24,58 @@ var tmplMap = template.Must(template.New("").Parse(`
     </style>
   </head>
   <body>
+    <div id="floating-panel">
+      <button onclick="toggleHeatmap()">Toggle Heatmap</button>
+      <button onclick="toggleMarkers()">Toogle markers</button>
+    </div>
     <div id="map"></div>
     <script>
+      var map, heatmap, markers;
+
+      function toggleHeatmap() {
+        heatmap.setMap(heatmap.getMap() ? null : map);
+      }
+      function toggleMarkers() {
+        for (var i = 0; i < markers.length; i++) {
+          if(markers[i].getVisible()) {
+            markers[i].setVisible(false);
+          } else {
+            markers[i].setVisible(true);
+          }
+        }
+      }
 
       function initMap() {
-        var map = new google.maps.Map(document.getElementById('map'), {
+        map = new google.maps.Map(document.getElementById('map'), {
           zoom: 3,
           center: {lat: 20, lng: 0}
         });
-      var heatmapData = [
+        var heatmapData = [
 {{range .Data -}}
         {location: new google.maps.LatLng({{.Lat}}, {{.Long}}), weight: {{.Weight}}},
 {{end}}
-      ];
+        ];
+
+        markers = [
 {{range .Stations -}}
-      new google.maps.Marker({
+        new google.maps.Marker({
           position: {lat: {{.Lat}}, lng: {{.Long}}},
           map: map,
           title: '{{.Name}}:\n{{range .Seen}}{{.}}\n{{end}}'
-      });
+        }),
 {{end}}
-      var heatmap = new google.maps.visualization.HeatmapLayer({
-        data: heatmapData,
-        radius: 3,
-        dissipating: false
-      });
+        ];
+        heatmap = new google.maps.visualization.HeatmapLayer({
+          data: heatmapData,
+          radius: 3,
+          dissipating: false
+        });
       
-      heatmap.setMap(map);
-      /*
-        var ctaLayer = new google.maps.KmlLayer({
-          url: 'http://googlemaps.github.io/js-v2-samples/ggeoxml/cta.kml',
-          map: map
-      });
-      */
+        heatmap.setMap(map);
       }
     </script>
     <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key={{.APIKey}}&callback=initMap&libraries=visualization">
+            src="https://maps.googleapis.com/maps/api/js?key={{.APIKey}}&callback=initMap&libraries=visualization">
     </script>
   </body>
 </html>

@@ -275,6 +275,7 @@ func decodePacket(p []byte) (*Packet, error) {
 }
 
 type JSONLog struct {
+	Addr           net.UDPAddr
 	DEGrid         string
 	Frequency      uint64
 	Mode           string
@@ -288,8 +289,9 @@ type JSONLog struct {
 	Comment        string
 }
 
-func makeJSON(deGrid string, freq uint64, mode string, pp *Packet) *JSONLog {
+func makeJSON(remote *net.UDPAddr, deGrid string, freq uint64, mode string, pp *Packet) *JSONLog {
 	return &JSONLog{
+		Addr:           *remote,
 		DEGrid:         deGrid,
 		Frequency:      freq,
 		Mode:           mode,
@@ -310,7 +312,7 @@ func main() {
 		log.Fatalf("Trailing args on cmdline: %q", flag.Args())
 	}
 
-	fo, err := os.Create(*out)
+	fo, err := os.OpenFile(*out, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatalf("Failed to open %q: %v", *out, err)
 	}
@@ -341,7 +343,6 @@ func main() {
 		if oobn != 0 {
 			log.Warningf("OOB data received: %d", oobn)
 		}
-		remote = remote
 		fl = fl
 		p := b[:n]
 		pp, err := decodePacket(p)
@@ -355,7 +356,7 @@ func main() {
 			deGrid = pp.DEGrid
 		case PacketTypeDecode:
 			fmt.Printf("%v %10d %6s %4d %4.1f %4d %s\n", pp.Time.UTC().Format("2006-01-02 15:04:05Z"), freq, mode, pp.SNR, pp.Delta, pp.DeltaFrequency, pp.Message)
-			if err := fos.Encode(makeJSON(deGrid, freq, mode, pp)); err != nil {
+			if err := fos.Encode(makeJSON(remote, deGrid, freq, mode, pp)); err != nil {
 				log.Fatalf("Failed to log to JSON: %v", err)
 			}
 		}

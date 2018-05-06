@@ -15,9 +15,10 @@ import (
 )
 
 var (
-	in     = flag.String("in", "", "Input file.")
-	out    = flag.String("out", "", "Output KML")
-	apiKey = flag.String("api_key", "", "Google Maps API key")
+	in      = flag.String("in", "", "Input file.")
+	out     = flag.String("out", "", "Output KML")
+	apiKey  = flag.String("api_key", "", "Google Maps API key")
+	markers = flag.Bool("markers", true, "Generate markers.")
 
 	res = []*regexp.Regexp{
 		regexp.MustCompile(`^CQ ([A-Z0-9]+) ([A-Z]{2}\d{2})$`),
@@ -54,6 +55,7 @@ func main() {
 	var data []datum
 	var stations []station
 	seenStations := make(map[string]int)
+	seenLocation := make(map[string]int)
 	for {
 		var r wxlog.JSONLog
 		if err := dec.Decode(&r); err == io.EOF {
@@ -81,25 +83,30 @@ func main() {
 				log.Errorf("%q is not a locator: %v", m[2], err)
 				continue
 			}
-			data = append(data, datum{
-				Lat:  lat,
-				Long: long,
-				//Weight: math.Log2(float64(r.SNR + 23)),
-				Weight: 1,
-			})
-			n, found := seenStations[callsign]
-			if !found {
-				n = len(stations)
-				seenStations[callsign] = n
-				stations = append(stations, station{
-					Name: callsign,
+			if _, found := seenLocation[latlong]; !found {
+				seenLocation[latlong] = len(data)
+				data = append(data, datum{
 					Lat:  lat,
 					Long: long,
+					//Weight: math.Log2(float64(r.SNR + 23)),
+					Weight: 1,
 				})
 			}
-			stations[n].Seen = append(stations[n].Seen, r.Time)
-			if len(stations[n].Seen) > 10 {
-				stations[n].Seen = stations[n].Seen[len(stations[n].Seen)-10:]
+			if *markers {
+				n, found := seenStations[callsign]
+				if !found {
+					n = len(stations)
+					seenStations[callsign] = n
+					stations = append(stations, station{
+						Name: callsign,
+						Lat:  lat,
+						Long: long,
+					})
+				}
+				stations[n].Seen = append(stations[n].Seen, r.Time)
+				if len(stations[n].Seen) > 10 {
+					stations[n].Seen = stations[n].Seen[len(stations[n].Seen)-10:]
+				}
 			}
 			if false {
 				fmt.Printf("%v (%f,%f): %v %v\n", m[2], lat, long, r.SNR, m[1])

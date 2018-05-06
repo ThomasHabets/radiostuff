@@ -45,7 +45,9 @@ var tmplMap = template.Must(template.New("").Parse(`
       });
 {{end}}
       var heatmap = new google.maps.visualization.HeatmapLayer({
-      data: heatmapData
+        data: heatmapData,
+        radius: 3,
+        dissipating: false
       });
       
       heatmap.setMap(map);

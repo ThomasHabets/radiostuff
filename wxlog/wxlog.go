@@ -306,6 +306,9 @@ func makeJSON(deGrid string, freq uint64, mode string, pp *Packet) *JSONLog {
 
 func main() {
 	flag.Parse()
+	if flag.NArg() > 0 {
+		log.Fatalf("Trailing args on cmdline: %q", flag.Args())
+	}
 
 	fo, err := os.Create(*out)
 	if err != nil {

@@ -3,10 +3,12 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"net"
+	"os"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -35,7 +37,9 @@ const (
 )
 
 var (
-	addr = flag.String("addr", ":2237", "Port to listen to")
+	addr    = flag.String("addr", ":2237", "Port to listen to")
+	out     = flag.String("out", "", "JSON Output")
+	comment = flag.String("comment", "", "Extra info about antenna setup etc to put in log")
 )
 
 type Packet struct {
@@ -270,8 +274,45 @@ func decodePacket(p []byte) (*Packet, error) {
 	return &pp, nil
 }
 
+type JSONLog struct {
+	DEGrid         string
+	Frequency      uint64
+	Mode           string
+	ID             string
+	Time           time.Time
+	SNR            int32
+	Delta          float64
+	DeltaFrequency uint32
+	Message        string
+	LowConfidence  bool
+	Comment        string
+}
+
+func makeJSON(deGrid string, freq uint64, mode string, pp *Packet) *JSONLog {
+	return &JSONLog{
+		DEGrid:         deGrid,
+		Frequency:      freq,
+		Mode:           mode,
+		ID:             pp.ID,
+		Time:           pp.Time,
+		SNR:            pp.SNR,
+		Delta:          pp.Delta,
+		DeltaFrequency: pp.DeltaFrequency,
+		Message:        pp.Message,
+		LowConfidence:  pp.LowConfidence,
+		Comment:        *comment,
+	}
+}
+
 func main() {
 	flag.Parse()
+
+	fo, err := os.Create(*out)
+	if err != nil {
+		log.Fatalf("Failed to open %q: %v", *out, err)
+	}
+	defer fo.Close()
+	fos := json.NewEncoder(fo)
 
 	a, err := net.ResolveUDPAddr("udp", *addr)
 	if err != nil {
@@ -284,6 +325,7 @@ func main() {
 	}
 	fmt.Printf("%20s %10s %6s %4s %4s %4s %s\n", "Time", "Dial", "Mode", "SNR", "DT", "Freq", "Message")
 	mode := "???"
+	deGrid := "???"
 	var freq uint64
 	for {
 		b := make([]byte, 1500, 1500)
@@ -307,8 +349,15 @@ func main() {
 		case PacketTypeStatus:
 			mode = pp.Mode
 			freq = pp.Dial
+			deGrid = pp.DEGrid
 		case PacketTypeDecode:
 			fmt.Printf("%v %10d %6s %4d %4.1f %4d %s\n", pp.Time.UTC().Format("2006-01-02 15:04:05Z"), freq, mode, pp.SNR, pp.Delta, pp.DeltaFrequency, pp.Message)
+			if err := fos.Encode(makeJSON(deGrid, freq, mode, pp)); err != nil {
+				log.Fatalf("Failed to log to JSON: %v", err)
+			}
 		}
+	}
+	if err := fo.Close(); err != nil {
+		log.Fatalf("Failed to close JSON output: %v", err)
 	}
 }

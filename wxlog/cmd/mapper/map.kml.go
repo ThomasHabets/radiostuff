@@ -46,6 +46,7 @@ var tmplMap = template.Must(template.New("").Parse(`
       function toggleHeatmap() {
         heatmap.setMap(heatmap.getMap() ? null : map);
       }
+
       function toggleMarkers() {
         for (var i = 0; i < markers.length; i++) {
           if(markers[i].getVisible()) {
@@ -56,25 +57,41 @@ var tmplMap = template.Must(template.New("").Parse(`
         }
       }
 
+      function make_heatmap_data(points) {
+        var ret = [];
+        var ll;
+        var x;
+        var y;
+        var dup = {};
+        for (var i = 0; i < points.length; i++) {
+          x = points[i][0];
+          y = points[i][1];
+          ll = x + "/" + y;
+          if (dup[ll]) {
+            continue;
+          }
+          dup[ll] = true;
+          ret.push({
+              location: new google.maps.LatLng(x, y)
+          });
+        }
+        return ret;
+      }
+
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
           zoom: 3,
           center: {lat: 20, lng: 0}
         });
-        var heatmapData = [
-{{range .Data -}}
-        {location: new google.maps.LatLng({{.Lat}}, {{.Long}}), weight: {{.Weight}}},
-{{end}}
-        ];
+        var heatmapData = make_heatmap_data([{{range .Data}}[{{.Lat}}, {{.Long}}],{{end}}]);
 
-        markers = [
-{{range .Stations -}}
-        new google.maps.Marker({
-          position: {lat: {{.Lat}}, lng: {{.Long}}},
-          map: map,
-          title: '{{.Name}}:\n{{range .Seen}}{{.}}\n{{end}}'
-        }),
-{{end}}
+        markers = [{{range .Data}}
+          new google.maps.Marker({
+            position: {lat: {{.Lat}}, lng: {{.Long}}},
+            map: map,
+            title: '{{.Callsign}}:\n{{range .Seen}}{{.}}\n{{end}}'
+          }),
+{{- end -}}
         ];
         heatmap = new google.maps.visualization.HeatmapLayer({
           data: heatmapData,

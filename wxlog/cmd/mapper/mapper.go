@@ -21,7 +21,7 @@ var (
 	in      = flag.String("in", "", "Input file.")
 	out     = flag.String("out", "", "Output HTML")
 	apiKey  = flag.String("api_key", "", "Google Maps API key")
-	markers = flag.Bool("markers", true, "Generate markers.")
+	minSeen = flag.Int("min_seen", 2, "Minimum times stations must have been seen to count")
 
 	res = []*regexp.Regexp{
 		regexp.MustCompile(`^CQ ([A-Z0-9]+) ([A-Z]{2}\d{2})$`),
@@ -49,16 +49,11 @@ func main() {
 	type datum struct {
 		Lat, Long float64
 		Weight    float64
-	}
-	type station struct {
-		Name      string
-		Lat, Long float64
+		Callsign  string
 		Seen      []time.Time
 	}
 	var data []datum
-	var stations []station
-	seenStations := make(map[string]int)
-	seenLocation := make(map[string]int)
+	seenData := make(map[string]int)
 	for {
 		var r wxlog.JSONLog
 		if err := dec.Decode(&r); err == io.EOF {
@@ -86,30 +81,21 @@ func main() {
 				log.Errorf("%q is not a locator: %v", m[2], err)
 				continue
 			}
-			if _, found := seenLocation[latlong]; !found {
-				seenLocation[latlong] = len(data)
+
+			key := latlong + callsign
+			n, found := seenData[key]
+			if !found {
+				seenData[key] = len(data)
 				data = append(data, datum{
-					Lat:  lat,
-					Long: long,
-					//Weight: math.Log2(float64(r.SNR + 23)),
-					Weight: 1,
+					Lat:      lat,
+					Long:     long,
+					Weight:   1,
+					Callsign: callsign,
 				})
 			}
-			if *markers {
-				n, found := seenStations[callsign]
-				if !found {
-					n = len(stations)
-					seenStations[callsign] = n
-					stations = append(stations, station{
-						Name: callsign,
-						Lat:  lat,
-						Long: long,
-					})
-				}
-				stations[n].Seen = append(stations[n].Seen, r.Time)
-				if len(stations[n].Seen) > 10 {
-					stations[n].Seen = stations[n].Seen[len(stations[n].Seen)-10:]
-				}
+			data[n].Seen = append(data[n].Seen, r.Time)
+			if len(data[n].Seen) > 10 {
+				data[n].Seen = data[n].Seen[len(data[n].Seen)-10:]
 			}
 			if true {
 				sc := s2.CellIDFromLatLng(s2.LatLngFromDegrees(lat, long))
@@ -117,15 +103,26 @@ func main() {
 			}
 		}
 	}
+
+	// Filter out stations only seen once.
+	{
+		var odata []datum
+		for _, d := range data {
+			if len(d.Seen) < *minSeen {
+				continue
+			}
+			odata = append(odata, d)
+		}
+		data = odata
+	}
+
 	var buf bytes.Buffer
 	if err := tmplMap.Execute(&buf, &struct {
-		APIKey   string
-		Data     []datum
-		Stations []station
+		APIKey string
+		Data   []datum
 	}{
-		APIKey:   *apiKey,
-		Data:     data,
-		Stations: stations,
+		APIKey: *apiKey,
+		Data:   data,
 	}); err != nil {
 		log.Fatal(err)
 	}

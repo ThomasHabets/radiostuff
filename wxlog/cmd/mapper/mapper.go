@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/golang/geo/s2"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/ThomasHabets/radiostuff/wxlog"
@@ -110,8 +111,9 @@ func main() {
 					stations[n].Seen = stations[n].Seen[len(stations[n].Seen)-10:]
 				}
 			}
-			if false {
-				fmt.Printf("%v (%f,%f): %v %v\n", m[2], lat, long, r.SNR, m[1])
+			if true {
+				sc := s2.CellIDFromLatLng(s2.LatLngFromDegrees(lat, long))
+				fmt.Printf("%v (%f,%f, aka %v): %v %v\n", m[2], lat, long, sc.Parent(9).ToToken(), r.SNR, m[1])
 			}
 		}
 	}

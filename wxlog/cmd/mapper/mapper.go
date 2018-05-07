@@ -28,9 +28,7 @@ var (
 		regexp.MustCompile(`^[A-Z0-9]+ ([A-Z0-9]+) ([A-Z]{2}\d{2})$`),
 	}
 
-	blacklist = map[string]bool{
-		"MU6PQE": true,
-	}
+	blacklist = map[string]bool{}
 )
 
 func main() {

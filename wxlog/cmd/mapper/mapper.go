@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"time"
@@ -16,7 +18,7 @@ import (
 
 var (
 	in      = flag.String("in", "", "Input file.")
-	out     = flag.String("out", "", "Output KML")
+	out     = flag.String("out", "", "Output HTML")
 	apiKey  = flag.String("api_key", "", "Google Maps API key")
 	markers = flag.Bool("markers", true, "Generate markers.")
 
@@ -113,7 +115,8 @@ func main() {
 			}
 		}
 	}
-	if err := tmplMap.Execute(os.Stdout, &struct {
+	var buf bytes.Buffer
+	if err := tmplMap.Execute(&buf, &struct {
 		APIKey   string
 		Data     []datum
 		Stations []station
@@ -122,6 +125,9 @@ func main() {
 		Data:     data,
 		Stations: stations,
 	}); err != nil {
+		log.Fatal(err)
+	}
+	if err := ioutil.WriteFile(*out, buf.Bytes(), 0644); err != nil {
 		log.Fatal(err)
 	}
 }

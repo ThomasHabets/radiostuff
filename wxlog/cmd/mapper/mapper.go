@@ -70,8 +70,9 @@ func main() {
 				continue
 			}
 			latlong := m[2]
-			if latlong == "RR73" {
-				// While a valid locator, it's unlikely.
+			switch latlong {
+			case "RR73", "AF73":
+				// While valid locators, they're unlikely.
 				continue
 			}
 			lat, long, err := wxlog.Locator2LatLong(latlong)

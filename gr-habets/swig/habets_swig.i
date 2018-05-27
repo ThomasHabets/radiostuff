@@ -18,6 +18,7 @@
 #include "habets/packetize_burst.h"
 #include "habets/stairclocker.h"
 #include "habets/float_streamer.h"
+#include "habets/jt65_encode.h"
 %}
 
 
@@ -41,3 +42,5 @@ GR_SWIG_BLOCK_MAGIC2(habets, packetize_burst);
 GR_SWIG_BLOCK_MAGIC2(habets, stairclocker);
 %include "habets/float_streamer.h"
 GR_SWIG_BLOCK_MAGIC2(habets, float_streamer);
+%include "habets/jt65_encode.h"
+GR_SWIG_BLOCK_MAGIC2(habets, jt65_encode);

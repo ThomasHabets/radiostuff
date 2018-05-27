@@ -63,7 +63,7 @@ test_cq()
     0, 48, 2, 35, 39, 3, 55, 33, 10, 39, 41, 32, 27, 33, 30, 4, 57, 3, 28, 52, 31,
   };
 
-  const auto p = pack_message("CQ M6VMB IO91");
+  const auto p = pack_message(in);
   test_step("pack", p, packed);
 
   // Test fecced.

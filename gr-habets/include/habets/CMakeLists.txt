@@ -31,5 +31,6 @@ install(FILES
     bitunpacker.h
     packetize_burst.h
     stairclocker.h
-    float_streamer.h DESTINATION include/habets
+    float_streamer.h
+    jt65_encode.h DESTINATION include/habets
 )

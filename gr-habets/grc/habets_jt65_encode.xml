@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<block>
+  <name>jt65_encode</name>
+  <key>habets_jt65_encode</key>
+  <category>[habets]</category>
+  <import>import habets</import>
+  <make>habets.jt65_encode()</make>
+  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
+       Sub-nodes:
+       * name
+       * key (makes the value accessible as $keyname, e.g. in the make node)
+       * type -->
+
+  <!-- Make one 'sink' node per input. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <sink>
+    <name>pdus</name>
+    <type>message</type>
+  </sink>
+
+  <!-- Make one 'source' node per output. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <source>
+    <name>out</name>
+    <type>byte</type>
+    <vlen>63</vlen>
+  </source>
+</block>

@@ -342,7 +342,7 @@ pack_message(const std::string& msg)
     return pack_plaintext(msg);
   }
       
-  throw std::runtime_error("couldn't encode string: " + msg);
+  throw std::runtime_error("couldn't encode string of unknown format: \"" + msg + "\", length " + std::to_string(msg.size()));
 }
 
 

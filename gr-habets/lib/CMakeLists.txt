@@ -36,6 +36,7 @@ list(APPEND habets_sources
     packetize_burst_impl.cc
     stairclocker_impl.cc
     float_streamer_impl.cc
+    jt65_encode_impl.cc jt65.cc mz.cc
 )
 
 set(habets_sources "${habets_sources}" PARENT_SCOPE)

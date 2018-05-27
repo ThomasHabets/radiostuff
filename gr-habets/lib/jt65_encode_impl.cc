@@ -16,6 +16,15 @@
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
  * Boston, MA 02110-1301, USA.
+ *
+ * NOTES
+ * * TX starts at 1s after minute boundary.
+ * * Finishes at 47.8s according to docs, 47.872s by my calculations.
+ * * Symbols are 0.372s long.
+ * * Or 1.486s, if using shorthand.
+ * * Tones are 1270.5 + 2.6917 (N+2) m Hz
+ *   * m: {1, 2, 4} for {A, B, C}
+ *   * N: Symbol value between 0 and 63.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -29,6 +38,15 @@
 #include "jt65.h"
 
 const int output_size = 63;
+
+// At these timeslots send the sync symbol, 1270.5Hz.
+const std::vector<bool> sync_pos{
+    1,0,0,1,1,0,0,0,1,1,1,1,1,1,0,1,0,1,0,0,0,1,0,1,1,0,0,1,0,0,
+    0,1,1,1,0,0,1,1,1,1,0,1,1,0,1,1,1,1,0,0,0,1,1,0,1,0,1,0,1,1,
+    0,0,1,1,0,1,0,1,0,1,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+    0,1,0,0,1,0,1,1,0,1,0,1,0,1,0,0,1,1,0,0,1,0,0,1,0,0,0,0,1,1,
+    1,1,1,1,1,1
+};
 
 namespace gr {
   namespace habets {

@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2018 <+YOU OR YOUR COMPANY+>.
+ * Copyright 2018 Thomas Habets <thomas@habets.se>
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ namespace gr {
       // Where all the action really happens
       int work(int noutput_items,
          gr_vector_const_void_star &input_items,
-         gr_vector_void_star &output_items);
+         gr_vector_void_star &output_items) override;
     };
 
   } // namespace habets

@@ -1937,7 +1937,7 @@
     </param>
     <param>
       <key>gain0</key>
-      <value>100</value>
+      <value>30</value>
     </param>
     <param>
       <key>ant10</key>

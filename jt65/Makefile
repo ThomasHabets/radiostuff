@@ -1,2 +1,2 @@
-jt65: jt65.cc jt65_test.cc
-	g++ -std=gnu++11 jt65.cc jt65_test.cc jt65code/mz.c -o jt65
+jt65: ../gr-habets/lib/jt65.cc jt65_test.cc
+	g++ -std=gnu++11 ../gr-habets/lib/jt65.cc jt65_test.cc ../gr-habets/lib/mz.cc -o jt65

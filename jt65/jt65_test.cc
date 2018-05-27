@@ -1,6 +1,6 @@
 #include<iostream>
 
-#include"jt65.h"
+#include"../gr-habets/lib/jt65.h"
 
 using namespace JT65;
 
@@ -73,10 +73,11 @@ test_cq()
   f = interleave(f);
   test_step("interleave", f, interleaved);
 
-  f = greycode(f);
-  test_step("greycode", f, greyed);
+  auto ota = greycode(f);
+  test_step("greycode", ota, greyed);
 
-  f = ungreycode(f);
+  // Try step by step decode.
+  f = ungreycode(ota);
   test_step("ungreycode", f, interleaved);
 
   f = uninterleave(f);
@@ -85,11 +86,18 @@ test_cq()
   f = unfec(f);
   test_step("unfec", f, packed);
 
-  auto t = unpack_message(f);
-  if (t != in) {
-    throw std::runtime_error("decoded to \"" + t + "\", want \"" + in + "\"");
+  // Add some over the air breakage.
+  ota[0] = 0;
+  for (int i = 20; i < 45; i++) {
+    ota[i] = 33;
   }
-  std::cout << "Decoded: " << t << std::endl;
+
+  // Check that output is still correct.
+  auto out = unpack_message(unfec(uninterleave(ungreycode(ota))));
+  if (out != in) {
+    throw std::runtime_error("decoded to \"" + out + "\", want \"" + in + "\"");
+  }
+  std::cout << "Decoded: " << out << std::endl;
 }
 
 void

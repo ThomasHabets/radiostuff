@@ -84,6 +84,7 @@ unpack_grid(const encoding_t n)
   return ret;
 }
 
+// Unpack as callsign.
 std::string
 unpack_call(encoding_t n)
 {
@@ -103,6 +104,9 @@ unpack_call(encoding_t n)
   call[1] = a[n%36];
   n /= 36;
   call[0] = a[n];
+  if (call[0] == ' ') {
+    call = call.substr(1,5);
+  }
   return call;
 }
 
@@ -572,3 +576,11 @@ main(int argc, char** argv)
     return 1;
   }
 }
+/* ---- Emacs Variables ----
+ * Local Variables:
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * End:
+ *
+ * vim: ts=2 sw=2
+ */

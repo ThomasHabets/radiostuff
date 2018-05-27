@@ -1,5 +1,6 @@
 // Requires mz.c from https://physics.princeton.edu/pulsar/k1jt/JT65code.tgz
 #include<string>
+#include<regex>
 #include<tuple>
 #include<iostream>
 #include<vector>
@@ -46,9 +47,9 @@ pack_grid(const std::string& grid)
 
   const encoding_t bn{static_cast<unsigned long>(ng)};
 
-  std::cout << "long: " << dlong << std::endl;
-  std::cout << "lat: " << dlat << std::endl;
-  std::cout << "GRID: " << bn << std::endl;
+  //std::cout << "long: " << dlong << std::endl;
+  //std::cout << "lat: " << dlat << std::endl;
+  //std::cout << "GRID: " << bn << std::endl;
   return bn;
 }
 
@@ -110,6 +111,7 @@ unpack_call(encoding_t n)
   return call;
 }
 
+// Pack callsign.
 encoding_t
 pack_call(const std::string& callsign)
 {
@@ -118,7 +120,6 @@ pack_call(const std::string& callsign)
   if (callsign.substr(0,3) == "CQ ") {
     bn += nbase + 1;
     // TODO: handle CQ freq offset.
-    std::cout << "Yeah, CQ\n";
     return bn;
   }
 
@@ -132,6 +133,7 @@ pack_call(const std::string& callsign)
   return bn;
 }
 
+// Pack plaintext.
 encoding_t
 pack_text(const std::string& txt)
 {
@@ -146,6 +148,7 @@ pack_text(const std::string& txt)
   return bn;
 }
 
+// Unpack plaintext.
 std::string
 unpack_text(encoding_t in, int chars)
 {
@@ -157,8 +160,9 @@ unpack_text(encoding_t in, int chars)
   return ret;
 }
 
+// Unpack a message into constituent numbers.
 std::tuple<encoding_t,encoding_t,encoding_t>
-message_to_nums(const std::vector<int>& s)
+syms2nums(const std::vector<int>& s)
 {
   const encoding_t nc1 =
     (encoding_t(s[0]) << 22)
@@ -182,6 +186,26 @@ message_to_nums(const std::vector<int>& s)
   return std::make_tuple(nc1, nc2, ng);
 }
 
+std::vector<int>
+nums2syms(const encoding_t bn1, const encoding_t bn2, const encoding_t bn3)
+{
+  return std::vector<int>{
+    static_cast<int>((bn1 >> 22) % 64),
+      static_cast<int>((bn1 >> 16) % 64),
+      static_cast<int>((bn1 >> 10) % 64),
+      static_cast<int>((bn1 >> 4) % 64),
+      static_cast<int>(4*(bn1 & 15) + ((bn2 >> 26) & 3)),
+      static_cast<int>((bn2 >> 20) % 64),
+      static_cast<int>((bn2 >> 14) % 64),
+      static_cast<int>((bn2 >> 8) % 64),
+      static_cast<int>((bn2 >> 2) % 64),
+      static_cast<int>(16*(bn2 & 3) + ((bn3 >> 12) & 15)),
+      static_cast<int>((bn3 >> 6) % 64),
+      static_cast<int>(bn3 & 63),
+  };
+}
+
+// Unpack constituent numbers as a CQ. 
 std::pair<std::string, std::string>
 unpack_cq(const encoding_t nc1, const encoding_t nc2, const encoding_t ng)
 {
@@ -200,12 +224,13 @@ unpack_cq(const encoding_t nc1, const encoding_t nc2, const encoding_t ng)
 
 // TODO: return structured data.
 std::string
-unpack_message(std::vector<int>& s)
+unpack_message(const std::vector<int>& s)
 {
   encoding_t nc1, nc2, ng;
-  std::tie(nc1, nc2, ng) = message_to_nums(s);
+  std::tie(nc1, nc2, ng) = syms2nums(s);
   std::cout  << "Unpack: " << nc1 << " " << nc2 << " " << ng << std::endl;
 
+  // Plaintext.
   if (ng > 32768) {
     ng &= 32767;
     if (nc1 & 1) {
@@ -216,10 +241,11 @@ unpack_message(std::vector<int>& s)
       ng += 65536;
     }
     nc2 /= 2;
-    std::cout  << "Text unpack: " << nc1 << " " << nc2 << " " << ng << std::endl;
+    //std::cout  << "Text unpack: " << nc1 << " " << nc2 << " " << ng << std::endl;
     return unpack_text(nc1, 5) + unpack_text(nc2, 5) + unpack_text(ng, 3);
   }
 
+  // Location call with specific source and destination.
   if (nc1 < encoding_t(nbase)) {
     const auto dst = unpack_call(nc1);
     const auto src = unpack_call(nc2);
@@ -227,11 +253,13 @@ unpack_message(std::vector<int>& s)
     return dst + " " + src + " " + loc;
   }
 
+  // CQ.
   if (nc1 == encoding_t(nbase+1)) {
     const auto cq = unpack_cq(nc1, nc2, ng);
     return "CQ " + cq.first + " " + cq.second;
   }
 
+  // QRZ.
   if (nc1 == nbase + 2) {
     throw std::runtime_error("QRZ not implemented");
   }
@@ -239,36 +267,17 @@ unpack_message(std::vector<int>& s)
 }
 
 std::vector<int>
-pack_numbers(const encoding_t bn1, const encoding_t bn2, const encoding_t bn3)
-{
-  return std::vector<int>{
-    static_cast<int>((bn1 >> 22) % 64),
-      static_cast<int>((bn1 >> 16) % 64),
-      static_cast<int>((bn1 >> 10) % 64),
-      static_cast<int>((bn1 >> 4) % 64),
-      static_cast<int>(4*(bn1 & 15) + ((bn2 >> 26) & 3)),
-      static_cast<int>((bn2 >> 20) % 64),
-      static_cast<int>((bn2 >> 14) % 64),
-      static_cast<int>((bn2 >> 8) % 64),
-      static_cast<int>((bn2 >> 2) % 64),
-      static_cast<int>(16*(bn2 & 3) + ((bn3 >> 12) & 15)),
-      static_cast<int>((bn3 >> 6) % 64),
-      static_cast<int>(bn3 & 63),
-  };
-}
-
-std::vector<int>
 pack_cq(const std::string& src, const std::string& locator)
 {
   const auto bn1 = pack_call("CQ ");
-  std::cout << "CQ bn1: " << bn1 << std::endl;
+  //std::cout << "CQ bn1: " << bn1 << std::endl;
 
   const auto bn2 = pack_call(" " + src);
-  std::cout << "CQ bn2: " << bn2 << std::endl;
+  //std::cout << "CQ bn2: " << bn2 << std::endl;
 
   const auto bn3 = pack_grid("IO91");
-  std::cout << "CQ grid: " << bn3 << std::endl;
-  return pack_numbers(bn1,bn2,bn3);
+  //std::cout << "CQ grid: " << bn3 << std::endl;
+  return nums2syms(bn1,bn2,bn3);
 }
 
 std::vector<int>
@@ -289,10 +298,12 @@ pack_plaintext(const std::string& msg)
   }
   bn3 &= 32767;
   bn3 += 32768;
-  std::cout << "bn1: " << bn1 << std::endl
-            << "bn2: " << bn2 << std::endl
-            << "bn3: " << bn3 << std::endl;
-  return pack_numbers(bn1,bn2,bn3);
+  if (false) {
+    std::cout << "bn1: " << bn1 << std::endl
+              << "bn2: " << bn2 << std::endl
+              << "bn3: " << bn3 << std::endl;
+  }
+  return nums2syms(bn1,bn2,bn3);
 }
 
 // Pack "DST SRC LOCATOR".
@@ -303,10 +314,37 @@ pack_call(const std::string& dst, const std::string& src, const std::string& loc
   const auto pad = [](const std::string &s){
     return s.size() == 6 ? s : " " + s;
   };
-  return pack_numbers(pack_call(pad(dst)),
-                      pack_call(pad(src)),
-                      pack_grid(locator));
+  return nums2syms(pack_call(pad(dst)),
+                   pack_call(pad(src)),
+                   pack_grid(locator));
 }
+
+// Take any message and pack it.
+std::vector<int>
+pack_message(const std::string& msg)
+{
+  std::smatch m;
+
+  // CQ
+  const std::regex re_cq_loc("CQ (\\w{5,6}) (\\w{4})");
+  if (std::regex_match(msg, m, re_cq_loc)) {
+    return pack_cq(m[1].str(), m[2].str());
+  }
+
+  // Call
+  const std::regex re_call_loc("(\\w{5,6}) (\\w{5,6}) (\\w{4})");
+  if (std::regex_match(msg, m, re_call_loc)) {
+    return pack_call(m[1].str(), m[2].str(), m[3].str());
+  }
+
+  // Plaintext
+  if (msg.size() <= 13) {
+    return pack_plaintext(msg);
+  }
+      
+  throw std::runtime_error("couldn't encode string: " + msg);
+}
+
 
 std::vector<int>
 greycode(const std::vector<int>& in)
@@ -440,7 +478,7 @@ test_cq()
     0, 48, 2, 35, 39, 3, 55, 33, 10, 39, 41, 32, 27, 33, 30, 4, 57, 3, 28, 52, 31,
   };
 
-  const auto p = pack_cq("M6VMB", "IO91");
+  const auto p = pack_message("CQ M6VMB IO91");
   test_step("pack", p, packed);
 
   // Test fecced.
@@ -463,6 +501,9 @@ test_cq()
   test_step("unfec", f, packed);
 
   auto t = unpack_message(f);
+  if (t != in) {
+    throw std::runtime_error("decoded to \"" + t + "\", want \"" + in + "\"");
+  }
   std::cout << "Decoded: " << t << std::endl;
 }
 
@@ -492,7 +533,7 @@ test_call()
       27, 48, 7, 5, 23, 6, 16, 31,
   };
 
-  const auto p = pack_call("N4CCB", "M6VMB", "IO91");
+  const auto p = pack_message(in);
   test_step("pack", p, packed);
 
   // Test fecced.
@@ -515,6 +556,9 @@ test_call()
   test_step("unfec", f, packed);
 
   auto t = unpack_message(f);
+  if (t != in) {
+    throw std::runtime_error("decoded to \"" + t + "\", want \"" + in + "\"");
+  }
   std::cout << "Decoded: " << t << std::endl;
 }
 
@@ -558,6 +602,9 @@ test_plaintext()
   test_step("unfec", f, packed);
 
   auto t = unpack_message(f);
+  if (t != in) {
+    throw std::runtime_error("decoded to \"" + t + "\", want \"" + in + "\"");
+  }
   std::cout << "Decoded: " << t << std::endl;
 }
 

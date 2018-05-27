@@ -55,7 +55,7 @@ namespace gr {
           const size_t len = pmt::blob_length(data);
           const uint8_t* bytes = static_cast<const uint8_t*>(pmt::blob_data(data));
           const std::string o(bytes, bytes+len);
-          std::cout << "got string: " << o << std::endl;
+          //std::cout << "got string: " << o << std::endl;
           queue_.push(o);
       });
     }
@@ -81,7 +81,7 @@ namespace gr {
       const auto msg = queue_.front();
       const auto enc = JT65::greycode(JT65::interleave(JT65::fec(JT65::pack_message(msg))));
       for (int i = 0; i < output_size; i++) {
-        std::cout << " " << enc[i];
+        //std::cout << " " << enc[i];
         out[i] = enc[i];
       }
       queue_.pop();

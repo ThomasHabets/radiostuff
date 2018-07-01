@@ -32,5 +32,6 @@ install(FILES
     packetize_burst.h
     stairclocker.h
     float_streamer.h
-    jt65_encode.h DESTINATION include/habets
+    jt65_encode.h
+    jt65_add_sync.h DESTINATION include/habets
 )

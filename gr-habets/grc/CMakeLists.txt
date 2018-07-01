@@ -33,5 +33,6 @@ install(FILES
     habets_stairclocker.xml
     habets_float_streamer.xml
     habets_prototype_tagged_stream_to_vector.xml
-    habets_jt65_encode.xml DESTINATION share/gnuradio/grc/blocks
+    habets_jt65_encode.xml
+    habets_jt65_add_sync.xml DESTINATION share/gnuradio/grc/blocks
 )

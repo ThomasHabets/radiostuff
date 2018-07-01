@@ -37,6 +37,7 @@ list(APPEND habets_sources
     stairclocker_impl.cc
     float_streamer_impl.cc
     jt65_encode_impl.cc jt65.cc mz.cc
+    jt65_add_sync_impl.cc
 )
 
 set(habets_sources "${habets_sources}" PARENT_SCOPE)

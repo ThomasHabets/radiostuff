@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<block>
+  <name>jt65_add_sync</name>
+  <key>habets_jt65_add_sync</key>
+  <category>[habets]</category>
+  <import>import habets</import>
+  <make>habets.jt65_add_sync()</make>
+  <!-- Make one 'sink' node per input. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <sink>
+    <name>in</name>
+    <type>byte</type>
+    <vlen>63</vlen>
+  </sink>
+
+  <!-- Make one 'source' node per output. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <source>
+    <name>out</name>
+    <type>byte</type>
+    <vlen>126</vlen>
+  </source>
+</block>

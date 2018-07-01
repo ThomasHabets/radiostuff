@@ -19,6 +19,7 @@
 #include "habets/stairclocker.h"
 #include "habets/float_streamer.h"
 #include "habets/jt65_encode.h"
+#include "habets/jt65_add_sync.h"
 %}
 
 
@@ -44,3 +45,5 @@ GR_SWIG_BLOCK_MAGIC2(habets, stairclocker);
 GR_SWIG_BLOCK_MAGIC2(habets, float_streamer);
 %include "habets/jt65_encode.h"
 GR_SWIG_BLOCK_MAGIC2(habets, jt65_encode);
+%include "habets/jt65_add_sync.h"
+GR_SWIG_BLOCK_MAGIC2(habets, jt65_add_sync);

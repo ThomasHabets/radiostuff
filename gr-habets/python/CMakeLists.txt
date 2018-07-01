@@ -62,3 +62,4 @@ GR_ADD_TEST(qa_stairclocker ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_
 GR_ADD_TEST(qa_float_streamer ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_float_streamer.py)
 GR_ADD_TEST(qa_prototype_tagged_stream_to_vector ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_prototype_tagged_stream_to_vector.py)
 GR_ADD_TEST(qa_jt65_encode ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_jt65_encode.py)
+GR_ADD_TEST(qa_jt65_add_sync ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_jt65_add_sync.py)

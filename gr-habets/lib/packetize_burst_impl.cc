@@ -1,17 +1,17 @@
 /* -*- c++ -*- */
-/* 
+/*
  * Copyright 2017 Thomas Habets <thomas@habets.se>
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -88,7 +88,7 @@ namespace gr {
 
       // API apparently doesn't guarantee tag order.
       std::sort(tags.begin(), tags.end(), tag_t::offset_compare);
-      
+
       for (const auto& t : tags) {
 	if (pmt::symbol_to_string(t.key) != tag_) {
 	  continue;
@@ -115,7 +115,7 @@ namespace gr {
 	  }
 	  const pmt::pmt_t vecpmt(pmt::make_blob(&buffer_[0], sizeof(float)*buffer_.size()));
 	  const pmt::pmt_t pdu(pmt::cons(pmt::PMT_NIL, vecpmt));
-	  
+
 	  message_port_pub(PDU_PORT_ID, pdu);
 	  if (debug) {
 	    std::cerr << "Sent packet of size " << buffer_.size() << std::endl;

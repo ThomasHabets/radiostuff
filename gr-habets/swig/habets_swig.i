@@ -21,6 +21,7 @@
 #include "habets/jt65_encode.h"
 #include "habets/jt65_add_sync.h"
 #include "habets/jt65_decode.h"
+#include "habets/tagged_stream_to_large_pdu_f.h"
 %}
 
 
@@ -50,3 +51,5 @@ GR_SWIG_BLOCK_MAGIC2(habets, jt65_encode);
 GR_SWIG_BLOCK_MAGIC2(habets, jt65_add_sync);
 %include "habets/jt65_decode.h"
 GR_SWIG_BLOCK_MAGIC2(habets, jt65_decode);
+%include "habets/tagged_stream_to_large_pdu_f.h"
+GR_SWIG_BLOCK_MAGIC2(habets, tagged_stream_to_large_pdu_f);

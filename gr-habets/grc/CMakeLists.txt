@@ -35,5 +35,6 @@ install(FILES
     habets_prototype_tagged_stream_to_vector.xml
     habets_jt65_encode.xml
     habets_jt65_add_sync.xml
-    habets_jt65_decode.xml DESTINATION share/gnuradio/grc/blocks
+    habets_jt65_decode.xml
+    habets_tagged_stream_to_large_pdu_f.xml DESTINATION share/gnuradio/grc/blocks
 )

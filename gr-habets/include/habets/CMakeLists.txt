@@ -34,5 +34,6 @@ install(FILES
     float_streamer.h
     jt65_encode.h
     jt65_add_sync.h
-    jt65_decode.h DESTINATION include/habets
+    jt65_decode.h
+    tagged_stream_to_large_pdu_f.h DESTINATION include/habets
 )

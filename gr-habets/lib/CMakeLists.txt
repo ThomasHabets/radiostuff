@@ -39,6 +39,7 @@ list(APPEND habets_sources
     jt65_encode_impl.cc jt65.cc mz.cc
     jt65_add_sync_impl.cc
     jt65_decode_impl.cc
+    tagged_stream_to_large_pdu_f_impl.cc
 )
 
 set(habets_sources "${habets_sources}" PARENT_SCOPE)

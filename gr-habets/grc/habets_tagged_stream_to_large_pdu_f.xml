@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<block>
+  <name>Tagged stream to large PDU</name>
+  <key>habets_tagged_stream_to_large_pdu_f</key>
+  <category>[habets]</category>
+  <import>import habets</import>
+  <make>habets.tagged_stream_to_large_pdu_f($length_tag)</make>
+  <param>
+    <name>Length tag name</name>
+    <key>length_tag</key>
+    <value>packet_len</value>
+    <type>string</type>
+  </param>
+
+  <sink>
+    <name>in</name>
+    <type>float</type>
+  </sink>
+
+  <source>
+    <name>out</name>
+    <type>message</type>
+  </source>
+</block>

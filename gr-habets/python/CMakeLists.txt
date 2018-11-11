@@ -64,3 +64,4 @@ GR_ADD_TEST(qa_prototype_tagged_stream_to_vector ${PYTHON_EXECUTABLE} ${CMAKE_CU
 GR_ADD_TEST(qa_jt65_encode ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_jt65_encode.py)
 GR_ADD_TEST(qa_jt65_add_sync ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_jt65_add_sync.py)
 GR_ADD_TEST(qa_jt65_decode ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_jt65_decode.py)
+GR_ADD_TEST(qa_tagged_stream_to_large_pdu_f ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_tagged_stream_to_large_pdu_f.py)

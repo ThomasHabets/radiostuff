@@ -19,7 +19,11 @@
 # Boston, MA 02110-1301, USA.
 #
 
+import time
+import struct
+
 from gnuradio import gr, gr_unittest
+from gnuradio.gr import pmt
 from gnuradio import blocks
 import habets_swig as habets
 
@@ -32,8 +36,52 @@ class qa_jt65_decode (gr_unittest.TestCase):
         self.tb = None
 
     def test_001_t (self):
-        # set up fg
-        self.tb.run ()
+        try:
+            src_data = open("jt65.floats.M6VMB").read()
+        except IOError:
+            print "Test input not found; skipping unit test"
+            return
+        src_data = struct.unpack("f"*(len(src_data)/4), src_data)
+        expected_result = "CQ M6VMB IO91"
+
+        print 'Making data'
+        pmt_data = pmt.cons(
+            pmt.PMT_NIL,
+            pmt.init_f32vector(len(src_data), list(src_data))
+        )
+
+        print 'Making flowgraph'
+        dec = habets.jt65_decode()
+        dbg = blocks.message_debug()
+        self.tb.msg_connect(dec,"out", dbg, "store")
+
+        print 'Starting flowgraph'
+        self.tb.start()
+
+        print 'Posting message'
+        dec.to_basic_block()._post(
+            pmt.intern("in"),
+            pmt_data,
+        )
+        print 'Waiting for message'
+        while dbg.num_messages() < 1:
+            time.sleep(0.1)
+        print 'Stopping flowgraph'
+        self.tb.stop()
+        self.tb.wait()
+        print 'Getting reply'
+        res = pmt.to_python(pmt.cdr(dbg.get_message(0)))
+        res = ''.join([chr(x) for x in res])
+        try:
+            print res
+            assert res == "CQ M6VMB IO91"
+        except AssertionError:
+            print "--"
+            print "Source:", src_data
+            print "Want:  ", expected_result
+            print "Got:   ", res
+            raise
+
         # check data
 
 

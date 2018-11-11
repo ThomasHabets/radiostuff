@@ -39,7 +39,7 @@ namespace gr {
       const float symbol_offset_;
 
       // Calculated:
-      const int batch_ = sps_/10;
+      const int batch_;
 
      public:
       jt65_decode_impl(int samp_rate, int sps, int buckets_per_symbol, int fft_size, float symbol_offset);

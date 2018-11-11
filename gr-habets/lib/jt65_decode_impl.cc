@@ -204,7 +204,8 @@ namespace gr {
         buckets_per_symbol_(buckets_per_symbol),
         fft_size_(fft_size),
         sps_(sps),
-        symbol_offset_(symbol_offset)
+        symbol_offset_(symbol_offset),
+        batch_(sps/buckets_per_symbol)
     {
       message_port_register_in(pmt::intern("in"));
       set_msg_handler(pmt::intern("in"), [this](pmt::pmt_t msg) {

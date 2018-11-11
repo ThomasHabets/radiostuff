@@ -25,7 +25,7 @@
 #include <gnuradio/io_signature.h>
 #include "tagged_stream_to_large_pdu_f_impl.h"
 namespace {
-  const bool debug = true;
+  const bool debug = false;
 }
 
 namespace gr {
@@ -79,7 +79,9 @@ namespace gr {
           if (pmt::symbol_to_string(t.key) == length_tag_) {
             current_length_ = value;
             const auto ofs = t.offset - relative_offset;
-            std::clog << "Packet length at offset " << ofs << std::endl;
+            if (debug) {
+              std::clog << "Packet length at offset " << ofs << std::endl;
+            }
             if (ofs != 0) {
               // Discard up to tag.
               return ofs;

@@ -63,7 +63,7 @@ namespace gr {
         // JT65C 10.8Hz per level.
         const float m = 10.8 * 64 * fft_size / samp_rate;
         auto out = in;
-        std::clog << "scaler: " << m << std::endl;
+        // std::clog << "scaler: " << m << std::endl;
         for (auto& o : out) {
           o = std::roundf(o*64.0/m) - 2;
         }
@@ -99,7 +99,7 @@ namespace gr {
 
       std::vector<int>
       runfft(const std::vector<float>& fs, const int batch, const int fft_size) {
-        std::clog << "runfft on " << fs.size() << std::endl;
+        // std::clog << "runfft on " << fs.size() << std::endl;
         const bool forward = true;
 
         std::vector<int> buckets;
@@ -157,12 +157,12 @@ namespace gr {
     {
       message_port_register_in(pmt::intern("in"));
       set_msg_handler(pmt::intern("in"), [this](pmt::pmt_t msg) {
-          std::clog << "C++> got message\n";
+          // std::clog << "C++> got message\n";
           pmt::pmt_t meta = pmt::car(msg);
           pmt::pmt_t data = pmt::cdr(msg);
           const size_t len = pmt::blob_length(data);
 
-          std::clog << "C++> size " << len << std::endl;
+          // std::clog << "C++> size " << len << std::endl;
           auto fs = static_cast<const float*>(pmt::blob_data(data));
 
           const auto out = decode(std::vector<float>(&fs[0], &fs[len/sizeof(float)]));
@@ -175,7 +175,7 @@ namespace gr {
 
     std::string
     jt65_decode_impl::decode(const std::vector<float>&fs) const {
-      std::clog << "C++ decoding with " << fs.size() << " floats\n";
+      // std::clog << "C++ decoding with " << fs.size() << " floats\n";
       const auto buckets = runfft(fs, batch_, fft_size_);
       const auto based = adjust_base(buckets);
       const auto synced = based; // TODO

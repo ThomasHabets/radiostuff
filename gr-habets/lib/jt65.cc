@@ -205,7 +205,7 @@ nums2syms(const encoding_t bn1, const encoding_t bn2, const encoding_t bn3)
   };
 }
 
-// Unpack constituent numbers as a CQ. 
+// Unpack constituent numbers as a CQ.
 std::pair<std::string, std::string>
 unpack_cq(const encoding_t nc1, const encoding_t nc2, const encoding_t ng)
 {
@@ -228,7 +228,7 @@ unpack_message(const std::vector<int>& s)
 {
   encoding_t nc1, nc2, ng;
   std::tie(nc1, nc2, ng) = syms2nums(s);
-  std::cout  << "Unpack: " << nc1 << " " << nc2 << " " << ng << std::endl;
+  // std::cout  << "Unpack: " << nc1 << " " << nc2 << " " << ng << std::endl;
 
   // Plaintext.
   if (ng > 32768) {
@@ -341,7 +341,7 @@ pack_message(const std::string& msg)
   if (msg.size() <= 13) {
     return pack_plaintext(msg);
   }
-      
+
   throw std::runtime_error("couldn't encode string of unknown format: \"" + msg + "\", length " + std::to_string(msg.size()));
 }
 

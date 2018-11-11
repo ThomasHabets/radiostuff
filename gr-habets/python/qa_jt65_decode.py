@@ -44,7 +44,7 @@ class qa_jt65_decode (gr_unittest.TestCase):
         src_data = struct.unpack("f"*(len(src_data)/4), src_data)
         expected_result = "CQ M0THC IO91"
 
-        print 'Making data'
+        # print 'Making data'
         pmt_data = pmt.cons(
             pmt.PMT_NIL,
             pmt.init_f32vector(len(src_data), list(src_data))

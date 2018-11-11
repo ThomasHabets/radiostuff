@@ -106,9 +106,8 @@ namespace gr {
       }
 
       std::vector<int>
-      scale(const std::vector<int>& in, const int samp_rate, const int fft_size) {
-        // JT65C 10.8Hz per level.
-        const float m = 10.8 * 64 * fft_size / samp_rate;
+      scale(const std::vector<int>& in, const int samp_rate, const int fft_size, const float symbol_offset) {
+        const float m = symbol_offset * 64 * fft_size / samp_rate;
         auto out = in;
         // std::clog << "scaler: " << m << std::endl;
         for (auto& o : out) {
@@ -188,23 +187,24 @@ namespace gr {
     }
 
     jt65_decode::sptr
-    jt65_decode::make(int samp_rate, int sps, int buckets_per_symbol, int fft_size)
+    jt65_decode::make(int samp_rate, int sps, int buckets_per_symbol, int fft_size, float symbol_offset)
     {
       return gnuradio::get_initial_sptr
-        (new jt65_decode_impl(samp_rate, sps, buckets_per_symbol, fft_size));
+        (new jt65_decode_impl(samp_rate, sps, buckets_per_symbol, fft_size, symbol_offset));
     }
 
     /*
      * The private constructor
      */
-    jt65_decode_impl::jt65_decode_impl(int samp_rate, int sps, int buckets_per_symbol, int fft_size)
+    jt65_decode_impl::jt65_decode_impl(int samp_rate, int sps, int buckets_per_symbol, int fft_size, float symbol_offset)
       : gr::block("jt65_decode",
                   gr::io_signature::make(0,0,0),
                   gr::io_signature::make(0,0,0)),
         samp_rate_(samp_rate),
         buckets_per_symbol_(buckets_per_symbol),
         fft_size_(fft_size),
-        sps_(sps)
+        sps_(sps),
+        symbol_offset_(symbol_offset)
     {
       message_port_register_in(pmt::intern("in"));
       set_msg_handler(pmt::intern("in"), [this](pmt::pmt_t msg) {
@@ -230,7 +230,7 @@ namespace gr {
       const auto buckets = runfft(fs, batch_, fft_size_);
       const auto based = adjust_base(buckets);
       const auto synced = sync(based, buckets_per_symbol_);
-      const auto scaled = scale(synced, samp_rate_, fft_size_);
+      const auto scaled = scale(synced, samp_rate_, fft_size_, symbol_offset_);
       const auto picked = pick(scaled, buckets_per_symbol_);
       const auto syms = remove_sync(picked);
       //dump(synced);

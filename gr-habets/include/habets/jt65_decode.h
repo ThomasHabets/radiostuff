@@ -29,9 +29,11 @@ namespace gr {
   namespace habets {
 
     /*!
-     * \brief <+description of block+>
+     * \brief JT65 decoder supporting all flavours of JT65.
      * \ingroup habets
      *
+     * Input: A whole JT65 burst as floats (audio).
+     * Output: Decoded packets as strings.
      */
     class HABETS_API jt65_decode : virtual public gr::block
     {
@@ -39,14 +41,15 @@ namespace gr {
       typedef boost::shared_ptr<jt65_decode> sptr;
 
       /*!
-       * \brief Return a shared_ptr to a new instance of habets::jt65_decode.
+       * \brief Create a JT65 decoder.
        *
-       * To avoid accidental use of raw pointers, habets::jt65_decode's
-       * constructor is in a private implementation
-       * class. habets::jt65_decode::make is the public interface for
-       * creating new instances.
+       * \param samp_rate Sample rate of input.
+       * \param sps Samples per symbol. Standard JT65 uses 0.372 seconds. JT65B2 and JT65C2 are half that.
+       * \param buckets_per_symbol How many FFTs done per symbol. TODO: Explain tradeoff.
+       * \param fft_size FFT size. FFT must be larger than sps/buckets_per_symbol, and will be padded with zeroes to size. Increasing FFT size improves frequency resolution at the cost of CPU. FFT is O(N*logN) with this number.
+       * \param symbol_offset Frequency distance between two symbols in Hertz. 2.7Hz for JT65A, 5.4Hz for JT65B, 10.8Hz for JT65C.
        */
-      static sptr make(int samp_rate, int sps, int buckets_per_symbol, int fft_size);
+      static sptr make(int samp_rate, int sps, int buckets_per_symbol, int fft_size, float symbol_offset);
     };
 
   } // namespace habets

@@ -36,12 +36,13 @@ namespace gr {
       const int buckets_per_symbol_;
       const int fft_size_;
       const int sps_;
+      const float symbol_offset_;
 
       // Calculated:
       const int batch_ = sps_/10;
 
      public:
-      jt65_decode_impl(int samp_rate, int sps, int buckets_per_symbol, int fft_size);
+      jt65_decode_impl(int samp_rate, int sps, int buckets_per_symbol, int fft_size, float symbol_offset);
       ~jt65_decode_impl();
 
       // Where all the action really happens

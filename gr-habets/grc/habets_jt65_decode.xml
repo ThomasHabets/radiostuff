@@ -4,7 +4,7 @@
   <key>habets_jt65_decode</key>
   <category>[habets]</category>
   <import>import habets</import>
-  <make>habets.jt65_decode($samp_rate, $sps, $buckets_per_symbol, $fft_size)</make>
+  <make>habets.jt65_decode($samp_rate, $sps, $buckets_per_symbol, $fft_size, $symbol_offset)</make>
 
   <param>
     <name>Sample rate</name>
@@ -29,6 +29,12 @@
     <key>fft_size</key>
     <value>8192</value>
     <type>int</type>
+  </param>
+  <param>
+    <name>Symbol offset</name>
+    <key>symbol_offset</key>
+    <value>10.8</value>
+    <type>float</type>
   </param>
 
   <sink>

@@ -326,6 +326,10 @@
       <key>sps</key>
       <value>int(samp_rate*0.372)</value>
     </param>
+    <param>
+      <key>symbol_offset</key>
+      <value>10.8</value>
+    </param>
   </block>
   <block>
     <key>habets_tagged_stream_to_large_pdu_f</key>

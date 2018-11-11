@@ -29,7 +29,8 @@ const int input_size = 63;
 const int output_size = 126;
 const int symbol_offset = 2;
 
-// At these timeslots send the sync symbol, 1270.5Hz.
+
+// TODO: move into JT65 namespace.
 const std::vector<bool> sync_pos{
     1,0,0,1,1,0,0,0,1,1,1,1,1,1,0,1,0,1,0,0,0,1,0,1,1,0,0,1,0,0,
     0,1,1,1,0,0,1,1,1,1,0,1,1,0,1,1,1,1,0,0,0,1,1,0,1,0,1,0,1,1,
@@ -37,7 +38,6 @@ const std::vector<bool> sync_pos{
     0,1,0,0,1,0,1,1,0,1,0,1,0,1,0,0,1,1,0,0,1,0,0,1,0,0,0,0,1,1,
     1,1,1,1,1,1
 };
-
 
 namespace gr {
   namespace habets {

@@ -7,6 +7,9 @@ namespace JT65 {
 }
 #endif
 
+// At these timeslots send the sync symbol, 1270.5Hz.
+extern const std::vector<bool> sync_pos;
+
 std::string unpack_message(const std::vector<int>& s);
 std::vector<int> pack_message(const std::string& msg);
 std::vector<int> greycode(const std::vector<int>& in);

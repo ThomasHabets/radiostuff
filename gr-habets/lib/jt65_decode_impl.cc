@@ -31,6 +31,21 @@
 #include "jt65_decode_impl.h"
 #include "jt65.h"
 
+// TODO: move to JT65 namespace.
+const std::vector<bool> sync_pos{
+    1,0,0,1,1,0,0,0,1,1,1,1,1,1,0,1,0,1,0,0,0,1,0,1,1,0,0,1,0,0,
+    0,1,1,1,0,0,1,1,1,1,0,1,1,0,1,1,1,1,0,0,0,1,1,0,1,0,1,0,1,1,
+    0,0,1,1,0,1,0,1,0,1,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+    0,1,0,0,1,0,1,1,0,1,0,1,0,1,0,0,1,1,0,0,1,0,0,1,0,0,0,0,1,1,
+    1,1,1,1,1,1
+};
+
+
+namespace {
+  constexpr bool debug = false;
+}
+
+//using JT65::sync_pos;
 using gr::fft::fft_complex;
 
 namespace gr {
@@ -40,7 +55,7 @@ namespace gr {
       std::vector<int>
       sync(const std::vector<int>& in, int buckets_per_symbol) {
         auto is_sync = [](int s) {
-          return s == 0;
+          return s < 5;
         };
 
         int skip = 0;
@@ -62,6 +77,9 @@ namespace gr {
             }
           }
         }
+        if (debug) {
+          std::clog << "jt65_decode: skipped " << skip << " to get some syncs syncs\n";
+        }
 
         // Skip so that we have at least a few nonsync.
         {
@@ -73,7 +91,7 @@ namespace gr {
               assert(skip >= 0);
               break;
             }
-            if (is_sync(s)) {
+            if (!is_sync(s)) {
               seen_nonsync++;
             } else {
               seen_nonsync = 0;
@@ -84,14 +102,21 @@ namespace gr {
       }
 
       std::vector<int>
-      remove_sync(const std::vector<int>& in) {
+      remove_sync(const std::vector<int>& in, int buckets_per_symbol) {
         // TODO: confirm sync.
         std::vector<int> out;
-        for (const auto& v : in) {
-          if (v < 0) {
-              continue;
+        if (true) {
+          for (const auto& v : in) {
+            if (v >= 0) {
+              out.push_back(v);
+            }
           }
-          out.push_back(v);
+        } else {
+          for (int i = 0; i < in.size(); i++) {
+            if (!sync_pos[i / buckets_per_symbol]) {
+              out.push_back(in[i]);
+            }
+          }
         }
         return out;
       }
@@ -109,7 +134,7 @@ namespace gr {
       scale(const std::vector<int>& in, const int samp_rate, const int fft_size, const float symbol_offset) {
         const float m = symbol_offset * 64 * fft_size / samp_rate;
         auto out = in;
-        // std::clog << "scaler: " << m << std::endl;
+        if (debug) { std::clog << "jt65_decode: scaler: " << m << std::endl; }
         for (auto& o : out) {
           o = std::roundf(o*64.0/m) - 2;
         }
@@ -127,6 +152,9 @@ namespace gr {
             mx = t;
             mxval = v;
           }
+        }
+        if (debug) {
+          std::clog << "jt65_decode: base is " << mxval << std::endl;
         }
         auto out = in;
         for (auto& o : out) {
@@ -209,15 +237,22 @@ namespace gr {
     {
       message_port_register_in(pmt::intern("in"));
       set_msg_handler(pmt::intern("in"), [this](pmt::pmt_t msg) {
-          // std::clog << "C++> got message\n";
+          if (debug) {
+            std::clog << "C++> got message\n";
+          }
           pmt::pmt_t meta = pmt::car(msg);
           pmt::pmt_t data = pmt::cdr(msg);
           const size_t len = pmt::blob_length(data);
 
-          // std::clog << "C++> size " << len << std::endl;
+          if (debug) {
+            std::clog << "C++> size " << len << std::endl;
+          }
           auto fs = static_cast<const float*>(pmt::blob_data(data));
 
           const auto out = decode(std::vector<float>(&fs[0], &fs[len/sizeof(float)]));
+          if (debug) {
+            std::clog << "jt65_decode: C++ decoded " << out.size() << std::endl;
+          }
           const pmt::pmt_t vecpmt(pmt::make_blob(out.data(), out.size()));
           const pmt::pmt_t pdu(pmt::cons(meta, vecpmt));
           message_port_pub(pmt::intern("out"), pdu);
@@ -227,14 +262,40 @@ namespace gr {
 
     std::string
     jt65_decode_impl::decode(const std::vector<float>&fs) const {
-      // std::clog << "C++ decoding with " << fs.size() << " floats\n";
+      if (debug) {
+        std::clog << "jt65_decode: decoding with " << fs.size() << " floats\n";
+      }
       const auto buckets = runfft(fs, batch_, fft_size_);
+
+      if (debug) { std::clog << "jt65_decode: adjust_base…\n"; }
       const auto based = adjust_base(buckets);
+
+      if (debug) { std::clog << "jt65_decode: sync…\n"; }
       const auto synced = sync(based, buckets_per_symbol_);
+
+      if (debug) { std::clog << "jt65_decode: scale…\n"; }
       const auto scaled = scale(synced, samp_rate_, fft_size_, symbol_offset_);
+
+      if (debug) { std::clog << "jt65_decode: pick…\n"; }
       const auto picked = pick(scaled, buckets_per_symbol_);
-      const auto syms = remove_sync(picked);
-      //dump(synced);
+
+      if (debug) { std::clog << "jt65_decode: remove_sync…\n"; }
+      const auto syms = remove_sync(picked, buckets_per_symbol_);
+
+      if (debug) {
+        dump(synced);
+      }
+
+      if (debug) {
+        std::clog << "jt65_decode: unpacking " << syms.size() << " symbols…\n";
+        for (const auto& s : syms) {
+          std::clog << s << " ";
+        }
+        std::clog << std::endl;
+      }
+      if (syms.size() < 63) {
+        return "invalid decode. Only got " + std::to_string(syms.size()) + " symbols";
+      }
       return JT65::unpack_message(JT65::unfec(JT65::uninterleave(JT65::ungreycode(syms))));
     }
 

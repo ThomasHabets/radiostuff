@@ -46,7 +46,7 @@ namespace gr {
        * class. habets::jt65_decode::make is the public interface for
        * creating new instances.
        */
-      static sptr make();
+      static sptr make(int samp_rate, int sps, int buckets_per_symbol, int fft_size);
     };
 
   } // namespace habets

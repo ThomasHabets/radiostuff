@@ -4,7 +4,32 @@
   <key>habets_jt65_decode</key>
   <category>[habets]</category>
   <import>import habets</import>
-  <make>habets.jt65_decode()</make>
+  <make>habets.jt65_decode($samp_rate, $sps, $buckets_per_symbol $fft_size)</make>
+
+  <param>
+    <name>Sample rate</name>
+    <key>samp_rate</key>
+    <value>samp_rate</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Samples per symbol</name>
+    <key>sps</key>
+    <value>int(samp_rate*0.372)</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Buckets per symbol</name>
+    <key>buckets_per_symbol</key>
+    <value>10</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>FFT Size</name>
+    <key>fft_size</key>
+    <value>8192</value>
+    <type>int</type>
+  </param>
 
   <sink>
     <name>in</name>

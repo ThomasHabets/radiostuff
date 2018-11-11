@@ -188,19 +188,23 @@ namespace gr {
     }
 
     jt65_decode::sptr
-    jt65_decode::make()
+    jt65_decode::make(int samp_rate, int sps, int buckets_per_symbol, int fft_size)
     {
       return gnuradio::get_initial_sptr
-        (new jt65_decode_impl());
+        (new jt65_decode_impl(samp_rate, sps, buckets_per_symbol, fft_size));
     }
 
     /*
      * The private constructor
      */
-    jt65_decode_impl::jt65_decode_impl()
+    jt65_decode_impl::jt65_decode_impl(int samp_rate, int sps, int buckets_per_symbol, int fft_size)
       : gr::block("jt65_decode",
                   gr::io_signature::make(0,0,0),
-                  gr::io_signature::make(0,0,0))
+                  gr::io_signature::make(0,0,0)),
+        samp_rate_(samp_rate),
+        buckets_per_symbol_(buckets_per_symbol),
+        fft_size_(fft_size),
+        sps_(sps)
     {
       message_port_register_in(pmt::intern("in"));
       set_msg_handler(pmt::intern("in"), [this](pmt::pmt_t msg) {

@@ -32,16 +32,16 @@ namespace gr {
       std::string decode(const std::vector<float>&) const;
 
       // Args:
-      const int fft_size_ = 8192;
-      const int samp_rate_ = 44100;
-      const int buckets_per_symbol_ = 10;
-      const int sps_ = 44100*0.372;
+      const int samp_rate_;
+      const int buckets_per_symbol_;
+      const int fft_size_;
+      const int sps_;
 
       // Calculated:
       const int batch_ = sps_/10;
 
      public:
-      jt65_decode_impl();
+      jt65_decode_impl(int samp_rate, int sps, int buckets_per_symbol, int fft_size);
       ~jt65_decode_impl();
 
       // Where all the action really happens

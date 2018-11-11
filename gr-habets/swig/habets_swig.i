@@ -20,6 +20,7 @@
 #include "habets/float_streamer.h"
 #include "habets/jt65_encode.h"
 #include "habets/jt65_add_sync.h"
+#include "habets/jt65_decode.h"
 %}
 
 
@@ -47,3 +48,5 @@ GR_SWIG_BLOCK_MAGIC2(habets, float_streamer);
 GR_SWIG_BLOCK_MAGIC2(habets, jt65_encode);
 %include "habets/jt65_add_sync.h"
 GR_SWIG_BLOCK_MAGIC2(habets, jt65_add_sync);
+%include "habets/jt65_decode.h"
+GR_SWIG_BLOCK_MAGIC2(habets, jt65_decode);

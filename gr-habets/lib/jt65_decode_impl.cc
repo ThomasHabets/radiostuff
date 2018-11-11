@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2017 Thomas Habets <thomas@habets.se>
+ * Copyright 2018 Thomas Habets <thomas@habets.se>
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,38 +22,25 @@
 #include "config.h"
 #endif
 
-#include <gnuradio/blocks/pdu.h>
 #include <gnuradio/io_signature.h>
-#include "bitunpacker_impl.h"
+#include "jt65_decode_impl.h"
 
 namespace gr {
   namespace habets {
 
-    std::vector<uint8_t>
-    bytes_to_bits(const std::vector<uint8_t>& in)
-    {
-      std::vector<uint8_t> ret;
-      for (auto& b : in) {
-        for (int c = 7; c >= 0; --c) {
-          ret.push_back((b >> c) & 1);
-        }
-      }
-      return ret;
-    }
-
-    bitunpacker::sptr
-    bitunpacker::make()
+    jt65_decode::sptr
+    jt65_decode::make()
     {
       return gnuradio::get_initial_sptr
-        (new bitunpacker_impl());
+        (new jt65_decode_impl());
     }
 
     /*
      * The private constructor
      */
-    bitunpacker_impl::bitunpacker_impl()
-      : gr::block("bitunpacker",
-		  gr::io_signature::make(0,0,0),
+    jt65_decode_impl::jt65_decode_impl()
+      : gr::block("jt65_decode",
+                  gr::io_signature::make(0,0,0),
                   gr::io_signature::make(0,0,0))
     {
       message_port_register_in(pmt::intern("in"));
@@ -61,30 +48,35 @@ namespace gr {
           pmt::pmt_t meta = pmt::car(msg);
           pmt::pmt_t data = pmt::cdr(msg);
           const size_t len = pmt::blob_length(data);
-          const uint8_t* bits = static_cast<const uint8_t*>(pmt::blob_data(data));
-          const std::vector<uint8_t> out = bytes_to_bits(std::vector<uint8_t>(&bits[0], &bits[len]));
-          const pmt::pmt_t vecpmt(pmt::make_blob(&out[0], out.size()));
+          auto fs = static_cast<const float*>(pmt::blob_data(data));
+          const auto out = decode(std::vector<float>(&fs[0], &fs[len]));
+          const pmt::pmt_t vecpmt(pmt::make_blob(out.data(), out.size()));
           const pmt::pmt_t pdu(pmt::cons(meta, vecpmt));
           message_port_pub(pmt::intern("out"), pdu);
       });
       message_port_register_out(pmt::intern("out"));
     }
 
+    std::string
+    jt65_decode_impl::decode(const std::vector<float>&fs) const {
+      return "TODO";
+    }
+
     /*
      * Our virtual destructor.
      */
-    bitunpacker_impl::~bitunpacker_impl()
+    jt65_decode_impl::~jt65_decode_impl()
     {
     }
 
     void
-    bitunpacker_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
+    jt65_decode_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
     {
       /* <+forecast+> e.g. ninput_items_required[0] = noutput_items */
     }
 
     int
-    bitunpacker_impl::general_work (int noutput_items,
+    jt65_decode_impl::general_work (int noutput_items,
                        gr_vector_int &ninput_items,
                        gr_vector_const_void_star &input_items,
                        gr_vector_void_star &output_items)
@@ -102,5 +94,5 @@ namespace gr {
  * indent-tabs-mode: nil
  * End:
  *
- * vim: ts=8 sw=8
+ * vim: ts=2 sw=2
  */

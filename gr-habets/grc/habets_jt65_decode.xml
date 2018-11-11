@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<block>
+  <name>jt65 Decoder</name>
+  <key>habets_jt65_decode</key>
+  <category>[habets]</category>
+  <import>import habets</import>
+  <make>habets.jt65_decode()</make>
+
+  <sink>
+    <name>in</name>
+    <type>message</type>
+  </sink>
+
+  <source>
+    <name>out</name>
+    <type>message</type>
+  </source>
+</block>

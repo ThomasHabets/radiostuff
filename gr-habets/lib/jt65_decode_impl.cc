@@ -18,6 +18,7 @@
  * Boston, MA 02110-1301, USA.
  */
 #include<algorithm>
+#include<cassert>
 #include<gnuradio/fft/fft.h>
 #include<fftw3.h>
 
@@ -35,6 +36,52 @@ using gr::fft::fft_complex;
 namespace gr {
   namespace habets {
     namespace {
+
+      std::vector<int>
+      sync(const std::vector<int>& in, int buckets_per_symbol) {
+        auto is_sync = [](int s) {
+          return s == 0;
+        };
+
+        int skip = 0;
+
+        // Skip up to the first few sync bits in a row.
+        {
+          int seen_sync = 0;
+          for (int n = 0; n < in.size(); n++) {
+            const auto& s = in[n];
+            if (seen_sync > buckets_per_symbol/2) {
+              skip = n - seen_sync;
+              assert(skip >= 0);
+              break;
+            }
+            if (is_sync(s)) {
+              seen_sync++;
+            } else {
+              seen_sync = 0;
+            }
+          }
+        }
+
+        // Skip so that we have at least a few nonsync.
+        {
+          int seen_nonsync = 0;
+          for (int n = skip; n < in.size(); n++) {
+            const auto& s = in[n];
+            if (seen_nonsync > buckets_per_symbol/2) {
+              skip = std::max(skip, n - seen_nonsync - buckets_per_symbol);
+              assert(skip >= 0);
+              break;
+            }
+            if (is_sync(s)) {
+              seen_nonsync++;
+            } else {
+              seen_nonsync = 0;
+            }
+          }
+        }
+        return std::vector<int>(in.begin() + skip, in.end());
+      }
 
       std::vector<int>
       remove_sync(const std::vector<int>& in) {
@@ -178,7 +225,7 @@ namespace gr {
       // std::clog << "C++ decoding with " << fs.size() << " floats\n";
       const auto buckets = runfft(fs, batch_, fft_size_);
       const auto based = adjust_base(buckets);
-      const auto synced = based; // TODO
+      const auto synced = sync(based, buckets_per_symbol_);
       const auto scaled = scale(synced, samp_rate_, fft_size_);
       const auto picked = pick(scaled, buckets_per_symbol_);
       const auto syms = remove_sync(picked);

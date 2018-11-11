@@ -59,9 +59,11 @@ namespace gr {
       }
 
       std::vector<int>
-      scale(const std::vector<int>& in) {
-        const auto m = *std::max_element(in.begin(), in.end());
+      scale(const std::vector<int>& in, const int samp_rate, const int fft_size) {
+        // JT65C 10.8Hz per level.
+        const float m = 10.8 * 64 * fft_size / samp_rate;
         auto out = in;
+        std::clog << "scaler: " << m << std::endl;
         for (auto& o : out) {
           o = std::roundf(o*64.0/m) - 2;
         }
@@ -177,10 +179,10 @@ namespace gr {
       const auto buckets = runfft(fs, batch_, fft_size_);
       const auto based = adjust_base(buckets);
       const auto synced = based; // TODO
-      const auto scaled = scale(synced);
+      const auto scaled = scale(synced, samp_rate_, fft_size_);
       const auto picked = pick(scaled, buckets_per_symbol_);
       const auto syms = remove_sync(picked);
-      //dump(syms);
+      //dump(synced);
       return JT65::unpack_message(JT65::unfec(JT65::uninterleave(JT65::ungreycode(syms))));
     }
 

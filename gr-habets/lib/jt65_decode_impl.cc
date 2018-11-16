@@ -18,6 +18,7 @@
  * Boston, MA 02110-1301, USA.
  */
 #include<algorithm>
+#include<numeric>
 #include<cassert>
 #include<gnuradio/fft/fft.h>
 #include<fftw3.h>
@@ -52,6 +53,7 @@ namespace gr {
   namespace habets {
     namespace {
 
+      // Sync up to start of the first bit.
       std::vector<int>
       sync(const std::vector<int>& in, int buckets_per_symbol) {
         auto is_sync = [](int s) {
@@ -87,7 +89,7 @@ namespace gr {
           for (int n = skip; n < in.size(); n++) {
             const auto& s = in[n];
             if (seen_nonsync > buckets_per_symbol/2) {
-              skip = std::max(skip, n - seen_nonsync - buckets_per_symbol);
+              skip = std::max(skip, n - seen_nonsync - buckets_per_symbol + 1);
               assert(skip >= 0);
               break;
             }
@@ -99,6 +101,33 @@ namespace gr {
           }
         }
         return std::vector<int>(in.begin() + skip, in.end());
+      }
+
+      // Use sync bits to align as perfectly as possible to bucket size boundaries.
+      std::vector<int>
+      bitsync(const std::vector<int>& in, int buckets_per_symbol) {
+        const int width = 3;
+        std::vector<int> out;
+        out.reserve(in.size());
+        for (int pos = 0; pos < in.size(); pos++) {
+          if (out.size() % buckets_per_symbol == 0) {
+            const bool is_sync = sync_pos[out.size()/buckets_per_symbol];
+            const bool next_sync = sync_pos[out.size()/buckets_per_symbol + 1];
+            if (is_sync && !next_sync && in[pos+buckets_per_symbol] < 0) {
+              // One too many sync symbols.
+              pos++;
+              continue;
+            }
+            if (!is_sync && next_sync && in[pos+buckets_per_symbol] > 0) {
+              // One too few sync symbols.
+              // TODO: aggregate better that skipping a symbol?
+              pos++;
+              continue;
+            }
+          }
+          out.push_back(in[pos]);
+        }
+        return out;
       }
 
       std::vector<int>
@@ -121,15 +150,28 @@ namespace gr {
         return out;
       }
 
+      // Pick median value.
       std::vector<int>
-      pick(const std::vector<int>& in, const int sps) {
+      pick(const std::vector<int>& in_, const int sps) {
         std::vector<int> out;
+        std::vector<int> in(in_);
+        const int width = 3;
         for (int pos = sps/2; pos < in.size(); pos += sps) {
-          out.push_back(in[pos]);
+          const auto& frompos = pos-width+1;
+          const auto& topos = pos+width;
+          const auto& from = &in[frompos];
+          const auto& to = &in[topos];
+          std::nth_element(from, &in[pos], to);
+          const auto& v = in[pos];
+          if (debug) {
+            std::clog << "for " << out.size() << " picking " << frompos << " - " << topos << " value " << v << std::endl;
+          }
+          out.push_back(v);
         }
         return out;
       }
 
+      // Scale from bucket index to symbol.
       std::vector<int>
       scale(const std::vector<int>& in, const int samp_rate, const int fft_size, const float symbol_offset) {
         const float m = symbol_offset * 64 * fft_size / samp_rate;
@@ -141,6 +183,7 @@ namespace gr {
         return out;
       }
 
+      // Bucket-translate according to what the base is.
       std::vector<int>
       adjust_base(const std::vector<int>& in) {
         std::map<int,int> counts;
@@ -163,9 +206,10 @@ namespace gr {
         return out;
       }
 
+      // Write raw data to file.
       void
-      dump(const std::vector<int>& vs) {
-        std::ofstream of("di");
+      dump(const std::vector<int>& vs, const std::string& fn) {
+        std::ofstream of(fn);
         for (const auto& v : vs) {
           of << v << std::endl;
         }
@@ -276,14 +320,19 @@ namespace gr {
       if (debug) { std::clog << "jt65_decode: scale…\n"; }
       const auto scaled = scale(synced, samp_rate_, fft_size_, symbol_offset_);
 
+      if (debug) { dump(scaled, "di.scaled"); }
+
+      if (debug) { std::clog << "jt65_decode: bitsync…\n"; }
+      const auto bitsynced = bitsync(scaled, buckets_per_symbol_);
+
       if (debug) { std::clog << "jt65_decode: pick…\n"; }
-      const auto picked = pick(scaled, buckets_per_symbol_);
+      const auto picked = pick(bitsynced, buckets_per_symbol_);
 
       if (debug) { std::clog << "jt65_decode: remove_sync…\n"; }
       const auto syms = remove_sync(picked, buckets_per_symbol_);
 
       if (debug) {
-        dump(synced);
+        dump(bitsynced, "di.bitsynced");
       }
 
       if (debug) {

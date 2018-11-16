@@ -271,7 +271,7 @@ unpack_message(const std::vector<int>& s)
   if (nc1 == nbase + 2) {
     throw std::runtime_error("QRZ not implemented");
   }
-  throw std::runtime_error("unknown special type");
+  throw std::runtime_error("unknown special JT65 type");
 }
 
 std::vector<int>

@@ -56,7 +56,7 @@ class qa_jt65_decode (gr_unittest.TestCase):
             )
 
             # print 'Making flowgraph'
-            dec = habets.jt65_decode(44100, int(44100*0.372), 10, 8192)
+            dec = habets.jt65_decode(44100, int(44100*0.372), 10, 8192, 10.8)
             dbg = blocks.message_debug()
             self.tb.msg_connect(dec,"out", dbg, "store")
 

@@ -53,158 +53,194 @@ namespace gr {
   namespace habets {
     namespace {
 
+      class Modder {
+      public:
+        virtual std::vector<int> operator()(const std::vector<int>&) = 0;
+      };
+
       // Sync up to start of the first bit.
-      std::vector<int>
-      sync(const std::vector<int>& in, int buckets_per_symbol) {
-        auto is_sync = [](int s) {
-          return s < 5;
-        };
+      class Sync : public Modder {
+        const int buckets_per_symbol_;
+      public:
+        Sync(int b): buckets_per_symbol_(b){}
 
-        int skip = 0;
+        std::vector<int>
+        operator()(const std::vector<int>& in) {
+          auto is_sync = [](int s) {
+            return s < 5;
+          };
 
-        // Skip up to the first few sync bits in a row.
-        {
-          int seen_sync = 0;
-          for (int n = 0; n < in.size(); n++) {
-            const auto& s = in[n];
-            if (seen_sync > buckets_per_symbol/2) {
-              skip = n - seen_sync;
-              assert(skip >= 0);
-              break;
-            }
-            if (is_sync(s)) {
-              seen_sync++;
-            } else {
-              seen_sync = 0;
+          int skip = 0;
+
+          // Skip up to the first few sync bits in a row.
+          {
+            int seen_sync = 0;
+            for (int n = 0; n < in.size(); n++) {
+              const auto& s = in[n];
+              if (seen_sync > buckets_per_symbol_/2) {
+                skip = n - seen_sync;
+                assert(skip >= 0);
+                break;
+              }
+              if (is_sync(s)) {
+                seen_sync++;
+              } else {
+                seen_sync = 0;
+              }
             }
           }
-        }
-        if (debug) {
-          std::clog << "jt65_decode: skipped " << skip << " to get some syncs syncs\n";
-        }
+          if (debug) {
+            std::clog << "jt65_decode: skipped " << skip << " to get some syncs syncs\n";
+          }
 
-        // Skip so that we have at least a few nonsync.
-        {
-          int seen_nonsync = 0;
-          for (int n = skip; n < in.size(); n++) {
-            const auto& s = in[n];
-            if (seen_nonsync > buckets_per_symbol/2) {
-              skip = std::max(skip, n - seen_nonsync - buckets_per_symbol + 1);
-              assert(skip >= 0);
-              break;
-            }
-            if (!is_sync(s)) {
-              seen_nonsync++;
-            } else {
-              seen_nonsync = 0;
+          // Skip so that we have at least a few nonsync.
+          {
+            int seen_nonsync = 0;
+            for (int n = skip; n < in.size(); n++) {
+              const auto& s = in[n];
+              if (seen_nonsync > buckets_per_symbol_/2) {
+                skip = std::max(skip, n - seen_nonsync - buckets_per_symbol_ + 1);
+                assert(skip >= 0);
+                break;
+              }
+              if (!is_sync(s)) {
+                seen_nonsync++;
+              } else {
+                seen_nonsync = 0;
+              }
             }
           }
+          return std::vector<int>(in.begin() + skip, in.end());
         }
-        return std::vector<int>(in.begin() + skip, in.end());
-      }
+      };
 
       // Use sync bits to align as perfectly as possible to bucket size boundaries.
-      std::vector<int>
-      bitsync(const std::vector<int>& in, int buckets_per_symbol) {
-        const int width = 3;
-        std::vector<int> out;
-        out.reserve(in.size());
-        for (int pos = 0; pos < in.size(); pos++) {
-          if (out.size() % buckets_per_symbol == 0) {
-            const bool is_sync = sync_pos[out.size()/buckets_per_symbol];
-            const bool next_sync = sync_pos[out.size()/buckets_per_symbol + 1];
-            if (is_sync && !next_sync && in[pos+buckets_per_symbol] < 0) {
-              // One too many sync symbols.
-              pos++;
-              continue;
+      class BitSync : public Modder {
+        const int buckets_per_symbol_;
+      public:
+        BitSync(int b): buckets_per_symbol_(b){}
+        std::vector<int>
+        operator()(const std::vector<int>& in) {
+          const int width = 3;
+          std::vector<int> out;
+          out.reserve(in.size());
+          for (int pos = 0; pos < in.size(); pos++) {
+            if (out.size() % buckets_per_symbol_ == 0) {
+              const bool is_sync = sync_pos[out.size()/buckets_per_symbol_];
+              const bool next_sync = sync_pos[out.size()/buckets_per_symbol_ + 1];
+              if (is_sync && !next_sync && in[pos+buckets_per_symbol_] < 0) {
+                // One too many sync symbols.
+                pos++;
+                continue;
+              }
+              if (!is_sync && next_sync && in[pos+buckets_per_symbol_] > 0) {
+                // One too few sync symbols.
+                // TODO: aggregate better that skipping a symbol?
+                pos++;
+                continue;
+              }
             }
-            if (!is_sync && next_sync && in[pos+buckets_per_symbol] > 0) {
-              // One too few sync symbols.
-              // TODO: aggregate better that skipping a symbol?
-              pos++;
-              continue;
-            }
+            out.push_back(in[pos]);
           }
-          out.push_back(in[pos]);
+          return out;
         }
-        return out;
-      }
+      };
 
-      std::vector<int>
-      remove_sync(const std::vector<int>& in, int buckets_per_symbol) {
-        // TODO: confirm sync.
-        std::vector<int> out;
-        if (true) {
-          for (const auto& v : in) {
-            if (v >= 0) {
-              out.push_back(v);
+      class RemoveSync : public Modder {
+        const int buckets_per_symbol_;
+      public:
+        RemoveSync(int b): buckets_per_symbol_(b){}
+        std::vector<int>
+        operator()(const std::vector<int>& in) {
+          // TODO: confirm sync.
+          std::vector<int> out;
+          if (true) {
+            for (const auto& v : in) {
+              if (v >= 0) {
+                out.push_back(v);
+              }
+            }
+          } else {
+            for (int i = 0; i < in.size(); i++) {
+              if (!sync_pos[i / buckets_per_symbol_]) {
+                out.push_back(in[i]);
+              }
             }
           }
-        } else {
-          for (int i = 0; i < in.size(); i++) {
-            if (!sync_pos[i / buckets_per_symbol]) {
-              out.push_back(in[i]);
-            }
-          }
+          return out;
         }
-        return out;
-      }
+      };
 
       // Pick median value.
-      std::vector<int>
-      pick(const std::vector<int>& in_, const int sps) {
-        std::vector<int> out;
-        std::vector<int> in(in_);
-        const int width = 3;
-        for (int pos = sps/2; pos < in.size(); pos += sps) {
-          const auto& frompos = pos-width+1;
-          const auto& topos = pos+width;
-          const auto& from = &in[frompos];
-          const auto& to = &in[topos];
-          std::nth_element(from, &in[pos], to);
-          const auto& v = in[pos];
-          if (debug) {
-            std::clog << "for " << out.size() << " picking " << frompos << " - " << topos << " value " << v << std::endl;
+      class Pick : public Modder {
+        const int buckets_per_symbol_;
+      public:
+        Pick(int b): buckets_per_symbol_(b){}
+        std::vector<int>
+        operator()(const std::vector<int>& in_) {
+          std::vector<int> out;
+          std::vector<int> in(in_);
+          const int width = 3;
+          for (int pos = buckets_per_symbol_/2; pos < in.size(); pos += buckets_per_symbol_) {
+            const auto& frompos = pos-width+1;
+            const auto& topos = pos+width;
+            const auto& from = &in[frompos];
+            const auto& to = &in[topos];
+            std::nth_element(from, &in[pos], to);
+            const auto& v = in[pos];
+            if (debug) {
+              std::clog << "for " << out.size() << " picking " << frompos << " - " << topos << " value " << v << std::endl;
+            }
+            out.push_back(v);
           }
-          out.push_back(v);
+          return out;
         }
-        return out;
-      }
+      };
 
       // Scale from bucket index to symbol.
-      std::vector<int>
-      scale(const std::vector<int>& in, const int samp_rate, const int fft_size, const float symbol_offset) {
-        const float m = symbol_offset * 64 * fft_size / samp_rate;
-        auto out = in;
-        if (debug) { std::clog << "jt65_decode: scaler: " << m << std::endl; }
-        for (auto& o : out) {
-          o = std::roundf(o*64.0/m) - 2;
+      class Scale : public Modder {
+        const int samp_rate_;
+        const int fft_size_;
+        const float symbol_offset_;
+      public:
+        Scale(int samp_rate, int fft_size, float symbol_offset): samp_rate_(samp_rate), fft_size_(fft_size), symbol_offset_(symbol_offset) {}
+        std::vector<int>
+        operator()(const std::vector<int>& in) {
+          const float m = symbol_offset_ * 64 * fft_size_ / samp_rate_;
+          auto out = in;
+          if (debug) { std::clog << "jt65_decode: scaler: " << m << std::endl; }
+          for (auto& o : out) {
+            o = std::roundf(o*64.0/m) - 2;
+          }
+          return out;
         }
-        return out;
-      }
+      };
 
       // Bucket-translate according to what the base is.
-      std::vector<int>
-      adjust_base(const std::vector<int>& in) {
-        std::map<int,int> counts;
-        int mx = -1;
-        int mxval = -1;
-        for (const auto& v : in) {
-          auto t = ++counts[v];
-          if (t > mx) {
-            mx = t;
-            mxval = v;
+      class AdjustBase : public Modder {
+      public:
+        std::vector<int>
+        operator()(const std::vector<int>& in) {
+          std::map<int,int> counts;
+          int mx = -1;
+          int mxval = -1;
+          for (const auto& v : in) {
+            auto t = ++counts[v];
+            if (t > mx) {
+              mx = t;
+              mxval = v;
+            }
           }
+          if (debug) {
+            std::clog << "jt65_decode: base is " << mxval << std::endl;
+          }
+          auto out = in;
+          for (auto& o : out) {
+            o -= mxval;
+          }
+          return out;
         }
-        if (debug) {
-          std::clog << "jt65_decode: base is " << mxval << std::endl;
-        }
-        auto out = in;
-        for (auto& o : out) {
-          o -= mxval;
-        }
-        return out;
-      }
+      };
 
       // Write raw data to file.
       void
@@ -309,31 +345,20 @@ namespace gr {
       if (debug) {
         std::clog << "jt65_decode: decoding with " << fs.size() << " floats\n";
       }
-      const auto buckets = runfft(fs, batch_, fft_size_);
+      auto buckets = runfft(fs, batch_, fft_size_);
 
-      if (debug) { std::clog << "jt65_decode: adjust_base…\n"; }
-      const auto based = adjust_base(buckets);
+      std::vector<std::unique_ptr<Modder> > modders;
+      modders.push_back(std::make_unique<AdjustBase>());
+      modders.push_back(std::make_unique<Sync>(buckets_per_symbol_));
+      modders.push_back(std::make_unique<Scale>(samp_rate_, fft_size_, symbol_offset_));
+      modders.push_back(std::make_unique<BitSync>(buckets_per_symbol_));
+      modders.push_back(std::make_unique<Pick>(buckets_per_symbol_));
+      modders.push_back(std::make_unique<RemoveSync>(buckets_per_symbol_));
 
-      if (debug) { std::clog << "jt65_decode: sync…\n"; }
-      const auto synced = sync(based, buckets_per_symbol_);
-
-      if (debug) { std::clog << "jt65_decode: scale…\n"; }
-      const auto scaled = scale(synced, samp_rate_, fft_size_, symbol_offset_);
-
-      if (debug) { dump(scaled, "di.scaled"); }
-
-      if (debug) { std::clog << "jt65_decode: bitsync…\n"; }
-      const auto bitsynced = bitsync(scaled, buckets_per_symbol_);
-
-      if (debug) { std::clog << "jt65_decode: pick…\n"; }
-      const auto picked = pick(bitsynced, buckets_per_symbol_);
-
-      if (debug) { std::clog << "jt65_decode: remove_sync…\n"; }
-      const auto syms = remove_sync(picked, buckets_per_symbol_);
-
-      if (debug) {
-        dump(bitsynced, "di.bitsynced");
+      for (const auto& mod : modders) {
+        buckets = (*mod)(buckets);
       }
+      const auto& syms = buckets;
 
       if (debug) {
         std::clog << "jt65_decode: unpacking " << syms.size() << " symbols…\n";

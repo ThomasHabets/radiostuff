@@ -61,8 +61,9 @@ namespace gr {
   namespace habets {
     namespace {
 
+      template<typename T>
       std::string
-      vector2string(const std::vector<int>& in)
+      vector2string(const std::vector<T>& in)
       {
         std::stringstream ss;
         ss << in[0];
@@ -75,7 +76,7 @@ namespace gr {
       class Modder {
       public:
         virtual std::string name() const = 0;
-        virtual std::vector<int> operator()(const std::vector<int>&) = 0;
+        virtual std::vector<float> operator()(const std::vector<float>&) = 0;
       };
 
       // Sync up to start of the first bit.
@@ -86,8 +87,8 @@ namespace gr {
 
         Sync(int b): buckets_per_symbol_(b){}
 
-        std::vector<int>
-        operator()(const std::vector<int>& in) override {
+        std::vector<float>
+        operator()(const std::vector<float>& in) override {
           auto is_sync = [](int s) {
             return s < 5;
           };
@@ -132,11 +133,11 @@ namespace gr {
               }
             }
           }
-          return std::vector<int>(in.begin() + skip, in.end());
+          return std::vector<float>(in.begin() + skip, in.end());
         }
       };
 
-      double stddev_and_penalty(const int* from,const int* to, const bool is_sync) {
+      double stddev_and_penalty(const float* from,const float* to, const bool is_sync) {
         double sum = 0;
         double sq_sum = 0;
         int n = 0;
@@ -158,9 +159,9 @@ namespace gr {
         std::string name() const override { return "bitsync"; };
         BitSync(int b): buckets_per_symbol_(b){}
 
-        std::vector<int>
-        operator()(const std::vector<int>& in) {
-          std::vector<int> out;
+        std::vector<float>
+        operator()(const std::vector<float>& in) {
+          std::vector<float> out;
           int pos = 0;
           const int width = 7;
           int total_ofs = 0;
@@ -172,14 +173,15 @@ namespace gr {
             const double drift = (double(total_ofs) / (first ? 1 : out.size()));
             if (is_sync) {
               for (int c = 0; c < buckets_per_symbol_; c++) {
-                out.push_back(-2);
+                out.push_back(in[pos++]);
               }
-              pos += buckets_per_symbol_ * (1 + (first ? 0.0 : drift));
+              pos += buckets_per_symbol_ * (first ? 0.0 : drift);
               if (debug) {
                 std::clog << " sync. next offset: " << pos << std::endl;
               }
               continue;
             }
+
             int best = 0;
             double best_diff = std::numeric_limits<double>::max();
             std::stringstream scores;
@@ -219,18 +221,24 @@ namespace gr {
       public:
         std::string name() const override { return "removesync"; };
         RemoveSync(int b): buckets_per_symbol_(b) {}
-        std::vector<int>
-        operator()(const std::vector<int>& in) {
-          std::vector<int> out;
-          if (false) {
+        std::vector<float>
+        operator()(const std::vector<float>& in) {
+          std::vector<float> out;
+          if (true) {
+            const double default_sync = -2.0;
+            double sync_adjust = 0;
             for (int pos = 0; pos < in.size(); pos++) {
               const bool is_sync = sync_pos[pos];
                // in[pos] to take care of overlong syncs.
               //if ((is_sync && in[pos] < 10) || in[pos] < 0) {
               if (is_sync) {// || in[pos] < 0) {
+                const auto& ofs = in[pos] - default_sync + sync_adjust;
+                sync_adjust += -0.2*ofs;
+                if (debug) { std::clog << "removesync: @" << pos << "=" << sync_adjust << " after " << (-0.1*ofs) << " adj" << std::endl; }
                 continue;
               }
-              out.push_back(in[pos]);
+              if (debug) { std::clog << "removesync-adj: @" << pos << " " << in[pos] << " -> " << (in[pos]+sync_adjust) << std::endl; }
+              out.push_back(in[pos] + sync_adjust);
             }
           } else {
             // TODO: confirm sync.
@@ -258,11 +266,11 @@ namespace gr {
       public:
         std::string name() const override { return "pick"; };
         Pick(int b): buckets_per_symbol_(b){}
-        std::vector<int>
-        operator()(const std::vector<int>& in_) {
-          std::vector<int> out;
-          std::vector<int> in(in_);
-          const int width = 3;
+        std::vector<float>
+        operator()(const std::vector<float>& in_) {
+          std::vector<float> out;
+          std::vector<float> in(in_);
+          const int width = 0.5 * buckets_per_symbol_;
           for (int pos = buckets_per_symbol_/2; pos < in.size();) {
             const bool is_sync = sync_pos[out.size()/buckets_per_symbol_];
             const auto& frompos = pos-width+1;
@@ -289,13 +297,13 @@ namespace gr {
       public:
         std::string name() const override { return "scale"; };
         Scale(int samp_rate, int fft_size, float symbol_offset): samp_rate_(samp_rate), fft_size_(fft_size), symbol_offset_(symbol_offset) {}
-        std::vector<int>
-        operator()(const std::vector<int>& in) {
+        std::vector<float>
+        operator()(const std::vector<float>& in) {
           const float m = symbol_offset_ * 64 * fft_size_ / samp_rate_;
           auto out = in;
           if (debug) { std::clog << "jt65_decode: scaler: " << m << std::endl; }
           for (auto& o : out) {
-            o = std::roundf(o*64.0/m) - 2;
+            o = 64.0*o/m - 2;
           }
           return out;
         }
@@ -305,13 +313,13 @@ namespace gr {
       class AdjustBase : public Modder {
       public:
         std::string name() const override { return "adjustbase"; };
-        std::vector<int>
-        operator()(const std::vector<int>& in) {
-          std::map<int,int> counts;
+        std::vector<float>
+        operator()(const std::vector<float>& in) {
+          std::map<float,int> counts;
           int mx = -1;
-          int mxval = -1;
+          float mxval = -1;
           for (const auto& v : in) {
-            auto t = ++counts[v];
+            const auto t = ++counts[v];
             if (t > mx) {
               mx = t;
               mxval = v;
@@ -330,26 +338,26 @@ namespace gr {
 
       // Write raw data to file.
       void
-      dump(const std::vector<int>& vs, const std::string& fn) {
+      dump(const std::vector<float>& vs, const std::string& fn) {
         std::ofstream of(fn);
         for (const auto& v : vs) {
           of << v << std::endl;
         }
       }
 
-      std::vector<int>
+      std::vector<float>
       runfft(const std::vector<float>& fs, const int batch, const int fft_size) {
         // std::clog << "runfft on " << fs.size() << std::endl;
         const bool forward = true;
 
-        std::vector<int> buckets;
+        std::vector<float> buckets;
         buckets.reserve(fs.size() / batch);
         for (int pos = 0; pos < fs.size(); pos += batch) {
           // Set up FFT buffer.
           std::vector<float> buf(fft_size);
           const int end = pos + std::min(batch, int(fs.size() - pos));
           std::copy(&fs[pos], &fs[end], buf.begin());
-          auto fft = std::make_unique<fft_complex>(fft_size, forward, 1);
+          auto fft = std::make_unique<fft_complex>(fft_size, forward, 4);
 
           gr_complex* dst = fft->get_inbuf();
           for (unsigned int i = 0; i < fft_size; i++) {   // float to complex conversion
@@ -433,6 +441,7 @@ namespace gr {
       }
       auto buckets = runfft(fs, batch_, fft_size_);
 
+      if (debug) { dump(buckets, "di.runfft"); }
       std::vector<std::unique_ptr<Modder>> modders;
       modders.push_back(std::make_unique<AdjustBase>());
       modders.push_back(std::make_unique<Sync>(buckets_per_symbol_));
@@ -447,7 +456,10 @@ namespace gr {
           dump(buckets, "di."+mod->name());
         }
       }
-      const auto& syms = buckets;
+      std::vector<int> syms;
+      for (const auto& f :buckets) {
+        syms.push_back(std::min(63, std::max(0, int(std::roundf(f)))));
+      }
 
       if (debug) {
         std::clog << "jt65_decode: unpacking " << syms.size() << " symbols…\n"

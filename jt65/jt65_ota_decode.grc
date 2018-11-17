@@ -635,7 +635,7 @@
     </param>
     <param>
       <key>file</key>
-      <value>jt65c-ota-40k-2.raw</value>
+      <value>jt65c-ota-40k-5.raw</value>
     </param>
     <param>
       <key>_coordinate</key>
@@ -1765,7 +1765,7 @@
     </param>
     <param>
       <key>size</key>
-      <value>samp_rate/deci1/deci2*55</value>
+      <value>samp_rate/deci1/deci2*60</value>
     </param>
     <param>
       <key>srate</key>
@@ -1777,7 +1777,7 @@
     </param>
     <param>
       <key>tr_delay</key>
-      <value>2</value>
+      <value>1</value>
     </param>
     <param>
       <key>tr_level</key>

@@ -61,6 +61,17 @@ namespace gr {
   namespace habets {
     namespace {
 
+      std::string
+      vector2string(const std::vector<int>& in)
+      {
+        std::stringstream ss;
+        ss << in[0];
+        for (int n = 1; n < in.size(); n++) {
+          ss << " " << in[n];
+        }
+        return ss.str();
+      }
+
       class Modder {
       public:
         virtual std::string name() const = 0;
@@ -125,55 +136,6 @@ namespace gr {
         }
       };
 
-      // Use sync bits to align as perfectly as possible to bucket size boundaries.
-      class BitSync : public Modder {
-        const int buckets_per_symbol_;
-      public:
-        std::string name() const override { return "bitsync"; };
-        BitSync(int b): buckets_per_symbol_(b){}
-        std::vector<int>
-        operator()(const std::vector<int>& in) {
-          const int width = 5;
-          std::vector<int> out;
-          out.reserve(in.size());
-          int skipped = 0;
-          for (int pos = 0; pos < in.size(); pos++) {
-            if (skipped < width && (out.size() % buckets_per_symbol_ == 0)) {
-              const bool is_sync = sync_pos[out.size()/buckets_per_symbol_];
-              if (is_sync && in[pos] > 0) {
-                // We're not yet at the sync. Go there.
-                pos++;
-                skipped++;
-                continue;
-              }
-              if (!is_sync && in[pos] < 0) {
-                // We're not yet at the non sync. Go there.
-                pos++;
-                skipped++;
-                continue;
-              }
-#if 0
-              const bool next_sync = sync_pos[out.size()/buckets_per_symbol_ + 1];
-              if (is_sync && !next_sync && in[pos+buckets_per_symbol_] < 0) {
-                // One too many sync symbols.
-                pos++;
-                continue;
-              }
-              if (!is_sync && next_sync && in[pos+buckets_per_symbol_] > 0) {
-                // One too few sync symbols.
-                // TODO: aggregate better that skipping a symbol?
-                pos++;
-                continue;
-              }
-#endif
-            }
-            skipped = 0;
-            out.push_back(in[pos]);
-          }
-          return out;
-        }
-      };
-
       double stddev_and_penalty(const int* from,const int* to, const bool is_sync) {
         double sum = 0;
         double sq_sum = 0;
@@ -189,27 +151,38 @@ namespace gr {
         return penalty + sq_sum / n - mean*mean;
       }
 
-      class BitSync2 : public Modder {
+      // Attempt to sync symbols so that they land on bucket_per_symbol boundaries.
+      class BitSync : public Modder {
         const int buckets_per_symbol_;
       public:
         std::string name() const override { return "bitsync"; };
-        BitSync2(int b): buckets_per_symbol_(b){}
+        BitSync(int b): buckets_per_symbol_(b){}
 
         std::vector<int>
         operator()(const std::vector<int>& in) {
           std::vector<int> out;
           int pos = 0;
           const int width = 7;
+          int total_ofs = 0;
           for (const auto& is_sync : sync_pos) {
+            const bool first = out.empty();
+            // TODO: this drift only adjusts for non-sync
+            // symbols. Ideally it should probably be calculated from
+            // output size and how much has been consumed to produce that output.
+            const double drift = (double(total_ofs) / (first ? 1 : out.size()));
             if (is_sync) {
               for (int c = 0; c < buckets_per_symbol_; c++) {
                 out.push_back(-2);
               }
-              pos += buckets_per_symbol_;
+              pos += buckets_per_symbol_ * (1 + (first ? 0.0 : drift));
+              if (debug) {
+                std::clog << " sync. next offset: " << pos << std::endl;
+              }
               continue;
             }
             int best = 0;
             double best_diff = std::numeric_limits<double>::max();
+            std::stringstream scores;
             for (int ofs = -width; ofs <= width; ofs++) {
               const auto& from = &in[pos+ofs];
               const auto& to = &in[pos+ofs+buckets_per_symbol_];
@@ -219,13 +192,23 @@ namespace gr {
                 best = ofs;
                 best_diff = score;
               }
-              // std::clog << "  " << score << std::endl;
+              scores << score << " ";
             }
-            // std::clog << "DEBUG " << (out.size()/buckets_per_symbol_) << " best score " << best_diff << " @" << (pos+best) << std::endl;
+            if (debug) {
+              std::clog << "Bitsync symbol " << (out.size()/buckets_per_symbol_)
+                        << " drift=" << drift
+                        << " best=" << best_diff << " @" << (pos+best)
+                        << " range=(" << (pos-width) << "-" << (pos+width) << ")"
+                        << " all scores: " << scores.str() << std::endl;
+            }
             for (int c = 0; c < buckets_per_symbol_; c++) {
               out.push_back(in[pos+best+c]);
             }
-            pos += best+buckets_per_symbol_;
+            pos += best + buckets_per_symbol_ * (1.0 + drift);
+            if (debug) {
+              std::clog << " next offset: " << pos << std::endl;
+            }
+            total_ofs += best;
           }
           return out;
         }
@@ -454,7 +437,7 @@ namespace gr {
       modders.push_back(std::make_unique<AdjustBase>());
       modders.push_back(std::make_unique<Sync>(buckets_per_symbol_));
       modders.push_back(std::make_unique<Scale>(samp_rate_, fft_size_, symbol_offset_));
-      modders.push_back(std::make_unique<BitSync2>(buckets_per_symbol_));
+      modders.push_back(std::make_unique<BitSync>(buckets_per_symbol_));
       modders.push_back(std::make_unique<Pick>(buckets_per_symbol_));
       modders.push_back(std::make_unique<RemoveSync>(buckets_per_symbol_));
 
@@ -467,17 +450,16 @@ namespace gr {
       const auto& syms = buckets;
 
       if (debug) {
-        std::clog << "jt65_decode: unpacking " << syms.size() << " symbols…\n";
-        for (const auto& s : syms) {
-          std::clog << s << " ";
-        }
-        std::clog << std::endl;
+        std::clog << "jt65_decode: unpacking " << syms.size() << " symbols…\n"
+                  << vector2string(syms) << std::endl;
       }
       if (syms.size() == 62) {
         // TODO: this symbol is most likely lost somewhere above, and should be reclaimed.
         buckets.push_back(0);
       } else if (syms.size() < 63) {
-        return "invalid decode. Only got " + std::to_string(syms.size()) + " symbols";
+        std::clog << "invalid decode. Only got " << std::to_string(syms.size())
+                  << " symbols: " << vector2string(syms) << std::endl;;
+        return  "invalid decode. Only got " + std::to_string(syms.size());
       }
       return JT65::unpack_message(JT65::unfec(JT65::uninterleave(JT65::ungreycode(syms))));
     }

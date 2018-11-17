@@ -635,7 +635,7 @@
     </param>
     <param>
       <key>file</key>
-      <value>jt65c-ota-40k-3.raw</value>
+      <value>jt65c-ota-40k-2.raw</value>
     </param>
     <param>
       <key>_coordinate</key>
@@ -941,7 +941,7 @@
     </param>
     <param>
       <key>fft_size</key>
-      <value>8192*8</value>
+      <value>4096</value>
     </param>
     <param>
       <key>_coordinate</key>

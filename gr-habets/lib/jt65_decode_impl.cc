@@ -34,11 +34,19 @@
 
 // TODO: move to JT65 namespace.
 const std::vector<bool> sync_pos{
-    1,0,0,1,1,0,0,0,1,1,1,1,1,1,0,1,0,1,0,0,0,1,0,1,1,0,0,1,0,0,
-    0,1,1,1,0,0,1,1,1,1,0,1,1,0,1,1,1,1,0,0,0,1,1,0,1,0,1,0,1,1,
-    0,0,1,1,0,1,0,1,0,1,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
-    0,1,0,0,1,0,1,1,0,1,0,1,0,1,0,0,1,1,0,0,1,0,0,1,0,0,0,0,1,1,
-    1,1,1,1,1,1
+    1,0,0,1,1,0,0,0,1,1, // 0-9
+    1,1,1,1,0,1,0,1,0,0, // 10-19
+    0,1,0,1,1,0,0,1,0,0, // 20-29
+    0,1,1,1,0,0,1,1,1,1, // 30-39
+    0,1,1,0,1,1,1,1,0,0, // 40-49
+    0,1,1,0,1,0,1,0,1,1, // 50-59
+    0,0,1,1,0,1,0,1,0,1, // 70-69
+    0,0,1,0,0,0,0,0,0,1, // 80-79
+    1,0,0,0,0,0,0,0,1,1, // 90-89
+    0,1,0,0,1,0,1,1,0,1, // 100-99
+    0,1,0,1,0,0,1,1,0,0, // 110-109
+    1,0,0,1,0,0,0,0,1,1, // 120-129
+    1,1,1,1,1,1          // 130-136
 };
 
 
@@ -55,6 +63,7 @@ namespace gr {
 
       class Modder {
       public:
+        virtual std::string name() const = 0;
         virtual std::vector<int> operator()(const std::vector<int>&) = 0;
       };
 
@@ -62,10 +71,12 @@ namespace gr {
       class Sync : public Modder {
         const int buckets_per_symbol_;
       public:
+        std::string name() const override { return "sync"; };
+
         Sync(int b): buckets_per_symbol_(b){}
 
         std::vector<int>
-        operator()(const std::vector<int>& in) {
+        operator()(const std::vector<int>& in) override {
           auto is_sync = [](int s) {
             return s < 5;
           };
@@ -118,15 +129,30 @@ namespace gr {
       class BitSync : public Modder {
         const int buckets_per_symbol_;
       public:
+        std::string name() const override { return "bitsync"; };
         BitSync(int b): buckets_per_symbol_(b){}
         std::vector<int>
         operator()(const std::vector<int>& in) {
-          const int width = 3;
+          const int width = 5;
           std::vector<int> out;
           out.reserve(in.size());
+          int skipped = 0;
           for (int pos = 0; pos < in.size(); pos++) {
-            if (out.size() % buckets_per_symbol_ == 0) {
+            if (skipped < width && (out.size() % buckets_per_symbol_ == 0)) {
               const bool is_sync = sync_pos[out.size()/buckets_per_symbol_];
+              if (is_sync && in[pos] > 0) {
+                // We're not yet at the sync. Go there.
+                pos++;
+                skipped++;
+                continue;
+              }
+              if (!is_sync && in[pos] < 0) {
+                // We're not yet at the non sync. Go there.
+                pos++;
+                skipped++;
+                continue;
+              }
+#if 0
               const bool next_sync = sync_pos[out.size()/buckets_per_symbol_ + 1];
               if (is_sync && !next_sync && in[pos+buckets_per_symbol_] < 0) {
                 // One too many sync symbols.
@@ -139,8 +165,67 @@ namespace gr {
                 pos++;
                 continue;
               }
+#endif
             }
+            skipped = 0;
             out.push_back(in[pos]);
+          }
+          return out;
+        }
+      };
+
+      double stddev_and_penalty(const int* from,const int* to, const bool is_sync) {
+        double sum = 0;
+        double sq_sum = 0;
+        int n = 0;
+        double penalty = 0;
+        for (;from != to;from++) {
+          sq_sum += *from * *from;
+          sum += *from;
+          n++;
+          penalty += 100 * ((*from < -1) != is_sync);
+        }
+        const double mean = sum / n;
+        return penalty + sq_sum / n - mean*mean;
+      }
+
+      class BitSync2 : public Modder {
+        const int buckets_per_symbol_;
+      public:
+        std::string name() const override { return "bitsync"; };
+        BitSync2(int b): buckets_per_symbol_(b){}
+
+        std::vector<int>
+        operator()(const std::vector<int>& in) {
+          std::vector<int> out;
+          int pos = 0;
+          const int width = 7;
+          for (const auto& is_sync : sync_pos) {
+            if (is_sync) {
+              for (int c = 0; c < buckets_per_symbol_; c++) {
+                out.push_back(-2);
+              }
+              pos += buckets_per_symbol_;
+              continue;
+            }
+            int best = 0;
+            double best_diff = std::numeric_limits<double>::max();
+            for (int ofs = -width; ofs <= width; ofs++) {
+              const auto& from = &in[pos+ofs];
+              const auto& to = &in[pos+ofs+buckets_per_symbol_];
+
+              const auto score = stddev_and_penalty(from, to, is_sync) + std::abs(ofs);
+              if (score < best_diff) {
+                best = ofs;
+                best_diff = score;
+              }
+              // std::clog << "  " << score << std::endl;
+            }
+            // std::clog << "DEBUG " << (out.size()/buckets_per_symbol_) << " best score " << best_diff << " @" << (pos+best) << std::endl;
+            for (int c = 0; c < buckets_per_symbol_; c++) {
+              out.push_back(in[pos+best+c]);
+            }
+            pos += best+buckets_per_symbol_;
           }
           return out;
         }
@@ -149,21 +234,34 @@ namespace gr {
       class RemoveSync : public Modder {
         const int buckets_per_symbol_;
       public:
-        RemoveSync(int b): buckets_per_symbol_(b){}
+        std::string name() const override { return "removesync"; };
+        RemoveSync(int b): buckets_per_symbol_(b) {}
         std::vector<int>
         operator()(const std::vector<int>& in) {
-          // TODO: confirm sync.
           std::vector<int> out;
-          if (true) {
-            for (const auto& v : in) {
-              if (v >= 0) {
-                out.push_back(v);
+          if (false) {
+            for (int pos = 0; pos < in.size(); pos++) {
+              const bool is_sync = sync_pos[pos];
+               // in[pos] to take care of overlong syncs.
+              //if ((is_sync && in[pos] < 10) || in[pos] < 0) {
+              if (is_sync) {// || in[pos] < 0) {
+                continue;
               }
+              out.push_back(in[pos]);
             }
           } else {
-            for (int i = 0; i < in.size(); i++) {
-              if (!sync_pos[i / buckets_per_symbol_]) {
-                out.push_back(in[i]);
+            // TODO: confirm sync.
+            if (true) {
+              for (const auto& v : in) {
+                if (v >= 0) {
+                  out.push_back(v);
+                }
+              }
+            } else {
+              for (int i = 0; i < in.size(); i++) {
+                if (!sync_pos[i / buckets_per_symbol_]) {
+                  out.push_back(in[i]);
+                }
               }
             }
           }
@@ -175,13 +273,15 @@ namespace gr {
       class Pick : public Modder {
         const int buckets_per_symbol_;
       public:
+        std::string name() const override { return "pick"; };
         Pick(int b): buckets_per_symbol_(b){}
         std::vector<int>
         operator()(const std::vector<int>& in_) {
           std::vector<int> out;
           std::vector<int> in(in_);
           const int width = 3;
-          for (int pos = buckets_per_symbol_/2; pos < in.size(); pos += buckets_per_symbol_) {
+          for (int pos = buckets_per_symbol_/2; pos < in.size();) {
+            const bool is_sync = sync_pos[out.size()/buckets_per_symbol_];
             const auto& frompos = pos-width+1;
             const auto& topos = pos+width;
             const auto& from = &in[frompos];
@@ -192,6 +292,7 @@ namespace gr {
               std::clog << "for " << out.size() << " picking " << frompos << " - " << topos << " value " << v << std::endl;
             }
             out.push_back(v);
+            pos += buckets_per_symbol_;
           }
           return out;
         }
@@ -203,6 +304,7 @@ namespace gr {
         const int fft_size_;
         const float symbol_offset_;
       public:
+        std::string name() const override { return "scale"; };
         Scale(int samp_rate, int fft_size, float symbol_offset): samp_rate_(samp_rate), fft_size_(fft_size), symbol_offset_(symbol_offset) {}
         std::vector<int>
         operator()(const std::vector<int>& in) {
@@ -219,6 +321,7 @@ namespace gr {
       // Bucket-translate according to what the base is.
       class AdjustBase : public Modder {
       public:
+        std::string name() const override { return "adjustbase"; };
         std::vector<int>
         operator()(const std::vector<int>& in) {
           std::map<int,int> counts;
@@ -347,16 +450,19 @@ namespace gr {
       }
       auto buckets = runfft(fs, batch_, fft_size_);
 
-      std::vector<std::unique_ptr<Modder> > modders;
+      std::vector<std::unique_ptr<Modder>> modders;
       modders.push_back(std::make_unique<AdjustBase>());
       modders.push_back(std::make_unique<Sync>(buckets_per_symbol_));
       modders.push_back(std::make_unique<Scale>(samp_rate_, fft_size_, symbol_offset_));
-      modders.push_back(std::make_unique<BitSync>(buckets_per_symbol_));
+      modders.push_back(std::make_unique<BitSync2>(buckets_per_symbol_));
       modders.push_back(std::make_unique<Pick>(buckets_per_symbol_));
       modders.push_back(std::make_unique<RemoveSync>(buckets_per_symbol_));
 
       for (const auto& mod : modders) {
         buckets = (*mod)(buckets);
+        if (debug) {
+          dump(buckets, "di."+mod->name());
+        }
       }
       const auto& syms = buckets;
 
@@ -367,7 +473,10 @@ namespace gr {
         }
         std::clog << std::endl;
       }
-      if (syms.size() < 63) {
+      if (syms.size() == 62) {
+        // TODO: this symbol is most likely lost somewhere above, and should be reclaimed.
+        buckets.push_back(0);
+      } else if (syms.size() < 63) {
         return "invalid decode. Only got " + std::to_string(syms.size()) + " symbols";
       }
       return JT65::unpack_message(JT65::unfec(JT65::uninterleave(JT65::ungreycode(syms))));

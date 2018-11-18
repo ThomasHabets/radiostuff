@@ -159,7 +159,7 @@
     </param>
     <param>
       <key>value</key>
-      <value>200</value>
+      <value>50</value>
     </param>
   </block>
   <block>
@@ -318,7 +318,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(8, 236)</value>
+      <value>(168, 124)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -330,7 +330,7 @@
     </param>
     <param>
       <key>value</key>
-      <value>8000000</value>
+      <value>2000000</value>
     </param>
   </block>
   <block>
@@ -631,7 +631,7 @@
     </param>
     <param>
       <key>_enabled</key>
-      <value>1</value>
+      <value>0</value>
     </param>
     <param>
       <key>file</key>
@@ -815,11 +815,11 @@
     </param>
     <param>
       <key>_enabled</key>
-      <value>1</value>
+      <value>0</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(840, 252)</value>
+      <value>(864, 228)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -921,7 +921,7 @@
     </param>
     <param>
       <key>_enabled</key>
-      <value>0</value>
+      <value>1</value>
     </param>
     <param>
       <key>_coordinate</key>
@@ -984,7 +984,7 @@
     </param>
     <param>
       <key>fft_size</key>
-      <value>4096</value>
+      <value>4096*2</value>
     </param>
     <param>
       <key>_coordinate</key>
@@ -1856,11 +1856,11 @@
     </param>
     <param>
       <key>ymax</key>
-      <value>3e-3</value>
+      <value>0.02</value>
     </param>
     <param>
       <key>ymin</key>
-      <value>-3e-3</value>
+      <value>-0.02</value>
     </param>
   </block>
   <block>
@@ -1891,7 +1891,7 @@
     </param>
     <param>
       <key>_enabled</key>
-      <value>0</value>
+      <value>1</value>
     </param>
     <param>
       <key>fftsize</key>
@@ -3540,7 +3540,7 @@
     </param>
     <param>
       <key>_enabled</key>
-      <value>0</value>
+      <value>1</value>
     </param>
     <param>
       <key>_coordinate</key>
@@ -3707,7 +3707,7 @@
     </param>
     <param>
       <key>_enabled</key>
-      <value>0</value>
+      <value>1</value>
     </param>
     <param>
       <key>_coordinate</key>
@@ -3761,7 +3761,7 @@
     </param>
     <param>
       <key>_enabled</key>
-      <value>0</value>
+      <value>1</value>
     </param>
     <param>
       <key>_coordinate</key>

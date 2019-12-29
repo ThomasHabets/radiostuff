@@ -387,25 +387,6 @@ blocks:
     coordinate: [816, 824.0]
     rotation: 0
     state: true
-- name: blocks_tag_gate_0
-  id: blocks_tag_gate
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    propagate_tags: 'False'
-    single_key: '""'
-    type: complex
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1368, 660.0]
-    rotation: 0
-    state: true
 - name: blocks_tagged_stream_multiply_length_0_0
   id: blocks_tagged_stream_multiply_length
   parameters:
@@ -562,7 +543,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    block_tags: 'False'
+    block_tags: 'True'
     comment: ''
     epsilon: '1'
     freq_offset: 1e-6
@@ -575,7 +556,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1160, 628.0]
+    coordinate: [1168, 636.0]
     rotation: 0
     state: enabled
 - name: digital_constellation_decoder_cb_0
@@ -1622,7 +1603,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1528, 668.0]
+    coordinate: [1360, 668.0]
     rotation: 0
     state: enabled
 - name: virtual_sink_2_0
@@ -1702,7 +1683,6 @@ connections:
 - [blocks_pack_k_bits_bb_0_0, '0', blocks_tagged_stream_multiply_length_0_0, '0']
 - [blocks_stream_mux_0, '0', digital_crc32_bb_0, '0']
 - [blocks_stream_mux_1, '0', virtual_sink_0, '0']
-- [blocks_tag_gate_0, '0', virtual_sink_2, '0']
 - [blocks_tagged_stream_multiply_length_0_0, '0', digital_crc32_bb_1, '0']
 - [blocks_tagged_stream_to_pdu_0, pdus, blocks_message_debug_0, print_pdu]
 - [blocks_tagged_stream_to_pdu_0, pdus, blocks_socket_pdu_0, pdus]
@@ -1713,7 +1693,7 @@ connections:
 - [blocks_vector_source_x_0_1, '0', blocks_stream_mux_1, '0']
 - [blocks_vector_source_x_1, '0', blocks_stream_mux_1, '3']
 - [blocks_vector_source_x_2, '0', blocks_stream_mux_0, '0']
-- [channels_channel_model_0, '0', blocks_tag_gate_0, '0']
+- [channels_channel_model_0, '0', virtual_sink_2, '0']
 - [digital_constellation_decoder_cb_0, '0', blocks_char_to_float_0, '0']
 - [digital_constellation_decoder_cb_0, '0', digital_diff_decoder_bb_0, '0']
 - [digital_constellation_modulator_0, '0', qtgui_const_sink_x_0, '0']

@@ -44,11 +44,32 @@ blocks:
     coordinate: [528, 12.0]
     rotation: 0
     state: true
+- name: igain
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: tabs@0
+    label: ''
+    min_len: '200'
+    orient: Qt.Horizontal
+    rangeType: float
+    start: '0'
+    step: '0.01'
+    stop: '1'
+    value: '0.5'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [96, 516.0]
+    rotation: 0
+    state: true
 - name: loop_bandwidth
   id: variable_qtgui_entry
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 'tabs@1: 1,1'
     label: ''
     type: real
     value: 3.14e-3/deci
@@ -99,6 +120,18 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [280, 12.0]
+    rotation: 0
+    state: true
+- name: tune_offset
+  id: variable
+  parameters:
+    comment: ''
+    value: -100e3
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [232, 516.0]
     rotation: 0
     state: true
 - name: analog_agc_xx_0
@@ -425,19 +458,19 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    center_freq: '0'
+    center_freq: -tune_offset
     comment: ''
     decim: '1'
     maxoutbuf: '0'
     minoutbuf: '0'
     samp_rate: samp_rate*deci
-    taps: firdes.low_pass(1,samp_rate*10,100e3,10e3)
+    taps: firdes.low_pass(1,samp_rate*10,20e3,2e3)
     type: ccc
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [352, 676.0]
+    coordinate: [296, 676.0]
     rotation: 0
     state: true
 - name: note_0
@@ -726,7 +759,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [592, 212.0]
+    coordinate: [600, 212.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_0
@@ -857,7 +890,7 @@ blocks:
     ctrlpanel: 'False'
     entags: 'True'
     grid: 'False'
-    gui_hint: 'tabs@1: 5,0,1,3'
+    gui_hint: 'tabs@2: 2,0,1,3'
     label1: Signal 1
     label10: Signal 10
     label2: Signal 2
@@ -954,7 +987,7 @@ blocks:
     ctrlpanel: 'True'
     entags: 'True'
     grid: 'False'
-    gui_hint: 'tabs@1: 4,0,1,3'
+    gui_hint: 'tabs@2: 1,0,1,3'
     label1: Signal 1
     label10: Signal 10
     label2: Signal 2
@@ -1051,7 +1084,7 @@ blocks:
     ctrlpanel: 'True'
     entags: 'True'
     grid: 'False'
-    gui_hint: 'tabs@1: 3,0,1,3'
+    gui_hint: 'tabs@2: 0,0,1,3'
     label1: Pre diff
     label10: Signal 10
     label2: Post diff
@@ -1205,7 +1238,7 @@ blocks:
     comment: ''
     gui_hint: ''
     label0: RF
-    label1: RX
+    label1: Frequency locked
     label10: Tab 10
     label11: Tab 11
     label12: Tab 12
@@ -1216,7 +1249,7 @@ blocks:
     label17: Tab 17
     label18: Tab 18
     label19: Tab 19
-    label2: Tab 2
+    label2: Bytes
     label3: Tab 3
     label4: Tab 4
     label5: Tab 5
@@ -1224,12 +1257,12 @@ blocks:
     label7: Tab 7
     label8: Tab 8
     label9: Tab 9
-    num_tabs: '2'
+    num_tabs: '3'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [664, 388.0]
+    coordinate: [592, 388.0]
     rotation: 0
     state: true
 - name: uhd_usrp_source_0
@@ -1301,7 +1334,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: '2320000000'
+    center_freq0: 2320000000-tune_offset
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -1377,7 +1410,7 @@ blocks:
     dc_offs_enb9: '""'
     dev_addr: '""'
     dev_args: ''
-    gain0: '30'
+    gain0: igain
     gain1: '0'
     gain10: '0'
     gain11: '0'
@@ -1508,7 +1541,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     nchan: '1'
-    norm_gain0: 'False'
+    norm_gain0: 'True'
     norm_gain1: 'False'
     norm_gain10: 'False'
     norm_gain11: 'False'
@@ -1600,7 +1633,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [72, 700.0]
+    coordinate: [72, 636.0]
     rotation: 0
     state: true
 - name: virtual_sink_2

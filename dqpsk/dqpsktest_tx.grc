@@ -863,8 +863,8 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [808, 424.0]
-    rotation: 0
+    coordinate: [860.0, 344]
+    rotation: 90
     state: true
 - name: qtgui_time_sink_x_0_0
   id: qtgui_time_sink_x

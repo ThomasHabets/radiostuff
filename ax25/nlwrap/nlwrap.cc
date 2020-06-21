@@ -1,3 +1,9 @@
+// nlwrap.cc
+// thomas@habets.se
+//
+// Runs a subprogram while replacing all \r with \n, in both directions.
+// For its use, see this blog post:
+// https://blog.habets.se/2020/06/Amateur-packet-radio.html
 #include <algorithm>
 #include <cerrno>
 #include <cstring>

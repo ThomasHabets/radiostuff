@@ -16,6 +16,10 @@ namespace {
 
 void handle2(SeqPacket conn) {
   FILE *f = fopen("test.txt", "r");
+  if (f == nullptr) {
+    throw std::runtime_error(std::string("opening test.txt: ") +
+                             strerror(errno));
+  }
   fseek(f, 0, SEEK_END);
   const auto size = ftell(f);
   fseek(f, 0, SEEK_SET);

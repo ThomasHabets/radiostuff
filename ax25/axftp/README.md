@@ -1,11 +1,3 @@
-## Turn off checksums on both ends
-
-Otherwise it'll break after a few packets for some reason.
-
-```
-kissparms -p radio -c 1 
-```
-
 ## Start server, currently only serving 'test.txt'
 
 ```

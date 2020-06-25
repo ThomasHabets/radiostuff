@@ -46,6 +46,26 @@ void set_packet_length_fd(int fd, unsigned int len)
 
 } // namespace
 
+std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& copt)
+{
+        if (copt.my_priv.empty() != copt.peer_pub.empty()) {
+                throw std::runtime_error("if priv key is provided, pubkey must be too. And vice versa");
+        }
+
+        std::unique_ptr<SeqPacket> sock;
+        if (!copt.my_priv.empty()) {
+        sock = std::make_unique<SignedSeqPacket>(
+            copt.src, copt.my_priv, copt.peer_pub, copt.path);
+    } else {
+        sock = std::make_unique<SeqPacket>(copt.src, copt.path);
+    }
+    sock->set_extended_modulus(copt.extended_modulus);
+    sock->set_window_size(copt.window);
+    sock->set_packet_length(copt.packet_length);
+    return sock;
+}
+
+
 unsigned int parse_uint(const std::string& s)
 {
     const char* p = s.data();
@@ -68,9 +88,6 @@ bool common_opt(CommonOpts& o, int opt)
         break;
     case 's':
         o.src = optarg;
-        break;
-    case 'U':
-        o.sign = false;
         break;
     case 'w':
         o.window = parse_uint(optarg);
@@ -120,10 +137,11 @@ SeqPacket::SeqPacket(std::string mycall, std::vector<std::string> digipeaters)
     me.fsa_ax25.sax25_ndigis =
         std::min(digipeaters_.size(), decltype(digipeaters_)::size_type(AX25_MAX_DIGIS));
     for (int i = 0; i < me.fsa_ax25.sax25_ndigis; i++) {
-            if (-1 == ax25_aton_entry(digipeaters_[i].c_str(),
-                                      reinterpret_cast<char*>(&me.fsa_digipeater[i]))) {
-                    throw std::runtime_error("ax25_aton_entry(" + digipeaters_[i] + "): " + strerror(errno));
-            }
+        if (-1 == ax25_aton_entry(digipeaters_[i].c_str(),
+                                  reinterpret_cast<char*>(&me.fsa_digipeater[i]))) {
+            throw std::runtime_error("ax25_aton_entry(" + digipeaters_[i] +
+                                     "): " + strerror(errno));
+        }
     }
     if (-1 == bind(sock_, reinterpret_cast<struct sockaddr*>(&me), sizeof(me))) {
         throw std::runtime_error("bind to " + mycall_ + " failed: " + strerror(errno));
@@ -137,8 +155,9 @@ int SeqPacket::connect(std::string addr)
     };
     peer.sax25_family = AF_AX25;
     peer.sax25_ndigis = 0; // TODO?
-    if (-1 == ax25_aton_entry(peer_addr_.c_str(), reinterpret_cast<char*>(&peer.sax25_call))) {
-            throw std::runtime_error("ax25_aton_entry(" + mycall_ + "): " + strerror(errno));
+    if (-1 ==
+        ax25_aton_entry(peer_addr_.c_str(), reinterpret_cast<char*>(&peer.sax25_call))) {
+        throw std::runtime_error("ax25_aton_entry(" + mycall_ + "): " + strerror(errno));
     }
 
     if (-1 == ::connect(sock_, reinterpret_cast<struct sockaddr*>(&peer), sizeof(peer))) {

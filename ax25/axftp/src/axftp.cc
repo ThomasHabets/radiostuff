@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 {
     CommonOpts copt;
     int opt;
-    while ((opt = getopt(argc, argv, "k:P:ehl:p:s:Uw:")) != -1) {
+    while ((opt = getopt(argc, argv, "k:P:ehl:p:s:w:")) != -1) {
         if (common_opt(copt, opt)) {
             continue;
         }
@@ -47,16 +47,7 @@ int main(int argc, char** argv)
     }
     const std::string dst = argv[optind];
 
-    std::unique_ptr<SeqPacket> sock;
-    if (copt.sign) {
-        sock = std::make_unique<SignedSeqPacket>(
-            copt.src, copt.my_priv, copt.peer_pub, copt.path);
-    } else {
-        sock = std::make_unique<SeqPacket>(copt.src, copt.path);
-    }
-    sock->set_extended_modulus(copt.extended_modulus);
-    sock->set_window_size(copt.window);
-    sock->set_packet_length(copt.packet_length);
+    auto sock = make_from_commonopts(copt);
 
     std::clog << "Connecting...\n";
     if (sock->connect(dst)) {

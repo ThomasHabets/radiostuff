@@ -66,21 +66,18 @@ protected:
     unsigned int packet_length_ = 0; // default
 };
 
-std::vector<std::string> split(std::string s);
-struct CommonOpts {
+
+        struct CommonOpts {
     std::string src;
     std::vector<std::string> path;
     unsigned int window = 0;
     bool extended_modulus = false;
     int packet_length = 200;
-    bool sign = true;
     std::string peer_pub;
     std::string my_priv;
     // TODO: AX25_T1, AX25_T2, AX25_T3, AX25_N2, AX25_BACKOFF,
     // AX25_PIDINCL, AX25_IDLE
 };
-
-std::string load_key(const std::string& fn, int size);
 
 class SignedSeqPacket : public SeqPacket
 {
@@ -115,12 +112,16 @@ private:
     void exchange_nonce();
 };
 
+std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& opt);
+std::vector<std::string> split(std::string s);
+std::string load_key(const std::string& fn, int size);
+unsigned int parse_uint(const std::string& s);
+
 namespace crypto {
 bool verify(const std::string& data, const std::string& pk);
 std::string sign(const std::string& msg, const std::string& sk);
 } // namespace crypto
 
-unsigned int parse_uint(const std::string& s);
 
 bool common_opt(CommonOpts& o, int opt);
 } // namespace axlib

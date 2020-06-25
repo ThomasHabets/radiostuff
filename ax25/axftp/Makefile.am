@@ -1,6 +1,8 @@
 AUTOMAKE_OPTIONS = foreign subdir-objects
 
-bin_PROGRAMS = axkeys axftp axftpd \
+bin_PROGRAMS = axkeys \
+axftp axftpd \
+axsh axshd \
 examples/client examples/server \
 examples/client_sign examples/server_sign
 
@@ -8,6 +10,8 @@ examples/client_sign examples/server_sign
 axkeys_SOURCES=src/axkeys.cc src/axlib.cc src/crypto.cc
 axftp_SOURCES=src/axftp.cc src/axlib.cc src/crypto.cc
 axftpd_SOURCES=src/axftpd.cc src/axlib.cc src/crypto.cc
+axsh_SOURCES=src/axsh.cc src/axlib.cc src/crypto.cc
+axshd_SOURCES=src/axshd.cc src/axlib.cc src/crypto.cc
 
 # Examples
 examples_client_SOURCES=examples/client.cc src/axlib.cc src/crypto.cc

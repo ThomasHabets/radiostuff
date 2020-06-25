@@ -9,9 +9,9 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
     axlib::SignedSeqPacket sock(argv[1],
-                          axlib::load_key<64>(argv[3]),
-                          axlib::load_key<32>(argv[4]),
-                          axlib::split(argv[2]));
+                                axlib::load_key<64>(argv[3]),
+                                axlib::load_key<32>(argv[4]),
+                                axlib::split(argv[2]));
 
     sock.connect(argv[5]);
     sock.write("hello world");

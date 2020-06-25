@@ -48,6 +48,7 @@ public:
     void set_window_size(unsigned int n);
     void set_packet_length(unsigned int n);
     void set_extended_modulus(bool v);
+    int get_fd() const noexcept { return sock_; }
 
 protected:
     SeqPacket(std::string mycall, int sock, std::string peer)
@@ -73,7 +74,9 @@ struct CommonOpts {
     unsigned int window = 0;
     bool extended_modulus = false;
     int packet_length = 200;
+    bool peer_pub_provided = false;
     std::array<char, 32> peer_pub;
+    bool my_priv_provided = false;
     std::array<char, 64> my_priv;
     // TODO: AX25_T1, AX25_T2, AX25_T3, AX25_N2, AX25_BACKOFF,
     // AX25_PIDINCL, AX25_IDLE

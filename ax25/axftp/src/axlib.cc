@@ -48,13 +48,12 @@ void set_packet_length_fd(int fd, unsigned int len)
 
 std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& copt)
 {
-    if (copt.my_priv.empty() != copt.peer_pub.empty()) {
+    if (copt.my_priv_provided != copt.peer_pub_provided) {
         throw std::runtime_error(
             "if priv key is provided, pubkey must be too. And vice versa");
     }
-
     std::unique_ptr<SeqPacket> sock;
-    if (!copt.my_priv.empty()) {
+    if (copt.my_priv_provided) {
         sock = std::make_unique<SignedSeqPacket>(
             copt.src, copt.my_priv, copt.peer_pub, copt.path);
     } else {
@@ -98,9 +97,11 @@ bool common_opt(CommonOpts& o, int opt)
         break;
     case 'P':
         o.peer_pub = load_key<32>(optarg);
+        o.peer_pub_provided = true;
         break;
     case 'k':
         o.my_priv = load_key<64>(optarg);
+        o.my_priv_provided = true;
         break;
     default:
         return false;

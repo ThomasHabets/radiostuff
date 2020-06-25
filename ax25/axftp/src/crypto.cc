@@ -28,7 +28,7 @@ void init()
 } // namespace
 
 
-bool verify(const std::string& data, const std::string& pk)
+bool verify(const std::string& data, const std::array<char, 32>& pk)
 {
     init();
     const auto sig = data.substr(0, 64);
@@ -43,7 +43,7 @@ bool verify(const std::string& data, const std::string& pk)
     return true;
 }
 
-std::string sign(const std::string& msg, const std::string& sk)
+std::string sign(const std::string& msg, const std::array<char, 64>& sk)
 {
     init();
 

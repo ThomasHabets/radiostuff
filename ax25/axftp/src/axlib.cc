@@ -48,12 +48,13 @@ void set_packet_length_fd(int fd, unsigned int len)
 
 std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& copt)
 {
-        if (copt.my_priv.empty() != copt.peer_pub.empty()) {
-                throw std::runtime_error("if priv key is provided, pubkey must be too. And vice versa");
-        }
+    if (copt.my_priv.empty() != copt.peer_pub.empty()) {
+        throw std::runtime_error(
+            "if priv key is provided, pubkey must be too. And vice versa");
+    }
 
-        std::unique_ptr<SeqPacket> sock;
-        if (!copt.my_priv.empty()) {
+    std::unique_ptr<SeqPacket> sock;
+    if (!copt.my_priv.empty()) {
         sock = std::make_unique<SignedSeqPacket>(
             copt.src, copt.my_priv, copt.peer_pub, copt.path);
     } else {
@@ -96,10 +97,10 @@ bool common_opt(CommonOpts& o, int opt)
         o.packet_length = parse_uint(optarg);
         break;
     case 'P':
-        o.peer_pub = load_key(optarg, 32);
+        o.peer_pub = load_key<32>(optarg);
         break;
     case 'k':
-        o.my_priv = load_key(optarg, 64);
+        o.my_priv = load_key<64>(optarg);
         break;
     default:
         return false;
@@ -281,7 +282,9 @@ Sock& Sock::operator=(Sock&& rhs) noexcept
     return *this;
 }
 
-SignedSeqPacket::SignedSeqPacket(SeqPacket&& rhs, std::string priv, std::string pub)
+SignedSeqPacket::SignedSeqPacket(SeqPacket&& rhs,
+                                 std::array<char, 64> priv,
+                                 std::array<char, 32> pub)
     : SeqPacket(std::move(rhs)), my_priv_(priv), peer_pub_(pub)
 {
 }
@@ -357,15 +360,19 @@ std::string SignedSeqPacket::sign(const std::string& msg) const
     return ret;
 }
 
-std::string load_key(const std::string& fn, int size)
+template <int size>
+std::array<char, size> load_key(const std::string& fn)
 {
-    std::vector<char> buf(size);
+    std::array<char, size> buf;
     std::ifstream pf(fn);
     pf.read(buf.data(), buf.size());
     if (!pf.good()) {
         throw std::runtime_error("loading key of size " + std::to_string(size));
     }
-    return std::string(buf.begin(), buf.end());
+    return buf;
 }
+
+template std::array<char, 32> load_key<32>(const std::string& fn);
+template std::array<char, 64> load_key<64>(const std::string& fn);
 
 } // namespace axlib

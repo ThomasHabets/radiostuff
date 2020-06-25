@@ -67,14 +67,14 @@ protected:
 };
 
 
-        struct CommonOpts {
+struct CommonOpts {
     std::string src;
     std::vector<std::string> path;
     unsigned int window = 0;
     bool extended_modulus = false;
     int packet_length = 200;
-    std::string peer_pub;
-    std::string my_priv;
+    std::array<char, 32> peer_pub;
+    std::array<char, 64> my_priv;
     // TODO: AX25_T1, AX25_T2, AX25_T3, AX25_N2, AX25_BACKOFF,
     // AX25_PIDINCL, AX25_IDLE
 };
@@ -83,8 +83,8 @@ class SignedSeqPacket : public SeqPacket
 {
 public:
     SignedSeqPacket(std::string mycall,
-                    std::string priv,
-                    std::string pub,
+                    std::array<char, 64> priv,
+                    std::array<char, 32> pub,
                     std::vector<std::string> digipeaters = {})
         : SeqPacket(std::move(mycall), std::move(digipeaters)),
           my_priv_(priv),
@@ -94,7 +94,7 @@ public:
     void listen(std::function<void(std::unique_ptr<SeqPacket>)> cb) override;
     void write(const std::string& msg) override;
     std::string read() override;
-    SignedSeqPacket(SeqPacket&&, std::string priv, std::string pub);
+    SignedSeqPacket(SeqPacket&&, std::array<char, 64> priv, std::array<char, 32> pub);
     int connect(std::string addr) override;
     unsigned int max_packet_size() const override { return packet_length() - sig_size_; }
 
@@ -102,8 +102,8 @@ private:
     static constexpr int sig_size_ = 64;
     static constexpr int nonce_size_ = 12;
     std::string sign(const std::string&) const;
-    std::string peer_pub_;
-    std::string my_priv_;
+    std::array<char, 32> peer_pub_;
+    std::array<char, 64> my_priv_;
     std::string nonce_local_;
     std::string nonce_peer_;
     uint64_t packets_sent_{};
@@ -114,12 +114,17 @@ private:
 
 std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& opt);
 std::vector<std::string> split(std::string s);
-std::string load_key(const std::string& fn, int size);
+
+template <int size>
+std::array<char, size> load_key(const std::string& fn);
+extern template std::array<char, 32> load_key<32>(const std::string& fn);
+extern template std::array<char, 64> load_key<64>(const std::string& fn);
+
 unsigned int parse_uint(const std::string& s);
 
 namespace crypto {
-bool verify(const std::string& data, const std::string& pk);
-std::string sign(const std::string& msg, const std::string& sk);
+bool verify(const std::string& data, const std::array<char, 32>& pk);
+std::string sign(const std::string& msg, const std::array<char, 64>& sk);
 } // namespace crypto
 
 

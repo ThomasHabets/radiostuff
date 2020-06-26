@@ -491,9 +491,12 @@ std::array<char, size> load_key(const std::string& fn)
 {
     std::array<char, size> buf;
     std::ifstream pf(fn);
-    pf.read(buf.data(), buf.size());
-    if (!pf.good()) {
-        throw std::runtime_error("loading key of size " + std::to_string(size));
+    if (pf.good()) {
+        pf.read(buf.data(), buf.size());
+    }
+    if (pf.fail()) {
+        throw std::runtime_error("loading key of size " + std::to_string(size) +
+                                 " from file '" + fn + "': " + strerror(errno));
     }
     return buf;
 }

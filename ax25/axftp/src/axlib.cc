@@ -1,4 +1,5 @@
 #include "axlib.h"
+#include <getopt.h>
 #include <netax25/ax25.h>
 #include <netax25/axconfig.h>
 #include <netax25/axlib.h>
@@ -14,6 +15,15 @@
 namespace axlib {
 
 namespace {
+enum class coptval {
+    t1 = 1,
+    t2 = 2,
+    t3 = 3,
+    n2 = 4,
+    backoff = 5,
+    idle = 6,
+};
+
 void set_window_size_fd(int fd, unsigned int window_size)
 {
     if (window_size > 0) {
@@ -25,6 +35,18 @@ void set_window_size_fd(int fd, unsigned int window_size)
         }
     }
 }
+
+void set_int_fd(int fd, int opt, int val)
+{
+    if (val > 0) {
+        if (-1 == setsockopt(fd, SOL_AX25, opt, &val, sizeof(val))) {
+            throw std::runtime_error(std::string("setting opt ") + std::to_string(opt) +
+                                     " to " + std::to_string(val) + ": " +
+                                     strerror(errno));
+        }
+    }
+}
+
 void set_extended_modulus_fd(int fd, bool onoff)
 {
     const unsigned int on = onoff ? 1 : 0;
@@ -62,6 +84,12 @@ std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& copt)
     sock->set_extended_modulus(copt.extended_modulus);
     sock->set_window_size(copt.window);
     sock->set_packet_length(copt.packet_length);
+    sock->set_t1(copt.t1);
+    sock->set_t2(copt.t2);
+    sock->set_t3(copt.t3);
+    sock->set_n2(copt.n2);
+    sock->set_backoff(copt.backoff);
+    sock->set_idle(copt.idle);
     return sock;
 }
 
@@ -77,9 +105,64 @@ unsigned int parse_uint(const std::string& s)
     return ret;
 }
 
+std::string common_usage()
+{
+    return "    --t1 <num>    Desc\n"
+           "    --t2 <num>    Desc\n"
+           "    --t3 <num>    Desc\n"
+           "    --n2 <num>    Desc\n"
+           "    --backoff=<num>    Desc\n"
+           "    -p, --path=<path>    Desc\n"
+           "    -P, --peer_pub=<file>    Desc\n"
+           "    -k, --my_priv=<file>    Desc\n"
+           "    -l, --paclen=<num>    Desc\n"
+           "    -w, --window=<num>    Desc\n"
+           "    -s, --mycall=<num>    Desc\n"
+           "    --idle=<num>    Desc\n"
+           "    -e, --extseq    Desc\n";
+}
+
+std::vector<struct option> common_long_opts()
+{
+    std::vector<struct ::option> ret{
+        { "t1", required_argument, 0, int(coptval::t1) },
+        { "t2", required_argument, 0, int(coptval::t2) },
+        { "t3", required_argument, 0, int(coptval::t3) },
+        { "n2", required_argument, 0, int(coptval::n2) },
+        { "backoff", required_argument, 0, int(coptval::backoff) },
+        { "path", required_argument, 0, 'p' },
+        { "peer_pub", required_argument, 0, 'P' },
+        { "my_priv", required_argument, 0, 'k' },
+        { "paclen", required_argument, 0, 'l' },
+        { "window", required_argument, 0, 'w' },
+        { "mycall", required_argument, 0, 's' },
+        { "idle", required_argument, 0, int(coptval::idle) },
+        { "extseq", no_argument, 0, 'e' },
+    };
+    return ret;
+}
+
 bool common_opt(CommonOpts& o, int opt)
 {
     switch (opt) {
+    case int(coptval::t1):
+        o.t1 = parse_uint(optarg);
+        break;
+    case int(coptval::t2):
+        o.t2 = parse_uint(optarg);
+        break;
+    case int(coptval::t3):
+        o.t3 = parse_uint(optarg);
+        break;
+    case int(coptval::n2):
+        o.n2 = parse_uint(optarg);
+        break;
+    case int(coptval::backoff):
+        o.backoff = parse_uint(optarg);
+        break;
+    case int(coptval::idle):
+        o.idle = parse_uint(optarg);
+        break;
     case 'e':
         o.extended_modulus = true;
         break;
@@ -232,12 +315,48 @@ void SeqPacket::set_extended_modulus(bool v)
     extended_modulus_ = v;
     set_extended_modulus_fd(sock_, extended_modulus_);
 }
+void SeqPacket::set_t1(int v)
+{
+    t1_ = v;
+    set_int_fd(sock_, AX25_T1, t1_);
+}
+void SeqPacket::set_t2(int v)
+{
+    t2_ = v;
+    set_int_fd(sock_, AX25_T2, t2_);
+}
+void SeqPacket::set_t3(int v)
+{
+    t3_ = v;
+    set_int_fd(sock_, AX25_T3, t3_);
+}
+void SeqPacket::set_n2(int v)
+{
+    n2_ = v;
+    set_int_fd(sock_, AX25_N2, n2_);
+}
+void SeqPacket::set_backoff(int v)
+{
+    backoff_ = v;
+    set_int_fd(sock_, AX25_BACKOFF, backoff_);
+}
+void SeqPacket::set_idle(int v)
+{
+    idle_ = v;
+    set_int_fd(sock_, AX25_IDLE, idle_);
+}
 
 void SeqPacket::set_parms(int fd)
 {
     set_extended_modulus_fd(fd, extended_modulus_);
     set_window_size_fd(fd, window_size_);
     set_packet_length_fd(fd, packet_length_);
+    set_int_fd(fd, AX25_T1, t1_);
+    set_int_fd(fd, AX25_T2, t2_);
+    set_int_fd(fd, AX25_T3, t3_);
+    set_int_fd(fd, AX25_N2, n2_);
+    set_int_fd(fd, AX25_BACKOFF, backoff_);
+    set_int_fd(fd, AX25_IDLE, idle_);
 }
 
 void SeqPacket::copy_parms(SeqPacket& other) const noexcept
@@ -245,6 +364,12 @@ void SeqPacket::copy_parms(SeqPacket& other) const noexcept
     other.set_window_size(window_size_);
     other.set_extended_modulus(extended_modulus_);
     other.set_packet_length(packet_length_);
+    other.set_t1(t1_);
+    other.set_t2(t2_);
+    other.set_t3(t3_);
+    other.set_n2(n2_);
+    other.set_backoff(backoff_);
+    other.set_idle(idle_);
 }
 
 unsigned int SeqPacket::window_size() const

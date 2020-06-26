@@ -1,4 +1,5 @@
 // -*- c++ -*-
+#include <getopt.h>
 #include <fstream>
 #include <functional>
 #include <memory>
@@ -48,6 +49,12 @@ public:
     void set_window_size(unsigned int n);
     void set_packet_length(unsigned int n);
     void set_extended_modulus(bool v);
+    void set_t1(int v);
+    void set_t2(int v);
+    void set_t3(int v);
+    void set_n2(int v);
+    void set_backoff(int v);
+    void set_idle(int v);
     int get_fd() const noexcept { return sock_; }
 
 protected:
@@ -65,6 +72,14 @@ protected:
     unsigned int window_size_ = 0; // use default.
     bool extended_modulus_ = false;
     unsigned int packet_length_ = 0; // default
+
+    // Timers.
+    int t1_ = -1;
+    int t2_ = -2;
+    int t3_ = -1;
+    int n2_ = -1;
+    int backoff_ = -1;
+    int idle_ = -1;
 };
 
 
@@ -78,8 +93,12 @@ struct CommonOpts {
     std::array<char, 32> peer_pub;
     bool my_priv_provided = false;
     std::array<char, 64> my_priv;
-    // TODO: AX25_T1, AX25_T2, AX25_T3, AX25_N2, AX25_BACKOFF,
-    // AX25_PIDINCL, AX25_IDLE
+    int t1 = -1;
+    int t2 = -2;
+    int t3 = -1;
+    int n2 = -1;
+    int backoff = -1;
+    int idle = -1;
 };
 
 class SignedSeqPacket : public SeqPacket
@@ -117,6 +136,9 @@ private:
 
 std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& opt);
 std::vector<std::string> split(std::string s);
+std::string common_usage();
+std::vector<struct option> common_long_opts();
+bool common_opt(CommonOpts& o, int opt);
 
 template <int size>
 std::array<char, size> load_key(const std::string& fn);
@@ -131,5 +153,4 @@ std::string sign(const std::string& msg, const std::array<char, 64>& sk);
 } // namespace crypto
 
 
-bool common_opt(CommonOpts& o, int opt);
 } // namespace axlib

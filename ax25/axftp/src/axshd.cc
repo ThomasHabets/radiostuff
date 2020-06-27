@@ -179,7 +179,13 @@ void usage(const char* av0, int err)
     if (err) {
         f = stderr;
     }
-    fprintf(f, "Usage: %s [-h] [-eU] [-w <window> ] -s <my call> [-p <digipath>]\n", av0);
+    fprintf(f,
+            "Usage: %s […options…] -s <src call>\n"
+            "%s\nExample:\n"
+            "   %s -k my.priv -P peer.pub -s M0XXX-9 -p M0XXX-0\n",
+            av0,
+            common_usage().c_str(),
+            av0);
     exit(err);
 }
 
@@ -189,7 +195,9 @@ int main(int argc, char** argv)
 {
     CommonOpts copt;
     int opt;
-    while ((opt = getopt(argc, argv, "ehk:P:l:p:s:w:")) != -1) {
+    auto lopts = common_long_opts();
+    lopts.push_back({ 0, 0, 0, 0 });
+    while ((opt = getopt_long(argc, argv, "ehk:l:P:p:s:w:", &lopts[0], NULL)) != -1) {
         if (common_opt(copt, opt)) {
             continue;
         }

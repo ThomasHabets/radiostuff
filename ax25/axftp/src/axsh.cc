@@ -68,8 +68,10 @@ int main(int argc, char** argv)
 
     std::mutex m;
     std::string cmd;
+    bool time_to_die = false;
     std::thread reader([&] {
         for (;;) {
+            usleep(100000); // Prevent CPU busyloop waiting for command to be sent.
             {
                 std::unique_lock<std::mutex> l(m);
                 if (!cmd.empty()) {
@@ -77,34 +79,68 @@ int main(int argc, char** argv)
                 }
             }
 
-            std::cout << "prompt\n";
-            std::vector<char> buf(128);
-            std::cin.getline(&buf[0], sizeof(buf));
-            const auto len = std::cin.gcount();
-            const auto line = std::string(&buf[0], &buf[len - 1]);
-            std::clog << "writing\n";
+            const std::string line = [] {
+                std::string t;
+                std::getline(std::cin, t);
+                return t;
+            }();
 
+            if (line.empty() || line == "exit") {
+                break;
+            }
+            if (!std::cin.good()) {
+                throw std::runtime_error(std::string("stdin read failure: ") +
+                                         strerror(errno));
+            }
             std::unique_lock<std::mutex> l(m);
             cmd = line;
         }
+        std::unique_lock<std::mutex> l(m);
+        time_to_die = true;
     });
+
+    // We have to use select() instead of a thread. A thread would be
+    // nicer (no polling needed wakeups), but the Linux kernel doesn't
+    // support threads calling write() and read() at the same time on
+    // the same AX_25 socket. I've sent a patch:
+    // https://marc.info/?l=linux-hams&m=159319049624305&w=2
+    //
+    // Yes, I could make this 100% event-based, but it's just so nice
+    // to not have to deal with partial command buffers that I
+    // preferred this.
     for (;;) {
-        fd_set fds;
-        FD_ZERO(&fds);
-        FD_SET(sock->get_fd(), &fds);
-        struct timeval tv;
-        tv.tv_sec = 0;
-        tv.tv_usec = 100000;
-        const auto rc = select(sock->get_fd() + 1, &fds, NULL, NULL, &tv);
+        // Check if done.
+        {
+            std::unique_lock<std::mutex> l(m);
+            if (time_to_die) {
+                break;
+            }
+        }
+
+        // Check if any data is received.
+        {
+            fd_set fds;
+            FD_ZERO(&fds);
+            FD_SET(sock->get_fd(), &fds);
+            struct timeval tv;
+            tv.tv_sec = 0;
+            tv.tv_usec = 100000;
+            const auto rc = select(sock->get_fd() + 1, &fds, NULL, NULL, &tv);
+            if (rc == 1) {
+                std::cout << sock->read() << std::flush;
+            } else if (rc == -1) {
+                throw std::runtime_error(std::string("select(): ") + strerror(errno));
+            }
+        }
+
+        // Write anything queued up to write.
         {
             std::unique_lock<std::mutex> l(m);
             if (!cmd.empty()) {
+                std::clog << "]]] Sending command <" << cmd << ">" << std::endl;
                 sock->write(cmd);
                 cmd = "";
             }
-        }
-        if (rc == 1) {
-            std::cout << sock->read() << std::flush;
         }
     }
     reader.join();

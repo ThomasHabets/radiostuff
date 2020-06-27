@@ -96,11 +96,13 @@ int main(int argc, char** argv)
     auto sock = make_from_commonopts(copt);
 
     std::clog << "Listening...\n";
-    sock->listen([](std::unique_ptr<SeqPacket> conn) {
+    std::vector<std::thread> threads;
+    sock->listen([&threads](std::unique_ptr<SeqPacket> conn) {
         std::clog << "Connection from " << conn->peer_addr() << "\n";
-        std::thread th(handle, std::move(conn));
-        th.detach();
+        threads.emplace_back(handle, std::move(conn));
     });
-
+    for (auto& th : threads) {
+        th.join();
+    }
     return 0;
 }

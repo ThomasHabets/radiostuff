@@ -271,6 +271,9 @@ std::string SeqPacket::read()
         rc = ::read(sock_, buf.data(), buf.size());
     } while (rc == -1 && errno == EINTR);
     if (rc == -1) {
+        if (errno == ENOTCONN) {
+            return "";
+        }
         throw std::runtime_error(std::string("read(): ") + strerror(errno));
     }
     return std::string(&buf[0], &buf[rc]);
@@ -420,8 +423,12 @@ void SignedSeqPacket::listen(std::function<void(std::unique_ptr<SeqPacket>)> cb)
     SeqPacket::listen([&cb, this](std::unique_ptr<SeqPacket> s) {
         auto ss = std::unique_ptr<SeqPacket>(
             std::make_unique<SignedSeqPacket>(std::move(*s), my_priv_, peer_pub_));
-        dynamic_cast<SignedSeqPacket*>(ss.get())->exchange_nonce();
-        cb(std::move(ss));
+        try {
+            dynamic_cast<SignedSeqPacket*>(ss.get())->exchange_nonce();
+            cb(std::move(ss));
+        } catch (const std::exception& e) {
+            std::clog << "Connection failed with exception: " << e.what() << std::endl;
+        }
     });
 }
 
@@ -464,6 +471,9 @@ int SignedSeqPacket::connect(std::string addr)
 std::string SignedSeqPacket::read()
 {
     const auto full = SeqPacket::read();
+    if (full.empty()) {
+        return "";
+    }
     const auto msg = full.substr(sig_size_);
     const auto sig = full.substr(0, sig_size_);
     if (!crypto::verify(full + nonce_peer_ + nonce_local_ + std::to_string(packet_good_),

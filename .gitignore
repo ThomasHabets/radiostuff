@@ -9,3 +9,4 @@ amateur/amateur_playback.py
 attic
 *.raw
 *.dat
+*.o

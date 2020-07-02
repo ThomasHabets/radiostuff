@@ -113,7 +113,7 @@ blocks:
     orient: Qt.QVBoxLayout
     type: int
     value: '1'
-    widget: combo_box
+    widget: radio_buttons
   states:
     bus_sink: false
     bus_source: false
@@ -143,9 +143,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [328, 84.0]
+    coordinate: [344, 84.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: blocks_add_xx_0
   id: blocks_add_xx
   parameters:
@@ -267,7 +267,7 @@ blocks:
     bus_structure: null
     coordinate: [828.0, 408]
     rotation: 270
-    state: true
+    state: bypassed
 - name: blocks_wavfile_source_0
   id: blocks_wavfile_source
   parameters:

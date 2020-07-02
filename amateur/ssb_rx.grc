@@ -135,7 +135,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1088, 164.0]
+    coordinate: [1160, 164.0]
     rotation: 0
     state: true
 - name: band_pass_filter_0
@@ -163,8 +163,26 @@ blocks:
     coordinate: [408, 164.0]
     rotation: 0
     state: true
-- name: blocks_complex_to_real_0
-  id: blocks_complex_to_real
+- name: blocks_add_xx_0
+  id: blocks_add_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [976, 208.0]
+    rotation: 0
+    state: true
+- name: blocks_complex_to_float_0
+  id: blocks_complex_to_float
   parameters:
     affinity: ''
     alias: ''
@@ -176,9 +194,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 224.0]
+    coordinate: [800, 208.0]
     rotation: 0
-    state: enabled
+    state: true
 - name: qtgui_waterfall_sink_x_0
   id: qtgui_waterfall_sink_x
   parameters:
@@ -298,7 +316,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1088, 256.0]
+    coordinate: [1160, 248.0]
     rotation: 0
     state: true
 - name: rational_resampler_xxx_0
@@ -695,9 +713,11 @@ blocks:
 
 connections:
 - [band_pass_filter_0, '0', rational_resampler_xxx_0, '0']
-- [blocks_complex_to_real_0, '0', audio_sink_0, '0']
-- [blocks_complex_to_real_0, '0', qtgui_waterfall_sink_x_1, '0']
-- [rational_resampler_xxx_0, '0', blocks_complex_to_real_0, '0']
+- [blocks_add_xx_0, '0', audio_sink_0, '0']
+- [blocks_add_xx_0, '0', qtgui_waterfall_sink_x_1, '0']
+- [blocks_complex_to_float_0, '0', blocks_add_xx_0, '0']
+- [blocks_complex_to_float_0, '1', blocks_add_xx_0, '1']
+- [rational_resampler_xxx_0, '0', blocks_complex_to_float_0, '0']
 - [uhd_usrp_source_0, '0', band_pass_filter_0, '0']
 - [uhd_usrp_source_0, '0', qtgui_waterfall_sink_x_0, '0']
 

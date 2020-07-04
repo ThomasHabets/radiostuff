@@ -15,6 +15,10 @@ import (
 	texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"
 )
 
+var (
+	lang = flag.String("language", "en-US", "Language")
+)
+
 func main() {
 	flag.Parse()
 
@@ -37,7 +41,7 @@ func main() {
 			},
 		},
 		Voice: &texttospeechpb.VoiceSelectionParams{
-			LanguageCode: "en-US",
+			LanguageCode: *lang,
 			// Name:
 			// SsmlGender:
 		},
@@ -48,10 +52,10 @@ func main() {
 	log.Infof("Text2Speeching…")
 	resp, err := client.SynthesizeSpeech(ctx, req)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("API call: %v", err)
 	}
 
-	log.Infof("Writing…")
+	log.Infof("Writing %d bytes…", len(resp.AudioContent))
 	if _, err := io.Copy(os.Stdout, bytes.NewBuffer(resp.AudioContent)); err != nil {
 		log.Fatal(err)
 	}

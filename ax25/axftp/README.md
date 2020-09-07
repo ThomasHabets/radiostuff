@@ -15,6 +15,8 @@ for a few reasons:
 
 ## Running
 
+See full demo [on youtube](https://www.youtube.com/watch?v=HRH6RpRlzZQ).
+
 ### Start server, currently only serving 'test.txt'
 
 ```

@@ -18,6 +18,16 @@
 #include <linux/if.h>
 #include <linux/if_tun.h>
 
+namespace {
+namespace options {
+int sf = 12;            // 7-12, lower is faster
+int bw = 125;           // 125,250,500, higher is faster
+const char* cr = "4/8"; // 4/5, 4/6, 4/7, 4/8
+bool persist = true;
+} // namespace options
+} // namespace
+
+
 void full_write(int fd, const std::string& s)
 {
     // TODO: full write
@@ -99,17 +109,33 @@ LoStik::LoStik(std::string dev) : dev_(dev)
 
     flush();
     std::clog << "LoStik ver: " << cmd("sys get ver") << std::endl
-              << "Stop RX: " << cmd("radio rxstop") << std::endl
-              << "Set mac pause: " << cmd("mac pause") << std::endl
-              << "Set power: " << cmd("radio set pwr 15") << std::endl
-              << "Modulation: " << cmd("radio get mod") << std::endl
-              << "Frequency: " << cmd("radio get freq") << std::endl
-              << "SF: " << cmd("radio get sf")
+              << "Setting options…\n"
+              << "… Set mac pause: " << cmd("mac pause") << std::endl
+              << "… Stop RX: " << cmd("radio rxstop") << std::endl
+              << "… Set power: " << cmd("radio set pwr 15") << std::endl
+              << "… SF: " << cmd("radio set sf sf" + std::to_string(options::sf))
               << std::endl
-              // TODO: probably should turn off watchdog now that rxstop exists.
-              << "Set watchdog: " << cmd("radio set wdt 60000") << std::endl
-              << "LED 0 off: " << cmd("sys set pindig GPIO10 0") << std::endl
-              << "LED 1 off: " << cmd("sys set pindig GPIO11 0") << std::endl;
+              << "… Bandwidth: " << cmd("radio set bw " + std::to_string(options::bw))
+              << std::endl
+              << "… Set watchdog: " << cmd("radio set wdt 0") << std::endl
+              << "… CRC: " << cmd("radio set crc on") << std::endl
+              << "… CR: " << cmd(std::string{ "radio set cr " } + options::cr)
+              << std::endl
+              << "… LED 0 off: " << cmd("sys set pindig GPIO10 0") << std::endl
+              << "… LED 1 off: " << cmd("sys set pindig GPIO11 0") << std::endl;
+
+    std::clog << "Settings:\n"
+              << "… Power: " << cmd("radio get pwr") << std::endl
+              << "… Modulation: " << cmd("radio get mod") << std::endl
+              << "… Frequency: " << cmd("radio get freq") << std::endl
+              << "… SF: " << cmd("radio get sf") << std::endl
+              << "… Bandwidth: " << cmd("radio get bw") << std::endl
+              << "… VDD: " << cmd("sys get vdd") << std::endl
+              << "… EUI: " << cmd("sys get hweui") << std::endl
+              << "… CRC: " << cmd("radio get crc") << std::endl
+              << "… CR: " << cmd("radio get cr") << std::endl
+              << "… Sync: " << cmd("radio get sync") << std::endl
+              << "… Watchdog: " << cmd("radio get wdt") << std::endl;
 }
 
 void LoStik::flush()
@@ -185,6 +211,7 @@ void receive(int fd, LoStik& stick)
         const auto packet = std::string(&line.c_str()[prefix.size()]);
         std::cout << "packet: <" << packet << ">\n";
         const auto p = from_hex(packet);
+        std::cout << "… snr:  " << stick.cmd("radio get snr") << std::endl;
         ::write(fd, p.data(), p.size());
         std::cout << "reset radio_rx reply> " << stick.cmd("radio rx 0") << std::endl;
         return;
@@ -200,6 +227,7 @@ void receive(int fd, LoStik& stick)
     std::cout << "reset radio_rx reply> " << stick.cmd("radio rx 0") << std::endl;
 }
 
+// tx on lostik
 void send(int fd, LoStik& stick)
 {
     std::array<char, 4096> buf;
@@ -242,6 +270,14 @@ int mainwrap(int argc, char** argv)
     if (0 > ioctl(fd, TUNSETIFF, reinterpret_cast<void*>(&ifr))) {
         throw std::runtime_error(std::string{ "ioctl(): " } + strerror(errno));
     }
+    if (options::persist) {
+        int on = 1;
+        if (0 > ioctl(fd, TUNSETPERSIST, reinterpret_cast<void*>(&on))) {
+            throw std::runtime_error(std::string{ "ioctl(TUNSETPERSIST): " } +
+                                     strerror(errno));
+        }
+    }
+
 
     LoStik stick{ dev };
     std::cout << "radio rx reply> " << stick.cmd("radio rx 0") << std::endl;

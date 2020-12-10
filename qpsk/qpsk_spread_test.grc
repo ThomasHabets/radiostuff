@@ -265,6 +265,23 @@ blocks:
     coordinate: [280, 12.0]
     rotation: 0
     state: enabled
+- name: analog_const_source_x_0
+  id: analog_const_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: '0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: short
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [88, 268.0]
+    rotation: 0
+    state: true
 - name: analog_random_source_x_0
   id: analog_random_source_x
   parameters:
@@ -387,6 +404,22 @@ blocks:
     coordinate: [3240, 788.0]
     rotation: 0
     state: enabled
+- name: blocks_char_to_short_0
+  id: blocks_char_to_short
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [208, 360.0]
+    rotation: 0
+    state: true
 - name: blocks_delay_1
   id: blocks_delay
   parameters:
@@ -437,7 +470,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [792, 268.0]
+    coordinate: [1040, 268.0]
     rotation: 0
     state: enabled
 - name: blocks_repeat_0
@@ -455,9 +488,28 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [520, 252.0]
+    coordinate: [768, 252.0]
     rotation: 0
     state: enabled
+- name: blocks_stream_mux_0
+  id: blocks_stream_mux
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    lengths: '[1,len(message)]'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: short
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [368, 240.0]
+    rotation: 0
+    state: true
 - name: blocks_throttle_1
   id: blocks_throttle
   parameters:
@@ -540,7 +592,7 @@ blocks:
     repeat: 'True'
     tags: '[]'
     type: byte
-    vector: '[0] + [ord(x) for x in message]'
+    vector: '[ord(x) for x in message]'
     vlen: '1'
   states:
     bus_sink: false
@@ -563,7 +615,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [712, 256.0]
+    coordinate: [960, 256.0]
     rotation: 0
     state: enabled
 - name: blocks_xor_xx_1
@@ -733,55 +785,6 @@ blocks:
     coordinate: [680, 796.0]
     rotation: 0
     state: enabled
-- name: epy_block_0
-  id: epy_block
-  parameters:
-    _source_code: "\"\"\"\nEmbedded Python Blocks:\n\nEach time this file is saved,\
-      \ GRC will instantiate the first class it finds\nto get ports and parameters\
-      \ of your block. The arguments to __init__  will\nbe the parameters. All of\
-      \ them are required to have default values!\n\"\"\"\n\nimport numpy as np\n\
-      from gnuradio import gr\nimport time\n\nclass blk(gr.basic_block):  # other\
-      \ base classes are basic_block, decim_block, interp_block\n    \"\"\"Embedded\
-      \ Python Block example - a simple multiply const\"\"\"\n\n    def __init__(self,\
-      \ start=1,bits=8,parity=0,stop=1):\n        \"\"\"arguments to this function\
-      \ show up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n    \
-      \        self,\n            name='UART Encode',   # will show up in GRC\n  \
-      \          in_sig=[np.byte],\n            out_sig=[np.byte]\n        )\n   \
-      \     # if an attribute with the same name as a parameter is found,\n      \
-      \  # a callback is registered (properties work, too).\n        self._start =\
-      \ start\n        self._bits = bits\n        self._parity = parity\n        self._stop\
-      \ = stop\n        self._symbol_size = self._start+self._bits+self._parity+self._stop\n\
-      \        #self.set_min_output_buffer(self._symbol_size*100)\n        self._bad\
-      \ = False\n        self._output_queue = []\n\n    def work(self, input_items,\
-      \ output_items):\n        \"\"\"example: multiply with constant\"\"\"\n    \
-      \    if len(self._output_queue) > 0:\n            output_items[0][0] = self._output_queue.pop(0)\n\
-      \            return 1\n        self._output_queue.append(0)\n        self._output_queue.append((input_items[0][0]\
-      \ & 1) != 0)\n        self._output_queue.append((input_items[0][0] & 2) != 0)\n\
-      \        self._output_queue.append((input_items[0][0] & 4) != 0)\n        self._output_queue.append((input_items[0][0]\
-      \ & 8) != 0)\n        self._output_queue.append((input_items[0][0] & 16) !=\
-      \ 0)\n        self._output_queue.append((input_items[0][0] & 32) != 0)\n   \
-      \     self._output_queue.append((input_items[0][0] & 64) != 0)\n        self._output_queue.append((input_items[0][0]\
-      \ & 128) != 0)\n        self._output_queue.append(1)\n        self.consume(0,\
-      \ 1)\n        return 0\n"
-    affinity: ''
-    alias: ''
-    bits: '8'
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    parity: '0'
-    start: '1'
-    stop: '1'
-  states:
-    _io_cache: ('UART Encode', 'blk', [('start', '1'), ('bits', '8'), ('parity', '0'),
-      ('stop', '1')], [('0', 'byte', 1)], [('0', 'byte', 1)], 'Embedded Python Block
-      example - a simple multiply const', [])
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [296, 228.0]
-    rotation: 0
-    state: disabled
 - name: epy_block_1
   id: epy_block
   parameters:
@@ -871,7 +874,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [288, 300.0]
+    coordinate: [512, 228.0]
     rotation: 0
     state: enabled
 - name: import_0
@@ -2086,7 +2089,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [968, 268.0]
+    coordinate: [1216, 268.0]
     rotation: 0
     state: true
 - name: virtual_sink_5
@@ -2138,7 +2141,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [40, 252.0]
+    coordinate: [40, 356.0]
     rotation: 0
     state: true
 - name: virtual_source_3
@@ -2190,7 +2193,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [144, 404.0]
+    coordinate: [736, 308.0]
     rotation: 0
     state: true
 - name: virtual_source_7
@@ -2208,6 +2211,7 @@ blocks:
     state: true
 
 connections:
+- [analog_const_source_x_0, '0', blocks_stream_mux_0, '0']
 - [analog_random_source_x_0, '0', blocks_throttle_1, '0']
 - [blocks_char_to_float_0, '0', qtgui_time_sink_x_1, '0']
 - [blocks_char_to_float_0_0, '0', qtgui_time_sink_x_1_0, '0']
@@ -2215,12 +2219,14 @@ connections:
 - [blocks_char_to_float_2_0, '0', qtgui_time_sink_x_2_1, '0']
 - [blocks_char_to_float_3, '0', qtgui_time_sink_x_2_0, '0']
 - [blocks_char_to_float_3_0, '0', qtgui_time_sink_x_2_0_0, '0']
+- [blocks_char_to_short_0, '0', blocks_stream_mux_0, '1']
 - [blocks_delay_1, '0', blocks_xor_xx_1, '1']
 - [blocks_keep_one_in_n_0, '0', blocks_char_to_float_3, '0']
 - [blocks_keep_one_in_n_0, '0', epy_block_1, '0']
 - [blocks_keep_one_in_n_0, '0', habets38_uart_decoder_0, '0']
 - [blocks_pack_k_bits_bb_1, '0', virtual_sink_3, '0']
 - [blocks_repeat_0, '0', blocks_xor_xx_0, '0']
+- [blocks_stream_mux_0, '0', habets38_uart_encoder_0, '0']
 - [blocks_throttle_1, '0', virtual_sink_2, '0']
 - [blocks_unpack_k_bits_bb_0, '0', blocks_char_to_float_2, '0']
 - [blocks_unpack_k_bits_bb_1, '0', blocks_char_to_float_0_0, '0']
@@ -2245,7 +2251,6 @@ connections:
 - [digital_pfb_clock_sync_xxx_0, '1', qtgui_time_sink_x_0, '0']
 - [digital_pfb_clock_sync_xxx_0, '2', qtgui_time_sink_x_0, '1']
 - [digital_pfb_clock_sync_xxx_0, '3', qtgui_time_sink_x_0, '2']
-- [epy_block_0, '0', blocks_repeat_0, '0']
 - [epy_block_1, '0', blocks_char_to_float_3_0, '0']
 - [habets38_uart_decoder_0, '0', blocks_char_to_float_3_0, '0']
 - [habets38_uart_encoder_0, '0', blocks_repeat_0, '0']
@@ -2253,8 +2258,7 @@ connections:
 - [rational_resampler_xxx_1, '0', digital_pfb_clock_sync_xxx_0, '0']
 - [virtual_source_0, '0', channels_channel_model_0, '0']
 - [virtual_source_1, '0', rational_resampler_xxx_1, '0']
-- [virtual_source_2, '0', epy_block_0, '0']
-- [virtual_source_2, '0', habets38_uart_encoder_0, '0']
+- [virtual_source_2, '0', blocks_char_to_short_0, '0']
 - [virtual_source_3, '0', blocks_char_to_float_2_0, '0']
 - [virtual_source_3, '0', blocks_unpack_k_bits_bb_0, '0']
 - [virtual_source_4, '0', qtgui_sink_x_0, '0']

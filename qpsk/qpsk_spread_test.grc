@@ -102,7 +102,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: int(1000000/(samp_rate*4*sps*spread))
+    value: int(3000000/(samp_rate*4*sps*spread))
   states:
     bus_sink: false
     bus_source: false
@@ -302,7 +302,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '4'
+    value: '20'
   states:
     bus_sink: false
     bus_source: false

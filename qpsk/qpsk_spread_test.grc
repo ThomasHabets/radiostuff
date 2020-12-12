@@ -331,6 +331,31 @@ blocks:
     coordinate: [2648, 788.0]
     rotation: 0
     state: true
+- name: spread_key
+  id: variable
+  parameters:
+    comment: ''
+    value: '"M0THC"'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [536, 12.0]
+    rotation: 0
+    state: true
+- name: spread_key_bits
+  id: variable
+  parameters:
+    comment: ''
+    value: '[(ord(x)-ord(''0'')) for x in ''''.join([bin(x)[2:].zfill(8) for x in
+      hashlib.sha256(spread_key.encode(''utf-8'')).digest()])]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [632, 12.0]
+    rotation: 0
+    state: true
 - name: sps
   id: variable
   parameters:
@@ -575,6 +600,19 @@ blocks:
     coordinate: [2856, 712.0]
     rotation: 0
     state: enabled
+- name: blocks_message_debug_0
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [864, 968.0]
+    rotation: 0
+    state: true
 - name: blocks_null_sink_0
   id: blocks_null_sink
   parameters:
@@ -713,9 +751,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [744, 92.0]
+    coordinate: [736, 84.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_vector_source_x_0_0
   id: blocks_vector_source_x
   parameters:
@@ -734,6 +772,26 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [152, 156.0]
+    rotation: 0
+    state: enabled
+- name: blocks_vector_source_x_0_1
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: byte
+    vector: (spread_key_bits*spread)[:spread]
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [776, 164.0]
     rotation: 0
     state: enabled
 - name: blocks_xor_xx_0
@@ -920,6 +978,24 @@ blocks:
     coordinate: [680, 796.0]
     rotation: 0
     state: enabled
+- name: digital_probe_mpsk_snr_est_c_0
+  id: digital_probe_mpsk_snr_est_c
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha: '1'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msg_nsamples: air_bw//interpolate
+    type: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [512, 976.0]
+    rotation: 0
+    state: true
 - name: epy_block_1
   id: epy_block
   parameters:
@@ -1065,6 +1141,19 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1392, 36.0]
+    rotation: 0
+    state: true
+- name: import_0_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import hashlib
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1424, 84.0]
     rotation: 0
     state: true
 - name: limesdr_source_0
@@ -3319,6 +3408,7 @@ connections:
 - [blocks_unpack_k_bits_bb_1, '0', blocks_xor_xx_1, '0']
 - [blocks_vector_source_x_0, '0', virtual_sink_5, '0']
 - [blocks_vector_source_x_0_0, '0', virtual_sink_2, '0']
+- [blocks_vector_source_x_0_1, '0', virtual_sink_5, '0']
 - [blocks_xor_xx_0, '0', blocks_pack_k_bits_bb_1, '0']
 - [blocks_xor_xx_1, '0', blocks_keep_one_in_n_0, '0']
 - [channels_channel_model_0, '0', virtual_sink_0, '0']
@@ -3337,6 +3427,7 @@ connections:
 - [digital_pfb_clock_sync_xxx_0, '1', qtgui_time_sink_x_0, '0']
 - [digital_pfb_clock_sync_xxx_0, '2', qtgui_time_sink_x_0, '1']
 - [digital_pfb_clock_sync_xxx_0, '3', qtgui_time_sink_x_0, '2']
+- [digital_probe_mpsk_snr_est_c_0, snr, blocks_message_debug_0, print]
 - [epy_block_1, '0', blocks_char_to_float_3_0, '0']
 - [freq_xlating_fft_filter_ccc_0, '0', virtual_sink_0_0, '0']
 - [freq_xlating_fft_filter_ccc_0_0, '0', uhd_usrp_sink_0, '0']
@@ -3346,6 +3437,7 @@ connections:
 - [rational_resampler_xxx_0, '0', qtgui_const_sink_x_0_0, '0']
 - [rational_resampler_xxx_0, '0', virtual_sink_1, '0']
 - [rational_resampler_xxx_1, '0', digital_pfb_clock_sync_xxx_0, '0']
+- [rational_resampler_xxx_1, '0', digital_probe_mpsk_snr_est_c_0, '0']
 - [uhd_usrp_source_0, '0', freq_xlating_fft_filter_ccc_0, '0']
 - [virtual_source_0, '0', blocks_throttle_0, '0']
 - [virtual_source_0_0, '0', freq_xlating_fft_filter_ccc_0_0, '0']

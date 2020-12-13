@@ -227,7 +227,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2112, 268.0]
+    coordinate: [2336, 276.0]
     rotation: 0
     state: enabled
 - name: output_sps
@@ -612,7 +612,24 @@ blocks:
     bus_structure: null
     coordinate: [864, 968.0]
     rotation: 0
-    state: true
+    state: enabled
+- name: blocks_message_strobe_0
+  id: blocks_message_strobe
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msg: pmt.intern("TEST")
+    period: '1000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [64, 1060.0]
+    rotation: 0
+    state: disabled
 - name: blocks_null_sink_0
   id: blocks_null_sink
   parameters:
@@ -646,6 +663,42 @@ blocks:
     coordinate: [1040, 268.0]
     rotation: 0
     state: enabled
+- name: blocks_pdu_to_tagged_stream_0
+  id: blocks_pdu_to_tagged_stream
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    tag: packet_len
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [472, 1148.0]
+    rotation: 0
+    state: disabled
+- name: blocks_random_pdu_0
+  id: blocks_random_pdu
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    length_modulo: '2'
+    mask: '0xFF'
+    maxoutbuf: '0'
+    maxsize: '20'
+    minoutbuf: '0'
+    minsize: '10'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [256, 1060.0]
+    rotation: 0
+    state: disabled
 - name: blocks_repeat_0
   id: blocks_repeat
   parameters:
@@ -664,13 +717,33 @@ blocks:
     coordinate: [768, 252.0]
     rotation: 0
     state: enabled
+- name: blocks_socket_pdu_0
+  id: blocks_socket_pdu
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    host: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mtu: '10000'
+    port: '52001'
+    tcp_no_delay: 'False'
+    type: UDP_SERVER
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [88, 1124.0]
+    rotation: 0
+    state: disabled
 - name: blocks_stream_mux_0
   id: blocks_stream_mux
   parameters:
     affinity: ''
     alias: ''
     comment: ''
-    lengths: '[2,len(message)]'
+    lengths: '[1,len(message)]'
     maxoutbuf: '0'
     minoutbuf: '0'
     num_inputs: '2'
@@ -683,6 +756,25 @@ blocks:
     coordinate: [368, 240.0]
     rotation: 0
     state: true
+- name: blocks_tagged_stream_multiply_length_0
+  id: blocks_tagged_stream_multiply_length
+  parameters:
+    affinity: ''
+    alias: ''
+    c: 4*sps*interpolate*spread*2
+    comment: ''
+    lengthtagname: packet_len
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2008, 152.0]
+    rotation: 0
+    state: enabled
 - name: blocks_throttle_0
   id: blocks_throttle
   parameters:
@@ -968,7 +1060,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     osps: output_sps
-    sps: sps
+    sps: sps*interpolate
     taps: rrc_taps
     type: ccf
   states:
@@ -983,11 +1075,11 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    alpha: '1'
+    alpha: '0.01'
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    msg_nsamples: air_bw//interpolate
+    msg_nsamples: air_bw
     type: '0'
   states:
     bus_sink: false
@@ -995,7 +1087,7 @@ blocks:
     bus_structure: null
     coordinate: [512, 976.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: epy_block_1
   id: epy_block
   parameters:
@@ -2489,9 +2581,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [448, 820.0]
+    coordinate: [416, 884.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: tabs
   id: qtgui_tab_widget
   parameters:
@@ -2799,7 +2891,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2096, 140.0]
+    coordinate: [2296, 124.0]
     rotation: 0
     state: enabled
 - name: uhd_usrp_source_0
@@ -3224,7 +3316,7 @@ blocks:
     bus_structure: null
     coordinate: [552, 124.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: virtual_sink_3
   id: virtual_sink
   parameters:
@@ -3238,6 +3330,19 @@ blocks:
     coordinate: [1216, 268.0]
     rotation: 0
     state: true
+- name: virtual_sink_4
+  id: virtual_sink
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: bytes
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [992, 1148.0]
+    rotation: 0
+    state: disabled
 - name: virtual_sink_5
   id: virtual_sink
   parameters:
@@ -3399,9 +3504,14 @@ connections:
 - [blocks_keep_one_in_n_0, '0', blocks_null_sink_0, '0']
 - [blocks_keep_one_in_n_0, '0', epy_block_1, '0']
 - [blocks_keep_one_in_n_0, '0', habets38_uart_decoder_0, '0']
+- [blocks_message_strobe_0, strobe, blocks_random_pdu_0, generate]
 - [blocks_pack_k_bits_bb_1, '0', virtual_sink_3, '0']
+- [blocks_pdu_to_tagged_stream_0, '0', virtual_sink_4, '0']
+- [blocks_random_pdu_0, pdus, blocks_pdu_to_tagged_stream_0, pdus]
 - [blocks_repeat_0, '0', blocks_xor_xx_0, '0']
+- [blocks_socket_pdu_0, pdus, blocks_pdu_to_tagged_stream_0, pdus]
 - [blocks_stream_mux_0, '0', habets38_uart_encoder_0, '0']
+- [blocks_tagged_stream_multiply_length_0, '0', uhd_usrp_sink_0, '0']
 - [blocks_throttle_0, '0', channels_channel_model_0, '0']
 - [blocks_unpack_k_bits_bb_0, '0', blocks_char_to_float_2, '0']
 - [blocks_unpack_k_bits_bb_1, '0', blocks_char_to_float_0_0, '0']
@@ -3430,7 +3540,7 @@ connections:
 - [digital_probe_mpsk_snr_est_c_0, snr, blocks_message_debug_0, print]
 - [epy_block_1, '0', blocks_char_to_float_3_0, '0']
 - [freq_xlating_fft_filter_ccc_0, '0', virtual_sink_0_0, '0']
-- [freq_xlating_fft_filter_ccc_0_0, '0', uhd_usrp_sink_0, '0']
+- [freq_xlating_fft_filter_ccc_0_0, '0', blocks_tagged_stream_multiply_length_0, '0']
 - [habets38_uart_decoder_0, '0', blocks_char_to_float_3_0, '0']
 - [habets38_uart_encoder_0, '0', blocks_repeat_0, '0']
 - [limesdr_source_0, '0', freq_xlating_fft_filter_ccc_0, '0']
@@ -3441,6 +3551,8 @@ connections:
 - [uhd_usrp_source_0, '0', freq_xlating_fft_filter_ccc_0, '0']
 - [virtual_source_0, '0', blocks_throttle_0, '0']
 - [virtual_source_0_0, '0', freq_xlating_fft_filter_ccc_0_0, '0']
+- [virtual_source_1, '0', digital_pfb_clock_sync_xxx_0, '0']
+- [virtual_source_1, '0', digital_probe_mpsk_snr_est_c_0, '0']
 - [virtual_source_1, '0', rational_resampler_xxx_1, '0']
 - [virtual_source_2, '0', blocks_char_to_short_0, '0']
 - [virtual_source_3, '0', blocks_char_to_float_2_0, '0']

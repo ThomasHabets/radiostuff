@@ -200,8 +200,9 @@ int main(int argc, char** argv)
     CommonOpts copt;
     int opt;
     auto lopts = common_long_opts();
+    common_init();
     lopts.push_back({ 0, 0, 0, 0 });
-    while ((opt = getopt_long(argc, argv, "ehk:l:P:p:s:w:", &lopts[0], NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "ehk:l:P:p:r:s:w:", &lopts[0], NULL)) != -1) {
         if (common_opt(copt, opt)) {
             continue;
         }

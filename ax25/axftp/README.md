@@ -20,13 +20,13 @@ See full demo [on youtube](https://www.youtube.com/watch?v=HRH6RpRlzZQ).
 ### Start server, currently only serving 'test.txt'
 
 ```
-./axftpd -s <mycall> -p <main call listed in /etc/ax25/axports>
+./axftpd -r <radio1> -s <mycall> -p <main call listed in /etc/ax25/axports>
 ```
 
 ### Run client
 
 ```
-./axftp -s <mycall> -p <main call> <remote call, first arg to axftpd>
+./axftp -r <radio1> -s <mycall> -p <main call> <remote call, first arg to axftpd>
 ```
 
 ## Enabling authentication
@@ -34,9 +34,9 @@ See full demo [on youtube](https://www.youtube.com/watch?v=HRH6RpRlzZQ).
 Create keys with `./axkeys client` and `./axkeys server`. Then use `-k` and `-P` e.g.:
 
 ```
-./axshd -s <mycall> -k server.key -P client.pub
+./axshd -r <radio1> -s <mycall> -k server.key -P client.pub
 ```
 
 ```
-./axsh -s <mycall> -k client.key -P server.pub <server call>
+./axsh -r <radio1> -s <mycall> -k client.key -P server.pub <server call>
 ```

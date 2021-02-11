@@ -31,7 +31,9 @@ private:
 class SeqPacket
 {
 public:
-    SeqPacket(std::string mycall, std::vector<std::string> digipeaters = {});
+    SeqPacket(std::string radio,
+              std::string mycall,
+              std::vector<std::string> digipeaters = {});
 
     SeqPacket(SeqPacket&&) = default;
     virtual ~SeqPacket() = default;
@@ -58,14 +60,18 @@ public:
     int get_fd() const noexcept { return sock_; }
 
 protected:
-    SeqPacket(std::string mycall, int sock, std::string peer)
-        : sock_(sock), mycall_(std::move(mycall)), peer_addr_(peer)
+    SeqPacket(std::string radio, std::string mycall, int sock, std::string peer)
+        : sock_(sock),
+          radio_(std::move(radio)),
+          mycall_(std::move(mycall)),
+          peer_addr_(peer)
     {
     }
     void set_parms(int fd);
     void copy_parms(SeqPacket& other) const noexcept;
 
     Sock sock_;
+    const std::string radio_;
     const std::string mycall_;
     std::string peer_addr_;
     const std::vector<std::string> digipeaters_;
@@ -86,6 +92,7 @@ protected:
 struct CommonOpts {
     std::string src;
     std::vector<std::string> path;
+    std::string radio;
     unsigned int window = 0;
     bool extended_modulus = false;
     int packet_length = 200;
@@ -104,11 +111,12 @@ struct CommonOpts {
 class SignedSeqPacket : public SeqPacket
 {
 public:
-    SignedSeqPacket(std::string mycall,
+    SignedSeqPacket(std::string radio,
+                    std::string mycall,
                     std::array<char, 64> priv,
                     std::array<char, 32> pub,
                     std::vector<std::string> digipeaters = {})
-        : SeqPacket(std::move(mycall), std::move(digipeaters)),
+        : SeqPacket(std::move(radio), std::move(mycall), std::move(digipeaters)),
           my_priv_(priv),
           peer_pub_(pub)
     {
@@ -139,6 +147,7 @@ std::vector<std::string> split(std::string s);
 std::string common_usage();
 std::vector<struct option> common_long_opts();
 bool common_opt(CommonOpts& o, int opt);
+void common_init();
 
 template <int size>
 std::array<char, size> load_key(const std::string& fn);

@@ -4,13 +4,17 @@
 
 int main(int argc, char** argv)
 {
-    if (argc != 4) {
-        std::cerr << "Usage: " << argv[0] << " <mycall> <path> <dest>\n";
+    if (argc != 5) {
+        std::cerr << "Usage: " << argv[0] << " <radio> <mycall> <path> <dest>\n";
         return EXIT_FAILURE;
     }
-    axlib::SeqPacket sock(argv[1], axlib::split(argv[2]));
+    const std::string radio = argv[1];
+    const std::string mycall = argv[2];
+    const std::string path = argv[3];
+    const std::string dest = argv[4];
+    axlib::SeqPacket sock(radio, mycall, axlib::split(path));
 
-    sock.connect(argv[3]);
+    sock.connect(dest);
     sock.write("hello world");
     std::cout << sock.read() << std::endl;
 }

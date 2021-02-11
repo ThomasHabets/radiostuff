@@ -18,13 +18,14 @@ void usage(const char* av0, int err)
     if (err) {
         f = stderr;
     }
-    fprintf(f,
-            "Usage: %s […options…] -s <src call> <dst>\n"
-            "%s\nExample:\n"
-            "   %s -k my.priv -P peer.pub -s M0XXX-9 -p M0XXX-0 2E0XXX-9\n",
-            av0,
-            common_usage().c_str(),
-            av0);
+    fprintf(
+        f,
+        "Usage: %s […options…] -r <radio> -s <src call> <dst>\n"
+        "%s\nExample:\n"
+        "   %s -k my.priv -P peer.pub -s M0XXX-9 -r radio -p M0ABC-3,M0XYZ-2 2E0XXX-9\n",
+        av0,
+        common_usage().c_str(),
+        av0);
     exit(err);
 }
 } // namespace
@@ -34,8 +35,9 @@ int main(int argc, char** argv)
     CommonOpts copt;
     int opt;
     auto lopts = common_long_opts();
+    common_init();
     lopts.push_back({ 0, 0, 0, 0 });
-    while ((opt = getopt_long(argc, argv, "ehk:l:P:p:s:w:", &lopts[0], NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "ehk:l:P:p:r:s:w:", &lopts[0], NULL)) != -1) {
         if (common_opt(copt, opt)) {
             continue;
         }

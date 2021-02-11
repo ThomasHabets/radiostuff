@@ -3,15 +3,21 @@
 
 int main(int argc, char** argv)
 {
-    if (argc != 5) {
-        std::cerr << "Usage: " << argv[0] << " <mycall> <path> <priv> <pub>\n";
+    if (argc != 6) {
+        std::cerr << "Usage: " << argv[0] << " <radio> <mycall> <path> <priv> <pub>\n";
         return EXIT_FAILURE;
     }
+    const std::string radio = argv[1];
+    const std::string mycall = argv[2];
+    const std::string path = argv[3];
+    const std::string priv = argv[4];
+    const std::string pub = argv[5];
 
-    axlib::SignedSeqPacket sock(argv[1],
-                                axlib::load_key<64>(argv[3]),
-                                axlib::load_key<32>(argv[4]),
-                                axlib::split(argv[2]));
+    axlib::SignedSeqPacket sock(radio,
+                                mycall,
+                                axlib::load_key<64>(priv),
+                                axlib::load_key<32>(pub),
+                                axlib::split(path));
 
     std::cerr << "Listening...\n";
     sock.listen([](auto conn) {

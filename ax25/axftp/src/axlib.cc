@@ -68,6 +68,14 @@ void set_packet_length_fd(int fd, unsigned int len)
 
 } // namespace
 
+void common_init()
+{
+    const auto ports = ax25_config_load_ports();
+    if (!ports) {
+        throw std::runtime_error("Failed to init ax25 library: zero ports available");
+    }
+}
+
 std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& copt)
 {
     if (copt.my_priv_provided != copt.peer_pub_provided) {
@@ -77,9 +85,9 @@ std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& copt)
     std::unique_ptr<SeqPacket> sock;
     if (copt.my_priv_provided) {
         sock = std::make_unique<SignedSeqPacket>(
-            copt.src, copt.my_priv, copt.peer_pub, copt.path);
+            copt.radio, copt.src, copt.my_priv, copt.peer_pub, copt.path);
     } else {
-        sock = std::make_unique<SeqPacket>(copt.src, copt.path);
+        sock = std::make_unique<SeqPacket>(copt.radio, copt.src, copt.path);
     }
     sock->set_extended_modulus(copt.extended_modulus);
     sock->set_window_size(copt.window);
@@ -113,6 +121,7 @@ std::string common_usage()
            "    --n2 <num>    Desc\n"
            "    --backoff=<num>    Desc\n"
            "    -p, --path=<path>    Desc\n"
+           "    -r, --radio=<radio>    Desc\n"
            "    -P, --peer_pub=<file>    Desc\n"
            "    -k, --my_priv=<file>    Desc\n"
            "    -l, --paclen=<num>    Desc\n"
@@ -132,6 +141,7 @@ std::vector<struct option> common_long_opts()
         { "backoff", required_argument, 0, int(coptval::backoff) },
         { "path", required_argument, 0, 'p' },
         { "peer_pub", required_argument, 0, 'P' },
+        { "radio", required_argument, 0, 'r' },
         { "my_priv", required_argument, 0, 'k' },
         { "paclen", required_argument, 0, 'l' },
         { "window", required_argument, 0, 'w' },
@@ -169,6 +179,14 @@ bool common_opt(CommonOpts& o, int opt)
     case 'p':
         o.path = split(optarg);
         break;
+    case 'r': {
+        const auto t = ax25_config_get_addr(optarg);
+        if (t == nullptr) {
+            throw std::runtime_error(std::string("invalid radio \"") + optarg +
+                                     "\": " + strerror(errno));
+        }
+        o.radio = t;
+    } break;
     case 's':
         o.src = optarg;
         break;
@@ -203,8 +221,24 @@ std::vector<std::string> split(std::string s)
     return ret;
 }
 
-SeqPacket::SeqPacket(std::string mycall, std::vector<std::string> digipeaters)
+void populate_digis(struct full_sockaddr_ax25* sa, const std::vector<std::string>& digis)
+{
+    using s_t = decltype(digis.size());
+    sa->fsa_ax25.sax25_ndigis = std::min(digis.size(), s_t(AX25_MAX_DIGIS));
+    for (int i = 0; i < sa->fsa_ax25.sax25_ndigis; i++) {
+        if (-1 == ax25_aton_entry(digis[i].c_str(),
+                                  reinterpret_cast<char*>(&sa->fsa_digipeater[i]))) {
+            throw std::runtime_error("ax25_aton_entry(" + digis[i] +
+                                     "): " + strerror(errno));
+        }
+    }
+}
+
+SeqPacket::SeqPacket(std::string radio,
+                     std::string mycall,
+                     std::vector<std::string> digipeaters)
     : sock_(socket(AF_AX25, SOCK_SEQPACKET, 0)),
+      radio_(std::move(radio)),
       mycall_(std::move(mycall)),
       digipeaters_(std::move(digipeaters))
 {
@@ -216,18 +250,11 @@ SeqPacket::SeqPacket(std::string mycall, std::vector<std::string> digipeaters)
 
     struct full_sockaddr_ax25 me {
     };
+    me.fsa_ax25.sax25_family = AF_AX25;
     if (-1 == ax25_aton(mycall_.c_str(), &me)) {
         throw std::runtime_error("ax25_aton(" + mycall_ + "): " + strerror(errno));
     }
-    me.fsa_ax25.sax25_ndigis =
-        std::min(digipeaters_.size(), decltype(digipeaters_)::size_type(AX25_MAX_DIGIS));
-    for (int i = 0; i < me.fsa_ax25.sax25_ndigis; i++) {
-        if (-1 == ax25_aton_entry(digipeaters_[i].c_str(),
-                                  reinterpret_cast<char*>(&me.fsa_digipeater[i]))) {
-            throw std::runtime_error("ax25_aton_entry(" + digipeaters_[i] +
-                                     "): " + strerror(errno));
-        }
-    }
+    populate_digis(&me, { radio_ });
     if (-1 == bind(sock_, reinterpret_cast<struct sockaddr*>(&me), sizeof(me))) {
         throw std::runtime_error("bind to " + mycall_ + " failed: " + strerror(errno));
     }
@@ -236,15 +263,16 @@ SeqPacket::SeqPacket(std::string mycall, std::vector<std::string> digipeaters)
 int SeqPacket::connect(std::string addr)
 {
     peer_addr_ = std::move(addr);
-    struct sockaddr_ax25 peer {
+    struct full_sockaddr_ax25 peer {
     };
-    peer.sax25_family = AF_AX25;
-    peer.sax25_ndigis = 0; // TODO?
-    if (-1 ==
-        ax25_aton_entry(peer_addr_.c_str(), reinterpret_cast<char*>(&peer.sax25_call))) {
+    peer.fsa_ax25.sax25_family = AF_AX25;
+    if (-1 == ax25_aton_entry(peer_addr_.c_str(),
+                              reinterpret_cast<char*>(&peer.fsa_ax25.sax25_call))) {
         throw std::runtime_error("ax25_aton_entry(" + mycall_ + "): " + strerror(errno));
     }
-
+    peer.fsa_ax25.sax25_ndigis =
+        std::min(digipeaters_.size(), decltype(digipeaters_)::size_type(AX25_MAX_DIGIS));
+    populate_digis(&peer, digipeaters_);
     if (-1 == ::connect(sock_, reinterpret_cast<struct sockaddr*>(&peer), sizeof(peer))) {
         return errno;
     }
@@ -297,7 +325,8 @@ void SeqPacket::listen(std::function<void(std::unique_ptr<SeqPacket>)> cb)
         set_parms(fd);
         auto p = reinterpret_cast<const ax25_address*>(&peer.fsa_ax25.sax25_call);
         // Private constructor, thus can't use make_unique.
-        auto s = std::unique_ptr<SeqPacket>(new SeqPacket(mycall_, fd, ax25_ntoa(p)));
+        auto s =
+            std::unique_ptr<SeqPacket>(new SeqPacket(radio_, mycall_, fd, ax25_ntoa(p)));
         copy_parms(*s);
         cb(std::move(s));
     }

@@ -27,7 +27,6 @@ void init()
 
 } // namespace
 
-
 bool verify(const std::string& data, const std::array<char, 32>& pk)
 {
     init();

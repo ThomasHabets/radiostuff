@@ -155,7 +155,6 @@ void shellout(const std::string& cmd, SeqPacket* conn)
     }
 }
 
-
 void handle2(std::unique_ptr<SeqPacket> conn)
 {
     for (;;) {
@@ -186,7 +185,7 @@ void usage(const char* av0, int err)
     fprintf(f,
             "Usage: %s […options…] -s <src call>\n"
             "%s\nExample:\n"
-            "   %s -k my.priv -P peer.pub -s M0XXX-9 -p M0XXX-0\n",
+            "   %s -k my.priv -P peer.pub -s M0XXX-9\n",
             av0,
             common_usage().c_str(),
             av0);

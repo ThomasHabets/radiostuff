@@ -18,14 +18,14 @@ void usage(const char* av0, int err)
     if (err) {
         f = stderr;
     }
-    fprintf(
-        f,
-        "Usage: %s […options…] -r <radio> -s <src call> <dst>\n"
-        "%s\nExample:\n"
-        "   %s -k my.priv -P peer.pub -s M0XXX-9 -r radio -p M0ABC-3,M0XYZ-2 2E0XXX-9\n",
-        av0,
-        common_usage().c_str(),
-        av0);
+    fprintf(f,
+            "Usage: %s […options…] -r <radio> -s <src call> <dst>\n"
+            "%s\nExample:\n"
+            "   %s -k my.priv -P peer.pub -s M0XXX-9 -r radio -p M0ABC-3,M0XYZ-2 "
+            "2E0XXX\n",
+            av0,
+            common_usage().c_str(),
+            av0);
     exit(err);
 }
 } // namespace

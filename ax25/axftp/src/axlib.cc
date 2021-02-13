@@ -101,7 +101,6 @@ std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& copt)
     return sock;
 }
 
-
 unsigned int parse_uint(const std::string& s)
 {
     const char* p = s.data();
@@ -115,20 +114,36 @@ unsigned int parse_uint(const std::string& s)
 
 std::string common_usage()
 {
-    return "    --t1 <num>    Desc\n"
-           "    --t2 <num>    Desc\n"
-           "    --t3 <num>    Desc\n"
-           "    --n2 <num>    Desc\n"
-           "    --backoff=<num>    Desc\n"
-           "    -p, --path=<path>    Desc\n"
-           "    -r, --radio=<radio>    Desc\n"
-           "    -P, --peer_pub=<file>    Desc\n"
-           "    -k, --my_priv=<file>    Desc\n"
-           "    -l, --paclen=<num>    Desc\n"
-           "    -w, --window=<num>    Desc\n"
-           "    -s, --mycall=<num>    Desc\n"
-           "    --idle=<num>    Desc\n"
-           "    -e, --extseq    Desc\n";
+    return "    --t1=<num>             Seconds to wait before retransmitting an\n"
+           "                           unacknowledged frame.\n"
+           "    --t2=<num>             Minimum seconds to wait for another frame "
+           "to be\n"
+           "                           received before transmitting an "
+           "acknowledgement.\n"
+           "    --t3=<num>             Seconds to wait between sending a check "
+           "that the\n"
+           "                           link is still active.\n"
+           "    --n2=<num>             How many times to retransmit a frame "
+           "before assuming\n"
+           "                           the connection has failed.\n"
+           "    --backoff=<num>        Set 0 for linear backoff, 1 for "
+           "exponential backoff.\n"
+           "    --idle=<num>           The period of time a connection can be "
+           "idle before\n"
+           "                           we close it down.\n"
+           "    -p, --path=<path>      AX25 path to route through. Comma "
+           "separated.\n"
+           "    -r, --radio=<radio>    Radio port name per /etc/ax25/axports.\n"
+           "    -P, --peer_pub=<file>  Peer public key.\n"
+           "    -k, --my_priv=<file>   Local private key.\n"
+           "    -l, --paclen=<num>     Max packet length\n"
+           "    -w, --window=<num>     The maximum number of unacknowledged "
+           "transmitted\n"
+           "                           frames.\n"
+           "    -s, --mycall=<num>     Local callsign\n"
+           "    -e, --extseq           Enable extended sequence numbers. Needed "
+           "for large\n"
+           "                           windows.\n";
 }
 
 std::vector<struct option> common_long_opts()

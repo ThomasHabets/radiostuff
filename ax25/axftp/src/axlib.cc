@@ -280,6 +280,65 @@ void populate_digis(struct full_sockaddr_ax25* sa, const std::vector<std::string
     }
 }
 
+DGram::DGram(std::string radio, std::string mycall, std::vector<std::string> digipeaters)
+    : sock_(socket(AF_AX25, SOCK_DGRAM, 0)),
+      radio_(std::move(radio)),
+      mycall_(std::move(mycall)),
+      digipeaters_(std::move(digipeaters))
+{
+    if (sock_ == -1) {
+        throw std::runtime_error(std::string("socket(AF_AX25, SOCK_DGRAM, 0): ") +
+                                 strerror(errno));
+    }
+
+    struct full_sockaddr_ax25 me {
+    };
+    me.fsa_ax25.sax25_family = AF_AX25;
+    if (-1 == ax25_aton(mycall_.c_str(), &me)) {
+        throw std::runtime_error("ax25_aton(" + mycall_ + "): " + strerror(errno));
+    }
+    populate_digis(&me, { radio_ });
+    if (-1 == bind(sock_, reinterpret_cast<struct sockaddr*>(&me), sizeof(me))) {
+        throw std::runtime_error("bind to " + mycall_ + " failed: " + strerror(errno));
+    }
+}
+
+std::pair<std::string, std::string> DGram::recv()
+{
+    struct full_sockaddr_ax25 sa {
+    };
+    socklen_t salen = sizeof(sa);
+    std::array<char, 4196> buf;
+    const auto rc = recvfrom(sock_,
+                             buf.data(),
+                             buf.size(),
+                             0,
+                             reinterpret_cast<struct sockaddr*>(&sa),
+                             &salen);
+    if (rc == -1) {
+        throw std::runtime_error(std::string("recvfrom(): ") + strerror(errno));
+    }
+    return std::make_pair("TODO", std::string(buf.data(), buf.data() + rc));
+}
+
+void DGram::write(const std::string& peer, const std::string& msg)
+{
+    struct full_sockaddr_ax25 sa {
+    };
+    if (-1 == ax25_aton(peer.c_str(), &sa)) {
+        throw std::runtime_error("ax25_aton(" + peer + "): " + strerror(errno));
+    }
+    const auto rc = sendto(sock_,
+                           msg.data(),
+                           msg.size(),
+                           0,
+                           reinterpret_cast<struct sockaddr*>(&sa),
+                           sizeof(sa));
+    if (rc == -1) {
+        throw std::runtime_error(std::string("sendto(): ") + strerror(errno));
+    }
+}
+
 SeqPacket::SeqPacket(std::string radio,
                      std::string mycall,
                      std::vector<std::string> digipeaters)

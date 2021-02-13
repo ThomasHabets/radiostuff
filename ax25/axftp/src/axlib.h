@@ -28,6 +28,22 @@ private:
     int fd;
 };
 
+class DGram
+{
+public:
+    DGram(std::string radio,
+          std::string mycall,
+          std::vector<std::string> digipeaters = {});
+    std::pair<std::string, std::string> recv();
+    void write(const std::string& dst, const std::string& msg);
+
+protected:
+    Sock sock_;
+    const std::string radio_;
+    const std::string mycall_;
+    const std::vector<std::string> digipeaters_;
+};
+
 class SeqPacket
 {
 public:

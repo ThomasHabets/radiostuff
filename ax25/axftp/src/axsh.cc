@@ -33,38 +33,6 @@ void usage(const char* av0, int err)
 }
 } // namespace
 
-std::string
-xgetline(std::istream& stream, const size_t max, const bool discard_first = false)
-{
-    std::vector<char> buf(max + 1); // Since getline fails at count-1 bytes.
-    std::cin.getline(&buf[0], buf.size());
-
-    if (std::cin.eof()) {
-        return "";
-    }
-
-    // Failbit is set if count-1 bytes have been read.
-    if (std::cin.fail()) {
-        if (!discard_first) {
-            std::clog << "]]] Command too long. Discarding.\n";
-        }
-        std::cin.clear();
-        return xgetline(stream, max, true);
-    }
-
-    // Got complete line, but it could be a tail end of a too large line.
-    if (discard_first) {
-        return xgetline(stream, max);
-    }
-
-    const auto len = std::cin.gcount();
-    if (len == 0) {
-        return "";
-    }
-
-    return std::string(&buf[0], &buf[len - 1]);
-}
-
 int main(int argc, char** argv)
 {
     CommonOpts copt;

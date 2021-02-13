@@ -63,21 +63,32 @@ int main(int argc, char** argv)
         return 1;
     }
     std::clog << "Connected!\n";
-    const auto total = atoi(sock->read().c_str());
-    std::clog << "Total size: " << total << std::endl;
-    int rcvd = 0;
     for (;;) {
-        const auto s = sock->read();
-        std::clog << "Got data of size " << s.size() << std::endl;
-        if (s.empty()) {
-            break;
+        const auto cmd = axlib::xgetline(std::cin, 1000);
+        std::clog << "Sending command <" << cmd << ">\n";
+        sock->write(cmd + "\n");
+
+        const auto resp = sock->read();
+        char* end = nullptr;
+        const auto total = strtoul(resp.data(), &end, 0);
+        if (*end != 0) {
+            std::cerr << "> " << resp << std::endl;
+            continue;
         }
-        rcvd += s.size();
-        std::cout << s << std::flush;
-        if (total == rcvd) {
-            break;
+
+        std::clog << "Total size: " << total << std::endl;
+        int rcvd = 0;
+        for (;;) {
+            const auto s = sock->read();
+            if (s.empty()) {
+                break;
+            }
+            rcvd += s.size();
+            std::cout << s << std::flush;
+            if (total == rcvd) {
+                break;
+            }
         }
     }
-    sock->write("OK");
     return 0;
 }

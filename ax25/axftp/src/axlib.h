@@ -155,6 +155,8 @@ extern template std::array<char, 32> load_key<32>(const std::string& fn);
 extern template std::array<char, 64> load_key<64>(const std::string& fn);
 
 unsigned int parse_uint(const std::string& s);
+std::string
+xgetline(std::istream& stream, const size_t max, const bool discard_first = false);
 
 namespace crypto {
 bool verify(const std::string& data, const std::array<char, 32>& pk);

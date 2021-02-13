@@ -328,6 +328,7 @@ void DGram::write(const std::string& peer, const std::string& msg)
     if (-1 == ax25_aton(peer.c_str(), &sa)) {
         throw std::runtime_error("ax25_aton(" + peer + "): " + strerror(errno));
     }
+    populate_digis(&sa, digipeaters_);
     const auto rc = sendto(sock_,
                            msg.data(),
                            msg.size(),

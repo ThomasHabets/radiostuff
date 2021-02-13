@@ -1,28 +1,61 @@
 #include "axlib.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include <functional>
 #include <iostream>
+#include <regex>
 #include <stdexcept>
 #include <string>
 #include <thread>
+
+#include <dirent.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 using namespace axlib;
 
 namespace {
 
-void handle2(std::unique_ptr<SeqPacket> conn)
+constexpr int max_buf_size = 1000;
+
+void handle_get(SeqPacket* conn, const std::vector<std::string>& args)
 {
-    FILE* f = fopen("test.txt", "r");
-    if (f == nullptr) {
-        throw std::runtime_error(std::string("opening test.txt: ") + strerror(errno));
+    if (args.size() != 2) {
+        conn->write("ERR 'get' command takes exactly one arg");
+        return;
     }
-    fseek(f, 0, SEEK_END);
+
+    const auto fn = args[1];
+    const std::regex fnRE("^[^/]+$");
+    if (!std::regex_match(fn, fnRE)) {
+        conn->write("ERR invalid filename: " + fn);
+        return;
+    }
+
+    FILE* f = fopen(fn.c_str(), "r");
+    // TODO: leaks filehandle if there's an exception.
+    if (f == nullptr) {
+        conn->write("ERR failed to open " + fn + ": " + strerror(errno));
+        return;
+    }
+    if (fseek(f, 0, SEEK_END)) {
+        fclose(f);
+        conn->write("ERR failed to seek to end in " + fn + ": " + strerror(errno));
+        return;
+    }
     const auto size = ftell(f);
-    fseek(f, 0, SEEK_SET);
+    if (size == -1) {
+        fclose(f);
+        conn->write("ERR failed to ftell() at end in " + fn + ": " + strerror(errno));
+        return;
+    }
+    if (fseek(f, 0, SEEK_SET)) {
+        fclose(f);
+        conn->write("ERR failed to seek to start in " + fn + ": " + strerror(errno));
+        return;
+    }
     conn->write(std::to_string(size));
     const auto len = conn->max_packet_size();
     std::clog << "Handling connection with packet length " << len << std::endl;
@@ -33,13 +66,67 @@ void handle2(std::unique_ptr<SeqPacket> conn)
             break;
         }
         if (n == -1) {
+            fclose(f);
             throw std::runtime_error(std::string("reading stdin: ") + strerror(errno));
         }
         std::clog << "Sending packet of size " << n << std::endl;
         conn->write(std::string(&buf[0], &buf[n]));
     }
-    std::clog << "reply: " << conn->read() << std::endl;
-    ;
+    fclose(f);
+}
+
+void handle_list(SeqPacket* conn, const std::vector<std::string>& args)
+{
+    std::string buf;
+    auto dir = opendir(".");
+    if (dir == nullptr) {
+        throw std::runtime_error(std::string("opendir(.): ") + strerror(errno));
+    }
+    while (auto f = readdir(dir)) {
+        if (f->d_name[0] == '.') {
+            continue;
+        }
+        switch (f->d_type) {
+        case DT_DIR:
+            buf += f->d_name + std::string("/\n");
+            break;
+        case DT_REG:
+            buf += f->d_name + std::string("\n");
+            break;
+        }
+    }
+    closedir(dir);
+    conn->write(std::to_string(buf.size()));
+    conn->write_chunked(buf);
+}
+
+void handle2(std::unique_ptr<SeqPacket> conn)
+{
+    std::string buf;
+    for (;;) {
+        // Get line.
+        if (buf.size() > max_buf_size) {
+            throw std::runtime_error("client sent too much data");
+        }
+        buf += conn->read();
+        const auto nl = buf.find('\n');
+        if (nl == std::string::npos) {
+            continue;
+        }
+        const auto line = buf.substr(0, nl);
+        buf = buf.substr(nl + 1);
+
+        // Parse command.
+        const auto args = axlib::split(line, ' ');
+
+        if (args[0] == "list") {
+            handle_list(conn.get(), args);
+        } else if (args[0] == "get") {
+            handle_get(conn.get(), args);
+        } else {
+            conn->write("ERR invalid command <" + args[0] + ">");
+        }
+    }
     std::clog << "closing connection\n";
 }
 

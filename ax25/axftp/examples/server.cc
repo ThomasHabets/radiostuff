@@ -11,7 +11,7 @@ int main(int argc, char** argv)
     const std::string mycall = argv[2];
     const std::string path = argv[3];
 
-    axlib::SeqPacket sock(radio, mycall, axlib::split(path));
+    axlib::SeqPacket sock(radio, mycall, axlib::split(path, ','));
 
     std::cerr << "Listening...\n";
     sock.listen([](auto conn) {

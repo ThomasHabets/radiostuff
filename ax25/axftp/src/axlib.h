@@ -41,7 +41,13 @@ public:
 
     virtual void listen(std::function<void(std::unique_ptr<SeqPacket>)> cb);
     virtual int connect(std::string addr);
+
+    // Write exactly an AX25 frame.
     virtual void write(const std::string& msg);
+
+    // Split the message into max sized frames and call write().
+    void write_chunked(const std::string& msg);
+
     virtual std::string read();
     std::string peer_addr() const { return peer_addr_; }
     unsigned int window_size() const;
@@ -143,7 +149,7 @@ private:
 };
 
 std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& opt);
-std::vector<std::string> split(std::string s);
+std::vector<std::string> split(std::string s, char splitchar);
 std::string common_usage();
 std::vector<struct option> common_long_opts();
 bool common_opt(CommonOpts& o, int opt);

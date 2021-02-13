@@ -17,7 +17,7 @@ int main(int argc, char** argv)
                                 mycall,
                                 axlib::load_key<64>(priv),
                                 axlib::load_key<32>(pub),
-                                axlib::split(path));
+                                axlib::split(path, ','));
 
     std::cerr << "Listening...\n";
     sock.listen([](auto conn) {

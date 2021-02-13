@@ -223,7 +223,7 @@ bool common_opt(CommonOpts& o, int opt)
         o.extended_modulus = true;
         break;
     case 'p':
-        o.path = split(optarg);
+        o.path = split(optarg, ',');
         break;
     case 'r': {
         const auto t = ax25_config_get_addr(optarg);
@@ -256,12 +256,12 @@ bool common_opt(CommonOpts& o, int opt)
     return true;
 }
 
-std::vector<std::string> split(std::string s)
+std::vector<std::string> split(std::string s, char splitchar)
 {
     std::stringstream ss{ s };
     std::string word;
     std::vector<std::string> ret;
-    while (std::getline(ss, word, ',')) {
+    while (std::getline(ss, word, splitchar)) {
         ret.push_back(word);
     }
     return ret;
@@ -334,6 +334,18 @@ void SeqPacket::write(const std::string& msg)
     } while (rc == -1 && errno == EINTR);
     if (rc != msg.size()) {
         throw std::runtime_error(std::string("write(): ") + strerror(errno));
+    }
+}
+
+void SeqPacket::write_chunked(const std::string& msg)
+{
+    const auto len = max_packet_size();
+    const auto size = msg.size();
+    const auto data = msg.data();
+    for (size_t pos = 0; pos < size; pos += len) {
+        const auto from = data + pos;
+        const auto to = std::min(from + len, data + size);
+        write(std::string(from, to));
     }
 }
 

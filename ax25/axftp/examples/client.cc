@@ -12,7 +12,7 @@ int main(int argc, char** argv)
     const std::string mycall = argv[2];
     const std::string path = argv[3];
     const std::string dest = argv[4];
-    axlib::SeqPacket sock(radio, mycall, axlib::split(path));
+    axlib::SeqPacket sock(radio, mycall, axlib::split(path, ','));
 
     sock.connect(dest);
     sock.write("hello world");

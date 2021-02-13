@@ -20,13 +20,13 @@ See full demo [on youtube](https://www.youtube.com/watch?v=HRH6RpRlzZQ).
 ### Start server, currently only serving 'test.txt'
 
 ```
-./axftpd -r <radio1> -s <mycall> -p <main call listed in /etc/ax25/axports>
+./axshd -r <radio1> -s <mycall>
 ```
 
 ### Run client
 
 ```
-./axftp -r <radio1> -s <mycall> -p <main call> <remote call, first arg to axftpd>
+./axsh -r <radio1> -s <mycall> <remote call, -s arg to axftpd>
 ```
 
 ## Enabling authentication

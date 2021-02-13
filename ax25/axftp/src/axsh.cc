@@ -52,7 +52,7 @@ int main(int argc, char** argv)
         }
     }
 
-    if (optind >= argc) {
+    if (optind + 1 != argc) {
         fprintf(stderr, "Need dest\n");
         exit(EXIT_FAILURE);
     }

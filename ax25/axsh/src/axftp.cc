@@ -65,6 +65,10 @@ int main(int argc, char** argv)
     std::clog << "Connected!\n";
     for (;;) {
         const auto cmd = axlib::xgetline(std::cin, 1000);
+        if (cmd == "") {
+            // EOF.
+            break;
+        }
         std::clog << "Sending command <" << cmd << ">\n";
         sock->write(cmd + "\n");
 

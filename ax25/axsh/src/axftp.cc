@@ -88,6 +88,8 @@ int main(int argc, char** argv)
                 break;
             }
             rcvd += s.size();
+            // TODO: progress bar.
+            std::cerr << "Got " << s.size() << " total: " << rcvd << std::endl;
             std::cout << s << std::flush;
             if (total == rcvd) {
                 break;

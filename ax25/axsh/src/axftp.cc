@@ -12,7 +12,7 @@
 using namespace axlib;
 
 namespace {
-void usage(const char* av0, int err)
+[[noreturn]] void usage(const char* av0, int err)
 {
     FILE* f = stdout;
     if (err) {
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
         }
 
         std::clog << "Total size: " << total << std::endl;
-        int rcvd = 0;
+        auto rcvd = decltype(total){ 0 };
         for (;;) {
             const auto s = sock->read();
             if (s.empty()) {

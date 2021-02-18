@@ -8,7 +8,7 @@
 #include <getopt.h>
 #include <unistd.h>
 
-void usage(const char* av0, int e)
+[[noreturn]] void usage(const char* av0, int e)
 {
     std::cerr << "Usage: " << av0 << "[options] <keybase>\n";
     exit(e);

@@ -15,7 +15,7 @@
 using namespace axlib;
 
 namespace {
-void usage(const char* av0, int err)
+[[noreturn]] void usage(const char* av0, int err)
 {
     FILE* f = stdout;
     if (err) {

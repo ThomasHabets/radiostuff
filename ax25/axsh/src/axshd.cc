@@ -136,7 +136,7 @@ void shellout(const std::string& cmd, SeqPacket* conn)
             break;
         }
         const int step = conn->max_packet_size();
-        for (int pos = 0; pos < out.size(); pos += step) {
+        for (size_t pos = 0; pos < out.size(); pos += step) {
             conn->write(out.substr(pos, step));
         }
     }
@@ -176,7 +176,7 @@ void handle(std::unique_ptr<SeqPacket> conn)
     }
 }
 
-void usage(const char* av0, int err)
+[[noreturn]] void usage(const char* av0, int err)
 {
     FILE* f = stdout;
     if (err) {

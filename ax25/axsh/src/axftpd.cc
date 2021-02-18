@@ -41,19 +41,22 @@ void handle_get(SeqPacket* conn, const std::vector<std::string>& args)
         return;
     }
     if (fseek(f, 0, SEEK_END)) {
+        const auto err = errno;
         fclose(f);
-        conn->write("ERR failed to seek to end in " + fn + ": " + strerror(errno));
+        conn->write("ERR failed to seek to end in " + fn + ": " + strerror(err));
         return;
     }
     const auto size = ftell(f);
     if (size == -1) {
+        const auto err = errno;
         fclose(f);
-        conn->write("ERR failed to ftell() at end in " + fn + ": " + strerror(errno));
+        conn->write("ERR failed to ftell() at end in " + fn + ": " + strerror(err));
         return;
     }
     if (fseek(f, 0, SEEK_SET)) {
+        const auto err = errno;
         fclose(f);
-        conn->write("ERR failed to seek to start in " + fn + ": " + strerror(errno));
+        conn->write("ERR failed to seek to start in " + fn + ": " + strerror(err));
         return;
     }
     conn->write(std::to_string(size));
@@ -63,11 +66,14 @@ void handle_get(SeqPacket* conn, const std::vector<std::string>& args)
         std::vector<char> buf(len);
         const auto n = fread(&buf[0], 1, buf.size(), f);
         if (n == 0) {
-            break;
-        }
-        if (n == -1) {
-            fclose(f);
-            throw std::runtime_error(std::string("reading stdin: ") + strerror(errno));
+            if (feof(f)) {
+                break;
+            }
+            if (ferror(f)) {
+                const auto err = errno;
+                fclose(f);
+                throw std::runtime_error(std::string("reading stdin: ") + strerror(err));
+            }
         }
         std::clog << "Sending packet of size " << n << std::endl;
         conn->write(std::string(&buf[0], &buf[n]));
@@ -75,7 +81,7 @@ void handle_get(SeqPacket* conn, const std::vector<std::string>& args)
     fclose(f);
 }
 
-void handle_list(SeqPacket* conn, const std::vector<std::string>& args)
+void handle_list(SeqPacket* conn, [[maybe_unused]] const std::vector<std::string>& args)
 {
     std::string buf;
     auto dir = opendir(".");
@@ -139,7 +145,7 @@ void handle(std::unique_ptr<SeqPacket> conn)
     }
 }
 
-void usage(const char* av0, int err)
+[[noreturn]] void usage(const char* av0, int err)
 {
     FILE* f = stdout;
     if (err) {

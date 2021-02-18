@@ -72,7 +72,8 @@ void common_init()
 {
     const auto ports = ax25_config_load_ports();
     if (!ports) {
-        throw std::runtime_error("Failed to init ax25 library: zero ports available");
+        std::cerr << "Warning: zero AX25 ports available. This tool will likely not be "
+                     "able to run.\n";
     }
 }
 
@@ -392,7 +393,7 @@ void SeqPacket::write(const std::string& msg)
     do {
         rc = ::write(sock_, msg.data(), msg.size());
     } while (rc == -1 && errno == EINTR);
-    if (rc != msg.size()) {
+    if (static_cast<size_t>(rc) != msg.size()) {
         throw std::runtime_error(std::string("write(): ") + strerror(errno));
     }
 }
@@ -595,7 +596,7 @@ void SignedSeqPacket::exchange_nonce()
     if (rc == -1) {
         throw std::runtime_error(std::string("getrandom(): ") + strerror(errno));
     }
-    if (rc != n.size()) {
+    if (static_cast<size_t>(rc) != n.size()) {
         throw std::runtime_error("too few random bytes(): " + std::to_string(rc) + "<" +
                                  std::to_string(n.size()));
     }

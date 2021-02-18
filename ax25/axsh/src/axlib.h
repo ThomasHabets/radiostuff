@@ -154,8 +154,8 @@ private:
     static constexpr int sig_size_ = 64;
     static constexpr int nonce_size_ = 12;
     std::string sign(const std::string&) const;
-    std::array<char, 32> peer_pub_;
     std::array<char, 64> my_priv_;
+    std::array<char, 32> peer_pub_;
     std::string nonce_local_;
     std::string nonce_peer_;
     uint64_t packets_sent_{};

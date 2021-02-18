@@ -8,7 +8,7 @@
 
 using namespace axlib;
 
-void usage(const char* av0, int err)
+[[noreturn]] void usage(const char* av0, int err)
 {
     fprintf(stderr, "%s: Usage\n", av0);
     exit(err);

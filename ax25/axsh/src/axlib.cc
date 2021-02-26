@@ -353,6 +353,10 @@ SeqPacket::SeqPacket(std::string radio,
         throw std::runtime_error(std::string("socket(AF_AX25, SOCK_SEQPACKET, 0): ") +
                                  strerror(errno));
     }
+    if (mycall_.empty()) {
+        throw std::runtime_error("empty MYCALL provided to SeqPacket");
+    }
+
     set_parms(sock_);
 
     struct full_sockaddr_ax25 me {

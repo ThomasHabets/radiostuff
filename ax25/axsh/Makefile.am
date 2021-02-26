@@ -9,13 +9,13 @@ examples/client_lockcheck \
 examples/client_sign examples/server_sign
 
 # Main binaries
-axkeys_SOURCES=src/axkeys.cc src/axlib.cc src/crypto.cc
-axping_SOURCES=src/axping.cc src/axlib.cc src/crypto.cc
-axpingd_SOURCES=src/axpingd.cc src/axlib.cc src/crypto.cc
-axftp_SOURCES=src/axftp.cc src/axlib.cc src/crypto.cc
-axftpd_SOURCES=src/axftpd.cc src/axlib.cc src/crypto.cc
-axsh_SOURCES=src/axsh.cc src/axlib.cc src/crypto.cc
-axshd_SOURCES=src/axshd.cc src/axlib.cc src/crypto.cc
+axkeys_SOURCES=src/main.cc src/axkeys.cc src/axlib.cc src/crypto.cc
+axping_SOURCES=src/main.cc src/axping.cc src/axlib.cc src/crypto.cc
+axpingd_SOURCES=src/main.cc src/axpingd.cc src/axlib.cc src/crypto.cc
+axftp_SOURCES=src/main.cc src/axftp.cc src/axlib.cc src/crypto.cc
+axftpd_SOURCES=src/main.cc src/axftpd.cc src/axlib.cc src/crypto.cc
+axsh_SOURCES=src/main.cc src/axsh.cc src/axlib.cc src/crypto.cc
+axshd_SOURCES=src/main.cc src/axshd.cc src/axlib.cc src/crypto.cc
 
 # Examples
 examples_client_SOURCES=examples/client.cc src/axlib.cc src/crypto.cc

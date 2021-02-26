@@ -14,7 +14,7 @@ using namespace axlib;
     exit(err);
 }
 
-int main(int argc, char** argv)
+int wrapmain(int argc, char** argv)
 {
     CommonOpts copt;
     int opt;

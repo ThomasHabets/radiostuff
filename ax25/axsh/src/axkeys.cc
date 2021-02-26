@@ -13,7 +13,7 @@
     std::cerr << "Usage: " << av0 << "[options] <keybase>\n";
     exit(e);
 }
-int main(int argc, char** argv)
+int wrapmain(int argc, char** argv)
 {
     std::vector<struct ::option> lopts{};
     int opt;

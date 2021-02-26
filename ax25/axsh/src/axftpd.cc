@@ -163,7 +163,7 @@ void handle(std::unique_ptr<SeqPacket> conn)
 
 } // namespace
 
-int main(int argc, char** argv)
+int wrapmain(int argc, char** argv)
 {
     CommonOpts copt;
     int opt;

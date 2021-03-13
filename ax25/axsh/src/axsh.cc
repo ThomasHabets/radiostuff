@@ -1,3 +1,4 @@
+#include <condition_variable>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -71,14 +72,13 @@ int wrapmain(int argc, char** argv)
     std::mutex m;
     std::string cmd;
     bool time_to_die = false;
+    std::condition_variable input_cv;
     std::thread reader([&] {
         for (;;) {
-            usleep(100000); // Prevent CPU busyloop waiting for command to be sent.
+            // Wait for last command to finish.
             {
                 std::unique_lock<std::mutex> l(m);
-                if (!cmd.empty()) {
-                    continue;
-                }
+                input_cv.wait(l, [&cmd] { return cmd.empty(); });
             }
 
             const auto line = xgetline(std::cin, sock->max_packet_size());
@@ -138,6 +138,7 @@ int wrapmain(int argc, char** argv)
                 std::clog << "]]] Sending command <" << cmd << ">" << std::endl;
                 sock->write(cmd);
                 cmd = "";
+                input_cv.notify_one();
             }
         }
     }

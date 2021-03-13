@@ -152,9 +152,9 @@ void handle(std::unique_ptr<SeqPacket> conn)
         f = stderr;
     }
     fprintf(f,
-            "Usage: %s […options…] -s <src call>\n"
+            "Usage: %s […options…] -r <radio> -s <src call>\n"
             "%s\nExample:\n"
-            "   %s -k my.priv -P peer.pub -s M0XXX-9 -p M0XXX-0\n",
+            "   %s -r radio6 -k my.priv -P peer.pub -s M0XXX-9 -p M0XXX-0\n",
             av0,
             common_usage().c_str(),
             av0);

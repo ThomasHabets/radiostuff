@@ -141,7 +141,6 @@ void shellout(const std::string& cmd, SeqPacket* conn)
         }
     }
     th.join();
-    // TODO: waitpid and check return code.
     int status;
     if (-1 == waitpid(pid, &status, 0)) {
         throw std::runtime_error(std::string("waitpid(): ") + strerror(errno));

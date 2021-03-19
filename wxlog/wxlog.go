@@ -38,7 +38,13 @@ type JSONLog struct {
 	DeltaFrequency uint32
 	Message        string
 	LowConfidence  bool
+	ConfigName     string
+	TxMessage      string
 	Comment        string
+
+	Callsign string
+	Power    int32
+	Grid     string
 }
 
 var locatorRE = regexp.MustCompile(`^[A-Z]{2}[0-9]{2}$`)

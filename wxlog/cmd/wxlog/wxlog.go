@@ -1,3 +1,4 @@
+// wxlog is a server that listens to wsjtx report UDP packets and logs to JSON.
 package main
 
 import (
@@ -46,22 +47,34 @@ type Packet struct {
 
 	// Status
 	// ID string
-	Dial         uint64
-	Mode         string
-	DXCall       string
-	Report       string
-	TXMode       string
-	TXEnabled    bool
-	Transmitting bool
-	Decoding     bool
-	RXDF         int32
-	TXDF         int32
-	DECall       string
-	DEGrid       string
-	DXGrid       string
-	TXWatchdog   bool
-	SubMode      string
-	FastMode     bool
+	Dial               uint64
+	Mode               string
+	DXCall             string
+	Report             string
+	TXMode             string
+	TXEnabled          bool
+	Transmitting       bool
+	Decoding           bool
+	RXDF               int32
+	TXDF               int32
+	DECall             string
+	DEGrid             string
+	DXGrid             string
+	TXWatchdog         bool
+	SubMode            string
+	FastMode           bool
+	SpecialOpMode      int8
+	FrequencyTolerance int32
+	TRPeriod           int32
+	ConfigName         string
+	TxMessage          string
+
+	// WSPR extra
+	Frequency uint64
+	Callsign  string
+	Power     int32
+	Drift     int32
+	Grid      string
 }
 
 func readString(r io.Reader) (string, error) {
@@ -167,6 +180,73 @@ func readStatusPacket(buf *bytes.Buffer, pp *Packet) error {
 	if err != nil {
 		return err
 	}
+
+	if err := binary.Read(buf, binary.BigEndian, &pp.SpecialOpMode); err != nil {
+		return nil
+	}
+	if err := binary.Read(buf, binary.BigEndian, &pp.FrequencyTolerance); err != nil {
+		return nil
+	}
+	if err := binary.Read(buf, binary.BigEndian, &pp.TRPeriod); err != nil {
+		return nil
+	}
+	pp.ConfigName, err = readString(buf)
+	if err != nil {
+		return nil
+	}
+	pp.TxMessage, err = readString(buf)
+	if err != nil {
+		return nil
+	}
+	return nil
+}
+
+func readWSPRDecodePacket(buf *bytes.Buffer, pp *Packet) error {
+	var err error
+	pp.ID, err = readString(buf)
+	if err != nil {
+		return err
+	}
+	pp.New, err = readBool(buf)
+	if err != nil {
+		return err
+	}
+	pp.Time, err = readTime(buf)
+	if err != nil {
+		return err
+	}
+
+	if err := binary.Read(buf, binary.BigEndian, &pp.SNR); err != nil {
+		return err
+	}
+
+	if err := binary.Read(buf, binary.BigEndian, &pp.Delta); err != nil {
+		return err
+	}
+
+	if err := binary.Read(buf, binary.BigEndian, &pp.Frequency); err != nil {
+		return err
+	}
+
+	if err := binary.Read(buf, binary.BigEndian, &pp.Drift); err != nil {
+		return err
+	}
+
+	pp.Callsign, err = readString(buf)
+	if err != nil {
+		return err
+	}
+	pp.Grid, err = readString(buf)
+	if err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.BigEndian, &pp.Power); err != nil {
+		return err
+	}
+	pp.OffAir, err = readBool(buf)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -254,12 +334,19 @@ func decodePacket(p []byte) (*Packet, error) {
 		if buf.Len() > 0 {
 			log.Errorf("Bytes left in Status packet: %v", buf.Bytes())
 		}
+	case wxlog.PacketTypeWSPRDecode:
+		if err := readWSPRDecodePacket(buf, &pp); err != nil {
+			return nil, err
+		}
+		if buf.Len() > 0 {
+			log.Errorf("Bytes left in WSPR Decode packet: %v", buf.Bytes())
+		}
 	}
 
 	return &pp, nil
 }
 
-func makeJSON(remote *net.UDPAddr, deGrid string, freq uint64, mode string, pp *Packet) *wxlog.JSONLog {
+func makeJSON(remote *net.UDPAddr, deGrid string, freq uint64, mode, configName, txMessage string, pp *Packet) *wxlog.JSONLog {
 	return &wxlog.JSONLog{
 		Addr:           *remote,
 		DEGrid:         deGrid,
@@ -273,6 +360,11 @@ func makeJSON(remote *net.UDPAddr, deGrid string, freq uint64, mode string, pp *
 		Message:        pp.Message,
 		LowConfidence:  pp.LowConfidence,
 		Comment:        *comment,
+		ConfigName:     configName,
+		TxMessage:      txMessage,
+		Callsign:       pp.Callsign,
+		Power:          pp.Power,
+		Grid:           pp.Grid,
 	}
 }
 
@@ -300,6 +392,8 @@ func main() {
 	}
 	fmt.Printf("%20s %10s %6s %4s %4s %4s %s\n", "Time", "Dial", "Mode", "SNR", "DT", "Freq", "Message")
 	mode := "???"
+	configName := "???"
+	txMessage := "???"
 	deGrid := "???"
 	var freq uint64
 	for {
@@ -324,11 +418,26 @@ func main() {
 			mode = pp.Mode
 			freq = pp.Dial
 			deGrid = pp.DEGrid
+			configName = pp.ConfigName
+			txMessage = pp.TxMessage
 		case wxlog.PacketTypeDecode:
 			fmt.Printf("%v %10d %6s %4d %4.1f %4d %s\n", pp.Time.UTC().Format("2006-01-02 15:04:05Z"), freq, mode, pp.SNR, pp.Delta, pp.DeltaFrequency, pp.Message)
-			if err := fos.Encode(makeJSON(remote, deGrid, freq, mode, pp)); err != nil {
+			if err := fos.Encode(makeJSON(remote, deGrid, freq, mode, configName, txMessage, pp)); err != nil {
 				log.Fatalf("Failed to log to JSON: %v", err)
 			}
+		case wxlog.PacketTypeHeartbeat:
+			// TODO: log and reply heartbeat.
+			// On first heartbeat, sand back "replay", and handle-non-new.
+		case wxlog.PacketTypeClose:
+			// TODO: log
+		case wxlog.PacketTypeWSPRDecode:
+			log.Debugf("WSPR: %+v", pp)
+			fmt.Printf("%v %10d %6s %4d %4.1f %4s %s\n", pp.Time.UTC().Format("2006-01-02 15:04:05Z"), pp.Frequency, "WSPR", pp.SNR, pp.Delta, "", pp.Callsign)
+			if err := fos.Encode(makeJSON(remote, pp.Grid, pp.Frequency, "WSPR", configName, "", pp)); err != nil {
+				log.Fatalf("Failed to log to JSON: %v", err)
+			}
+		default:
+			log.Infof("Unknown packet format %v", pp.Type)
 		}
 	}
 	if err := fo.Close(); err != nil {

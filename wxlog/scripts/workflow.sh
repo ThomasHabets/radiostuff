@@ -10,7 +10,7 @@ fi
 
 echo "Creating CSV…"
 jq -r \
-   '[.Frequency,(.Time|strptime("%Y-%m-%dT%H:%M:%S+01:00")|mktime)] | @csv' \
+   '[.Frequency,(.Time|strptime("%Y-%m-%dT%H:%M:%S%z")|mktime)] | @csv' \
    wxlog.json \
     | awk -F, '{print $1 " " $2%86400}' \
     | uniq -c \

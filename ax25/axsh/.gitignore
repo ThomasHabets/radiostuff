@@ -24,3 +24,5 @@ examples/server_sign
 install-sh
 missing
 stamp-h1
+*.pub
+*.priv

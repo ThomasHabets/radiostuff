@@ -1,14 +1,7 @@
 #!/bin/bash
 set -e
 
-REMOTE_FILE="$1"
-
-if [[ ! "$REMOTE_FILE" = "" ]]; then
-    echo "Transferring…"
-    rsync -zvP "$REMOTE_FILE" wxlog.json
-fi
-
-echo "Creating CSV…"
+echo "Creating day CSV…"
 jq -r \
    '[.Frequency,(.Time|strptime("%Y-%m-%dT%H:%M:%S%z")|mktime)] | @csv' \
    wxlog.json \
@@ -21,5 +14,5 @@ echo "Creating day data…"
 ./toavg.py 7074000 < daydata.txt > day40.data &
 ./toavg.py 14074000 < daydata.txt > day20.data
 wait
-echo "Plotting…"
+echo "Plotting day…"
 exec ./day.plot

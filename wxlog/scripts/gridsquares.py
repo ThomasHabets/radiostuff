@@ -43,7 +43,7 @@ def main():
     blockw,blockh = max(w//maxxy, 1), max(h//maxxy, 1)
     img = [[0 for _ in range(w*channels)] for _ in range(h)]
     for maiden, (lo,la) in generate_maidenheads():
-        if counts.get(maiden, 0):
+        if counts.get(maiden, 0) > 1:
             sx = (lo*w)//maxxy
             sy = (la*h)//maxxy
             print(maiden, sx,sy)

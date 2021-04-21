@@ -47,7 +47,6 @@ def main():
         if counts.get(maiden, 0) > 1:
             sx = (lo*w)//maxxy
             sy = (la*h)//maxxy
-            print(maiden, sx,sy)
             for x in range(blockw+1):
                 for y in range(blockh+1):
                     a = h - (sy + y)

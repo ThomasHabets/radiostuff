@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# jq -r '[.Message] | @csv' wxlog.json  | sed 's/"//g' | python3 gridsquares.py
 # composite -blend 50 foo.png Maidenhead_Locator_Map.png blah.png
 import re
 import sys

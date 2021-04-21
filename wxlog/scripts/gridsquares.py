@@ -30,7 +30,7 @@ def generate_maidenheads():
                     yield grid, grid_coord(grid)
 
 def main():
-    call = '[\w]+'
+    call = '[a-zA-Z0-9]{1,3}[0123456789][a-zA-Z0-9]{0,3}[a-zA-Z]'
     grid = '[A-R][A-R]\d{2}'
     for line in sys.stdin:
         m = re.findall(f'^CQ {call} ({grid})', line)

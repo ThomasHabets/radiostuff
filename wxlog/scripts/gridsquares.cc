@@ -487,10 +487,9 @@ int main(int argc, char** argv)
     int last_ts = 0;
     int frame = 0;
     std::vector<std::jthread> threads;
-    // AtomicSemaphore sem(20);
-    Semaphore sem(12);
+    Semaphore sem(get_nprocs());
     setaffinity(0);
-    ThreadPool pool(12);
+    ThreadPool pool(get_nprocs());
     setprio(true);
     for (const auto& line : Lines(data)) {
         // std::cout << line << "\n";

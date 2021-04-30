@@ -42,7 +42,6 @@
 
 constexpr auto min_maiden_signals = 2;
 constexpr auto jpeg_quality = 50;
-constexpr bool use_pool = true;
 using floating = float;
 
 void setaffinity(int i)
@@ -124,69 +123,6 @@ private:
     const int workers_;
 };
 
-
-// Awaiting c++22 semaphore
-class AtomicSemaphore
-{
-public:
-    AtomicSemaphore(int max) : max_(max) {}
-    // no copy or delete.
-    AtomicSemaphore(const AtomicSemaphore&) = delete;
-    AtomicSemaphore(AtomicSemaphore&&) = delete;
-    AtomicSemaphore& operator=(const AtomicSemaphore&) = delete;
-    AtomicSemaphore& operator=(AtomicSemaphore&&) = delete;
-
-    void acquire()
-    {
-        for (;;) {
-            const auto v = cur_.fetch_add(1, std::memory_order_acquire);
-            if (v < max_) {
-                return;
-            }
-            cur_.fetch_sub(1, std::memory_order_relaxed);
-            // usleep(10);
-            // C++20: cur_.wait(v);
-        }
-    }
-    void release() { cur_.fetch_sub(1, std::memory_order_relaxed); }
-    int max() const noexcept { return max_; }
-
-private:
-    std::atomic<int> cur_ = 0;
-    const int max_;
-};
-
-// Awaiting c++22 semaphore
-class Semaphore
-{
-public:
-    Semaphore(int max) : max_(max) {}
-    // no copy or delete.
-    Semaphore(const Semaphore&) = delete;
-    Semaphore(Semaphore&&) = delete;
-    Semaphore& operator=(const Semaphore&) = delete;
-    Semaphore& operator=(Semaphore&&) = delete;
-
-    void acquire()
-    {
-        std::unique_lock<std::mutex> lk(mu_);
-        cv_.wait(lk, [this] { return cur_ < max_; });
-        cur_++;
-    }
-    void release()
-    {
-        std::unique_lock<std::mutex> l(mu_);
-        cur_--;
-        cv_.notify_one();
-    }
-    [[nodiscard]] int max() const { return max_; }
-
-private:
-    std::mutex mu_;
-    std::condition_variable cv_;
-    int cur_ = 0;
-    const int max_;
-};
 
 [[nodiscard]] std::string_view map_data()
 {
@@ -357,7 +293,6 @@ using color_t = std::array<unsigned char, 3>;
     return ret;
 }
 
-
 void create_frame(int frame,
                   std::vector<floating>&& snr_sums,
                   std::vector<int> count,
@@ -429,7 +364,7 @@ void create_frame(int frame,
         char buf[1024];
         snprintf(buf, sizeof buf, "data/blah-v2-%06d.png", frame);
         image.write(buf);
-    } else if constexpr (false) { // JPG
+    } else if constexpr (true) { // JPG
         struct jpeg_compress_struct cinfo;
         struct jpeg_error_mgr jerr;
         cinfo.err = jpeg_std_error(&jerr);
@@ -487,7 +422,6 @@ int main(int argc, char** argv)
     int last_ts = 0;
     int frame = 0;
     std::vector<std::jthread> threads;
-    Semaphore sem(get_nprocs());
     setaffinity(0);
     ThreadPool pool(get_nprocs());
     setprio(true);
@@ -501,37 +435,14 @@ int main(int argc, char** argv)
         }
         const auto snr = parse_int(sp[0]);
         const auto ts = parse_int(sp[1]);
-        // std::cerr << "Parsed " << okmaiden.second << "\n";
         const auto maiden_index = maidenhead_to_index(okmaiden.second);
         count[maiden_index]++;
         snr_sums[maiden_index] += snr;
 
         if (last_ts != ts) [[unlikely]] {
             if (last_ts) [[likely]] {
-                if constexpr (use_pool) {
-                    pool.add(
-                        [frame, snr_sums, &image, count, w, h, blockh, blockw]() mutable {
-                            create_frame(frame,
-                                         std::move(snr_sums),
-                                         std::move(count),
-                                         image,
-                                         w,
-                                         h,
-                                         blockh,
-                                         blockw);
-                        });
-                } else {
-                    sem.acquire();
-                    threads.emplace_back([&sem,
-                                          frame,
-                                          snr_sums,
-                                          &image,
-                                          count,
-                                          w,
-                                          h,
-                                          blockh,
-                                          blockw]() mutable {
-                        setprio(false);
+                pool.add(
+                    [frame, snr_sums, &image, count, w, h, blockh, blockw]() mutable {
                         create_frame(frame,
                                      std::move(snr_sums),
                                      std::move(count),
@@ -540,9 +451,7 @@ int main(int argc, char** argv)
                                      h,
                                      blockh,
                                      blockw);
-                        sem.release();
                     });
-                }
                 frame++;
             }
             std::ranges::fill(count, 0);
@@ -553,9 +462,4 @@ int main(int argc, char** argv)
     create_frame(
         frame, std::move(snr_sums), std::move(count), image, w, h, blockh, blockw);
     std::cerr << "Waiting for threads…\n";
-    if constexpr (!use_pool) {
-        for (int i = 0; i < sem.max(); i++) {
-            sem.acquire();
-        }
-    }
 }

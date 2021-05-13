@@ -3,3 +3,11 @@
 *.png
 *.json
 *.csv
+*.gz
+*.jpg
+*.png
+gmon.out
+keff
+*.avi
+a.*
+__pycache__/

@@ -23,6 +23,8 @@
 //    run
 //    -fprofile-use=profile-dir -fprofile-correction
 //    -Ofast
+#include "lines.h"
+
 #include <fcntl.h>
 #include <string_view>
 #include <sys/mman.h>
@@ -39,6 +41,8 @@
 
 #include <jpeglib.h>
 #include <png++/png.hpp>
+
+#include "lib.h"
 
 constexpr auto min_maiden_signals = 2;
 constexpr auto jpeg_quality = 50;
@@ -150,59 +154,6 @@ private:
     };
 }
 
-class Lines
-{
-public:
-    Lines(std::string_view data) : data_(std::move(data)) {}
-
-    class Iterator
-    {
-    public:
-        Iterator(std::string_view sv, bool end = false) : sv_(std::move(sv)), end_(end)
-        {
-            if (!end_) {
-                read();
-            }
-        }
-
-        [[nodiscard]] bool operator!=(const Iterator& rhs) const
-        {
-            return !(end_ && rhs.end_);
-        }
-
-        Iterator& operator++()
-        {
-            read();
-            return *this;
-        }
-
-        [[nodiscard]] const std::string_view& operator*() const { return cur_; }
-
-    private:
-        void read()
-        {
-            auto nl = sv_.find('\n');
-            if (nl == std::string_view::npos) {
-                end_ = true;
-                return;
-            }
-            cur_ = { sv_.begin(), nl };
-            sv_ = { sv_.begin() + nl + 1, sv_.end() };
-        }
-
-        std::string_view cur_;
-        std::string_view sv_;
-        bool end_;
-    };
-
-    [[nodiscard]] Iterator begin() const { return Iterator{ data_ }; }
-
-    [[nodiscard]] Iterator end() const { return Iterator("", true); }
-
-private:
-    const std::string_view data_;
-};
-
 [[nodiscard]] std::array<std::string_view, 3> split(std::string_view sv)
 {
     std::array<std::string_view, 3> ret;
@@ -218,23 +169,6 @@ private:
     return ret;
 }
 
-[[nodiscard]] int parse_int(const std::string_view& sv)
-{
-    char* endptr = nullptr;
-    const auto ret = strtol(sv.data(), &endptr, 10);
-    if (endptr != sv.end()) {
-        throw std::runtime_error(std::string("int parsing of ") + std::string(sv) +
-                                 " failed");
-    }
-    return ret;
-}
-
-[[nodiscard]] constexpr int maidenhead_to_index(std::string_view sv)
-{
-    assert(sv.size() == 4);
-
-    return ((sv[0] - 'A') * 10 + sv[2] - '0') * 180 + (sv[1] - 'A') * 10 + sv[3] - '0';
-}
 
 static const std::string call = "[a-zA-Z0-9]{1,3}[0123456789][a-zA-Z0-9]{0,3}[a-zA-Z]";
 static const std::string grid = "[A-R][A-R]\\d{2}";
@@ -262,8 +196,6 @@ static const std::vector<std::regex> res = {
 {
     return { index % 180, index / 180 };
 }
-
-constexpr auto maiden_count = maidenhead_to_index("RR99") + 1;
 
 using color_t = std::array<unsigned char, 3>;
 [[nodiscard]] color_t color(float val)

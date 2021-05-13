@@ -61,7 +61,7 @@ int main(int argc, char** argv)
 
     for (const auto band : bands) {
         for (int n = 0; n < maiden_count; n++) {
-            auto f = std::ofstream("distday-data/" + maidenhead_from_index(n) + "." +
+            auto f = std::ofstream("out.distday/" + maidenhead_from_index(n) + "." +
                                    std::to_string(band));
             if (!f.good()) {
                 throw std::runtime_error(std::string("failed to open output file: ") +

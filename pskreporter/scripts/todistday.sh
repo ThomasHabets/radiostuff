@@ -12,12 +12,14 @@ SORTED_INPUT=${INPUT}.sorted
 echo "Step 1: Sort the input…"
 # Takes about 16min for 1.3GB gzipped input.
 if [[ ! -f "${SORTED_INPUT}" ]]; then
-    echo "Sort the input…"
-    zcat "${INPUT}" \
+    pv -c -N in "${INPUT}" \
+	| zcat \
 	| awk -F, '{print (15*int(($1%86400)/15)) "," $0}' \
-	| sort -t, -k 1,1 -n -S 500M \
+	| sort -t, -k 1,2 -n -S 500M \
 	| uniq \
-	| gzip -9 > "${SORTED_INPUT}"
+	| gzip -9 \
+	| pv -c -N out \
+	     > "${SORTED_INPUT}"
 fi
 
 #

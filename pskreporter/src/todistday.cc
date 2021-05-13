@@ -74,6 +74,10 @@ int main(int argc, char** argv)
     int cur_tod = -1;
     for (auto line : StreamLines(std::cin)) {
         const auto cols = split<7>(line);
+        if (cols[0].empty()) {
+            // Splitting failed.
+            continue;
+        }
         auto& src = cols[5];
         auto& dst = cols[6];
         if (dst.size() < 4) {

@@ -118,11 +118,17 @@ private:
 template <int Size>
 [[nodiscard]] std::array<std::string_view, Size> split(std::string_view sv)
 {
+    const auto orig = sv;
     std::array<std::string_view, Size> ret;
     for (size_t c = 0; c < ret.size() - 1; c++) {
         auto n = sv.find(',');
         if (n == std::string_view::npos) {
-            throw std::runtime_error("splitting failed");
+            // throw std::runtime_error("splitting <" + std::string(orig) + "> into " +
+            // std::to_string(Size) + " failed");
+            for (auto& o : ret) {
+                o = { orig.begin(), orig.begin() };
+            }
+            return ret;
         }
         ret[c] = { sv.begin(), n };
         sv = { sv.begin() + n + 1, sv.end() };

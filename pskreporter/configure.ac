@@ -17,6 +17,7 @@ CXXFLAGS="$CXXFLAGS -march=native -mtune=native -Ofast -flto -fuse-linker-plugin
 
 # Checks for libraries.
 AC_CHECK_LIB([m], [sqrt])
+AC_CHECK_LIB([pthread], [pthread_create])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

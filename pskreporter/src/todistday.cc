@@ -57,8 +57,8 @@ int main(int argc, char** argv)
     };
     state_reset();
 
+    // Open output files.
     std::map<int, std::vector<std::ofstream>> outs;
-
     for (const auto band : bands) {
         for (int n = 0; n < maiden_count; n++) {
             auto f = std::ofstream("out.distday/" + maidenhead_from_index(n) + "." +
@@ -72,7 +72,8 @@ int main(int argc, char** argv)
     }
 
     int cur_tod = -1;
-    for (auto line : StreamLines(std::cin)) {
+    for (auto line : StreamMapLines(std::cin)) {
+        // std::cerr << "LINE: <" << line << ">\n";
         const auto cols = split<7>(line);
         if (cols[0].empty()) {
             // Splitting failed.
@@ -95,7 +96,6 @@ int main(int argc, char** argv)
         if (mode != "FT8") {
             continue;
         }
-        // TODO: split by frequency.
         const std::string_view dst4(dst.begin(), dst.begin() + 4);
         const std::string_view src4(src.begin(), src.begin() + 4);
         const auto dstindex = maidenhead_to_index(dst4);
@@ -122,5 +122,21 @@ int main(int argc, char** argv)
             dist_entry.count++;
         }
         // std::cout << line << " " << band << "\n";
+    }
+
+    std::cerr << "todistday: Flushing and closing output files…\n";
+    ThreadPool pool(get_nprocs() * 20);
+    // std::vector<std::jthread> threads;
+    for (auto& os : outs) {
+        for (auto& out : os.second) {
+            pool.add([&out] {
+                out.close();
+                if (out.fail()) {
+                    throw std::runtime_error(
+                        std::string("Failed to flush/close output file: ") +
+                        strerror(errno));
+                }
+            });
+        }
     }
 }

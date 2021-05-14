@@ -23,6 +23,8 @@
 //    run
 //    -fprofile-use=profile-dir -fprofile-correction
 //    -Ofast
+//
+// Input format: snr,ts,msg
 #include "lines.h"
 
 #include <fcntl.h>
@@ -47,86 +49,6 @@
 constexpr auto min_maiden_signals = 2;
 constexpr auto jpeg_quality = 50;
 using floating = float;
-
-void setaffinity(int i)
-{
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
-    CPU_SET(i, &mask);
-    if (sched_setaffinity(0, sizeof(cpu_set_t), &mask)) {
-        throw std::runtime_error(std::string("setting affinity: ") + strerror(errno));
-    }
-}
-
-void setprio(bool high)
-{
-    struct sched_param param {
-    };
-    param.sched_priority = high ? 10 : 0;
-    if (sched_setscheduler(0, high ? SCHED_FIFO : SCHED_OTHER, &param)) {
-        std::cerr << "Setting priority: " << strerror(errno) << "\n";
-    }
-}
-
-class ThreadPool
-{
-public:
-    using func_t = std::function<void()>;
-    ThreadPool(int workers) : workers_(workers)
-    {
-        for (int i = 0; i < workers_; i++) {
-            threads_.emplace_back([this, i] { thread_main(i); });
-        }
-    }
-
-    // No copy or move.
-    ThreadPool(const ThreadPool&) = delete;
-    ThreadPool& operator=(const ThreadPool&) = delete;
-    ThreadPool(ThreadPool&&) = delete;
-    ThreadPool& operator=(ThreadPool&&) = delete;
-
-    void thread_main(int i)
-    {
-        setaffinity(i % get_nprocs());
-        setprio(false);
-        for (;;) {
-            func_t fn;
-            {
-                std::unique_lock<std::mutex> lk(mu_);
-                cv_.wait(lk, [this] { return !work_.empty() || done_; });
-                if (work_.empty() && done_) [[unlikely]] {
-                    return;
-                }
-                fn = work_.front();
-                work_.pop_front();
-            }
-            fn();
-        }
-    }
-
-    void add(func_t fn)
-    {
-        std::unique_lock<std::mutex> lk(mu_);
-        work_.push_back(std::move(fn));
-        cv_.notify_one();
-    }
-
-    ~ThreadPool()
-    {
-        std::unique_lock<std::mutex> lk(mu_);
-        done_ = true;
-        cv_.notify_all();
-    }
-
-private:
-    std::mutex mu_;
-    bool done_ = false;
-    std::condition_variable cv_;
-    std::deque<func_t> work_;
-    std::vector<std::jthread> threads_;
-    const int workers_;
-};
-
 
 [[nodiscard]] std::string_view map_data()
 {
@@ -153,22 +75,6 @@ private:
         static_cast<size_t>(st.st_size),
     };
 }
-
-[[nodiscard]] std::array<std::string_view, 3> split(std::string_view sv)
-{
-    std::array<std::string_view, 3> ret;
-    for (size_t c = 0; c < ret.size() - 1; c++) {
-        auto n = sv.find(',');
-        if (n == std::string_view::npos) {
-            throw std::runtime_error("splitting failed");
-        }
-        ret[c] = { sv.begin(), n };
-        sv = { sv.begin() + n + 1, sv.end() };
-    }
-    ret[ret.size() - 1] = { sv.begin(), sv.end() };
-    return ret;
-}
-
 
 static const std::string call = "[a-zA-Z0-9]{1,3}[0123456789][a-zA-Z0-9]{0,3}[a-zA-Z]";
 static const std::string grid = "[A-R][A-R]\\d{2}";
@@ -237,7 +143,7 @@ void create_frame(int frame,
     // Make averages.
     std::vector<floating> snr_avgs(maiden_count);
     for (int c = 0; c < maiden_count; c++) {
-        if (count[c] < min_maiden_signals) [[likely]] {
+        if (count[c] < min_maiden_signals) {
             continue;
         }
         snr_avgs[c] = snr_sums[c] / count[c];
@@ -250,7 +156,7 @@ void create_frame(int frame,
     for (auto& avg : snr_avgs) {
         const auto before = avg;
         avg = (avg - min) / (max - min);
-        if (avg < 0 || avg > 1) [[unlikely]] {
+        if (avg < 0 || avg > 1) {
             std::cerr << "What? avg not 0-1? " << before << " " << min << " " << max
                       << "\n";
             throw std::runtime_error("failed precondition!");
@@ -259,7 +165,7 @@ void create_frame(int frame,
 
     // Draw onto png.
     for (int c = 0; c < maiden_count; c++) {
-        if (count[c] < min_maiden_signals) [[likely]] {
+        if (count[c] < min_maiden_signals) {
             continue;
         }
         const auto coords = maiden_coords(c);
@@ -357,12 +263,12 @@ int main(int argc, char** argv)
     setaffinity(0);
     ThreadPool pool(get_nprocs());
     setprio(true);
-    for (const auto& line : Lines(data)) {
+    for (const auto& line : MemLines(data)) {
         // std::cout << line << "\n";
-        const auto sp = split(line);
+        const auto sp = split<3>(line);
         const auto msg = sp[2];
         const auto okmaiden = get_maiden(msg);
-        if (!okmaiden.first) [[unlikely]] {
+        if (!okmaiden.first) {
             continue;
         }
         const auto snr = parse_int(sp[0]);
@@ -371,8 +277,8 @@ int main(int argc, char** argv)
         count[maiden_index]++;
         snr_sums[maiden_index] += snr;
 
-        if (last_ts != ts) [[unlikely]] {
-            if (last_ts) [[likely]] {
+        if (last_ts != ts) {
+            if (last_ts) {
                 pool.add(
                     [frame, snr_sums, &image, count, w, h, blockh, blockw]() mutable {
                         create_frame(frame,

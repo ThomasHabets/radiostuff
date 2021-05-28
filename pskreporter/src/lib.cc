@@ -14,8 +14,10 @@
     return ret;
 }
 
-[[nodiscard]] int parse_int(const std::string_view& sv)
+#if 0
+[[nodiscard]] int parse_int(std::string_view sv)
 {
+#if 0
     char* endptr = nullptr;
     const auto ret = strtol(sv.data(), &endptr, 10);
     if (endptr != sv.end()) {
@@ -23,4 +25,16 @@
                                  " failed");
     }
     return ret;
+#else
+    int ret = 0;
+    for (const auto& ch : sv) {
+      if (ch < '0' || ch > '9') {
+        throw std::runtime_error(std::string("int parsing of ") + std::string(sv) +
+                                 " failed");
+      }
+      ret = 10*ret + ch - '0';
+    }
+    return ret;
+#endif
 }
+#endif

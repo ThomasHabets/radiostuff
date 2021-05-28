@@ -23,7 +23,49 @@ static_assert(xtoupper('a') == 'A');
 static_assert(xtoupper('A') == 'A');
 static_assert(xtoupper('b') == 'B');
 
-[[nodiscard]] int parse_int(const std::string_view& sv);
+[[nodiscard]] inline int parse_int(const std::string_view& sv)
+{
+#if 0
+    char* endptr = nullptr;
+    const auto ret = strtol(sv.data(), &endptr, 10);
+    if (endptr != sv.end()) {
+        throw std::runtime_error(std::string("int parsing of ") + std::string(sv) +
+                                 " failed");
+    }
+    return ret;
+#elif 0
+    int ret = 0;
+    for (auto ch : sv) {
+        if (ch < '0' || ch > '9') {
+            throw std::runtime_error(std::string("int parsing of ") + std::string(sv) +
+                                     " failed");
+        }
+        ret = 10 * ret + ch - '0';
+    }
+    return sign * ret;
+#else
+    int ret = 0;
+    auto cur = sv.begin();
+    if (cur == sv.end()) {
+        throw std::runtime_error("parse_int on empty string");
+    }
+    int sign = 1;
+    if (*cur == '-') {
+        sign = -1;
+        cur++;
+    }
+    for (; cur != sv.end(); cur++) {
+        auto& ch = *cur;
+        if (ch < '0' || ch > '9') {
+            throw std::runtime_error(std::string("int parsing of ") + std::string(sv) +
+                                     " failed");
+        }
+        ret = 10 * ret + ch - '0';
+    }
+    return sign * ret;
+#endif
+}
+
 [[nodiscard]] constexpr int maidenhead_to_index(std::string_view sv)
 {
     assert(sv.size() == 4);

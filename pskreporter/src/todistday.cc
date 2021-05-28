@@ -1,6 +1,12 @@
 // INPUT: CSV with:
 // tod,epoch,freq,mode,SNR,fromGrid,toGrid
 // sorted by tod,epoch
+//
+// Improvement ideas:
+// * band map -> vector
+// * rethink write path
+// * background state flusher?
+// * pure memset state flusher?
 
 #include "lib.h"
 #include "lines.h"
@@ -13,12 +19,12 @@ int parse_band(std::string_view s)
 {
     const auto i = parse_int(s);
     if (i > 7000000 && i < 7300000) {
-        return 40;
+        return 1;
     }
     if (i > 14000000 && i < 14350000) {
-        return 20;
+        return 0;
     }
-    return 0;
+    return -1;
 }
 
 struct DistState {
@@ -42,24 +48,26 @@ void print_lines(int tod,
     }
 }
 
+
 int main(int argc, char** argv)
 {
     std::ios_base::sync_with_stdio(false);
     assert("IO91" == maidenhead_from_index(maidenhead_to_index("IO91")));
 
     const std::vector<int> bands{ 20, 40 };
-    std::map<int, std::vector<DistState>> dist_states;
+    std::vector<std::vector<DistState>> dist_states;
     auto state_reset = [&dist_states, &bands] {
         dist_states.clear();
-        for (auto b : bands) {
-            dist_states[b].resize(maiden_count);
+        for (long unsigned int b = 0; b < bands.size(); b++) {
+            dist_states.emplace_back(maiden_count);
         }
     };
     state_reset();
 
     // Open output files.
-    std::map<int, std::vector<std::ofstream>> outs;
+    std::vector<std::vector<std::ofstream>> outs;
     for (const auto band : bands) {
+        std::vector<std::ofstream> t;
         for (int n = 0; n < maiden_count; n++) {
             auto f = std::ofstream("out.distday/" + maidenhead_from_index(n) + "." +
                                    std::to_string(band));
@@ -67,16 +75,18 @@ int main(int argc, char** argv)
                 throw std::runtime_error(std::string("failed to open output file: ") +
                                          strerror(errno));
             }
-            outs[band].push_back(std::move(f));
+            t.push_back(std::move(f));
         }
+        outs.push_back(std::move(t));
     }
 
     int cur_tod = -1;
-    for (auto line : StreamMapLines(std::cin)) {
+    for (auto line : StreamLines(std::cin)) {
         // std::cerr << "LINE: <" << line << ">\n";
         const auto cols = split<7>(line);
         if (cols[0].empty()) {
             // Splitting failed.
+            std::cerr << "Split failed\n";
             continue;
         }
         auto& src = cols[5];
@@ -88,7 +98,7 @@ int main(int argc, char** argv)
             continue;
         }
         const auto band = parse_band(cols[2]);
-        if (!band) {
+        if (band == -1) {
             // Unknown band.
             continue;
         }
@@ -106,7 +116,7 @@ int main(int argc, char** argv)
         const auto coord_src = decode_maidenhead(src);
         const auto coord_dst = decode_maidenhead(dst);
         if (cur_tod != tod) {
-            for (const auto oband : bands) {
+            for (size_t oband = 0; oband < bands.size(); oband++) {
                 print_lines(cur_tod, outs[oband], dist_states[oband]);
             }
             state_reset();
@@ -128,7 +138,7 @@ int main(int argc, char** argv)
     ThreadPool pool(get_nprocs() * 20);
     // std::vector<std::jthread> threads;
     for (auto& os : outs) {
-        for (auto& out : os.second) {
+        for (auto& out : os) {
             pool.add([&out] {
                 out.close();
                 if (out.fail()) {

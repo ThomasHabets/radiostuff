@@ -1,23 +1,4 @@
-/*
- *
- *
- *
- *
- *
- *
- *
- *
- *
- * BIG FAT TODO: Merge with ../loratnc/loralib.*
- *
- *
- *
- *
- *
- *
- *
- *
- */
+#include "loralib.h"
 
 // C++
 #include <array>
@@ -52,7 +33,10 @@ bool persist = true;
 void full_write(int fd, const std::string& s)
 {
     // TODO: full write
-    ::write(fd, s.data(), s.size());
+  const auto rc = ::write(fd, s.data(), s.size());
+  if (rc != s.size()) {
+    throw std::runtime_error("full_write()");
+  }
 }
 
 std::string readline(int fd)
@@ -81,25 +65,6 @@ std::string readline(int fd)
         }
     }
 }
-
-class LoStik
-{
-public:
-    LoStik(std::string dev);
-    std::string cmd(const std::string&);
-    std::string readline();
-    int get_fd() const noexcept { return fd_; }
-
-private:
-    void flush();
-    const std::string dev_;
-    int fd_ = -1;
-
-    static constexpr int speed = B57600;
-
-    // TODO: create a send() that takes pending_tx into account.
-    bool pending_tx_ = false;
-};
 
 LoStik::LoStik(std::string dev) : dev_(dev)
 {
@@ -191,7 +156,6 @@ std::string LoStik::readline()
     return ret;
 }
 
-
 std::string to_hex(const std::string& s)
 {
     const char* hexes = "0123456789ABCDEF";
@@ -201,6 +165,27 @@ std::string to_hex(const std::string& s)
         ret.push_back(hexes[ch & 0xf]);
     }
     return std::string(ret.begin(), ret.end());
+}
+
+bool LoStik::send(const std::vector<unsigned char>& vec)
+{
+    if (send_in_progress_) {
+        return false;
+    }
+    const auto msg = to_hex(std::string(vec.begin(), vec.end()));
+    // std::cout << "rx stop>" << cmd("rxstop") << std::endl;
+    std::cout << "rx stop>" << cmd("radio rxstop") << std::endl;
+    auto sbuf = std::string{ "radio tx " } + msg;
+    cmd("sys set pindig GPIO11 1");
+    std::cout << "sending packet...<" << sbuf << ">\n";
+    const auto reply = cmd(sbuf);
+    std::clog << "... " << reply << std::endl;
+    usleep(10000); // Give the receiver a chance to go back to rx mode.
+    if (reply == "ok") {
+        send_in_progress_ = true;
+        return true;
+    }
+    return false;
 }
 
 char nibble(char ch)
@@ -224,110 +209,27 @@ std::string from_hex(const std::string& s)
     return std::string(ret.begin(), ret.end());
 }
 
-void receive(int fd, LoStik& stick)
+std::vector<unsigned char> LoStik::process()
 {
-    const auto line = stick.readline();
+    const auto line = readline();
     const std::string prefix{ "radio_rx  " };
     if (!strncmp(prefix.c_str(), line.c_str(), prefix.size())) {
         const auto packet = std::string(&line.c_str()[prefix.size()]);
         std::cout << "packet: <" << packet << ">\n";
         const auto p = from_hex(packet);
-        std::cout << "… snr:  " << stick.cmd("radio get snr") << std::endl;
-        ::write(fd, p.data(), p.size());
-        std::cout << "reset radio_rx reply> " << stick.cmd("radio rx 0") << std::endl;
-        return;
+        std::cout << "… snr:  " << cmd("radio get snr") << std::endl;
+        std::cout << "reset radio_rx reply> " << cmd("radio rx 0") << std::endl;
+        return std::vector<unsigned char>(p.begin(), p.end());
     }
 
     if (line == "radio_tx_ok") {
+        send_in_progress_ = false;
         std::cout << "Packet sent\n";
-        std::cout << "... restarting listen> " << stick.cmd("radio rx 0") << std::endl;
-        return;
+        std::cout << "... restarting listen> " << cmd("radio rx 0") << std::endl;
+        return {};
     }
 
     std::cout << "What? no match!? <" << line << ">\n";
-    std::cout << "reset radio_rx reply> " << stick.cmd("radio rx 0") << std::endl;
-}
-
-// tx on lostik
-void send(int fd, LoStik& stick)
-{
-    std::array<char, 4096> buf;
-    ssize_t n;
-    struct pollfd fds {
-        .fd = fd, .events = POLLIN,
-    };
-    poll(&fds, 1, -1);
-    if (0 > (n = read(fd, buf.data(), buf.size()))) {
-        throw std::runtime_error(std::string{ "read(): " } + strerror(errno));
-    }
-    const auto msg = to_hex(std::string(&buf[0], &buf[n]));
-
-    // std::cout << "rx stop>" << stick.cmd("rxstop") << std::endl;
-    std::cout << "rx stop>" << stick.cmd("radio rxstop") << std::endl;
-    auto sbuf = std::string{ "radio tx " } + msg;
-    stick.cmd("sys set pindig GPIO11 1");
-    std::cout << "sending packet...<" << sbuf << ">\n";
-    const auto reply = stick.cmd(sbuf);
-    std::clog << "... " << reply << std::endl;
-    // std::clog << "... " << stick.await("radio_tx_ok") << std::endl;
-    // std::clog << "... " << stick.readline() << std::endl;
-    usleep(10000);
-}
-
-int mainwrap(int argc, char** argv)
-{
-    int fd = open("/dev/net/tun", O_RDWR);
-    if (fd == -1) {
-        throw std::runtime_error(std::string{ "open(): " } + strerror(errno));
-    }
-    struct ifreq ifr {
-        .ifr_flags = IFF_TUN,
-    };
-    memset(&ifr, 0, sizeof(struct ifreq));
-    ifr.ifr_flags = IFF_TUN;
-    const std::string dev = argv[1];
-    const std::string tundev = argv[2];
-    strncpy(ifr.ifr_name, tundev.c_str(), IFNAMSIZ);
-    if (0 > ioctl(fd, TUNSETIFF, reinterpret_cast<void*>(&ifr))) {
-        throw std::runtime_error(std::string{ "ioctl(): " } + strerror(errno));
-    }
-    if (options::persist) {
-        int on = 1;
-        if (0 > ioctl(fd, TUNSETPERSIST, reinterpret_cast<void*>(&on))) {
-            throw std::runtime_error(std::string{ "ioctl(TUNSETPERSIST): " } +
-                                     strerror(errno));
-        }
-    }
-
-
-    LoStik stick{ dev };
-    std::cout << "radio rx reply> " << stick.cmd("radio rx 0") << std::endl;
-    for (;;) {
-        struct pollfd fds[] = { {
-                                    .fd = fd,
-                                    .events = POLLIN,
-                                },
-                                {
-                                    .fd = stick.get_fd(),
-                                    .events = POLLIN,
-                                } };
-        poll(fds, 2, -1);
-        if (fds[0].revents & POLLIN) {
-            send(fd, stick);
-        }
-        if (fds[1].revents & POLLIN) {
-            receive(fd, stick);
-        }
-    }
-
-    return 0;
-}
-
-int main(int argc, char** argv)
-{
-    try {
-        return mainwrap(argc, argv);
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
-    }
+    std::cout << "reset radio_rx reply> " << cmd("radio rx 0") << std::endl;
+    return {};
 }

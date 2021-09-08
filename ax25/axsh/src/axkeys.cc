@@ -77,4 +77,5 @@ int wrapmain(int argc, char** argv)
             throw std::runtime_error("opening " + fn + " failed");
         }
     }
+    return 0;
 }

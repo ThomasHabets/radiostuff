@@ -77,7 +77,7 @@ void common_init()
     }
 }
 
-std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& copt)
+std::unique_ptr<SeqPacket> SeqPacket::make_from_commonopts(const CommonOpts& copt)
 {
     if (copt.my_priv_provided != copt.peer_pub_provided) {
         throw std::runtime_error(
@@ -144,9 +144,18 @@ unsigned int parse_uint(const std::string& s)
     return ret;
 }
 
-std::string common_usage()
+std::string DGram::common_usage()
 {
-    return "    --t1=<num>             Seconds to wait before retransmitting an\n"
+    return "    -p, --path=<path>      AX25 path to route through. Comma "
+           "separated.\n"
+           "    -r, --radio=<radio>    Radio port name per /etc/ax25/axports.\n"
+           "    -s, --mycall=<num>     Local callsign\n";
+}
+
+std::string SeqPacket::common_usage()
+{
+    return DGram::common_usage() +
+           "    --t1=<num>             Seconds to wait before retransmitting an\n"
            "                           unacknowledged frame.\n"
            "    --t2=<num>             Minimum seconds to wait for another frame "
            "to be\n"
@@ -163,22 +172,18 @@ std::string common_usage()
            "    --idle=<num>           The period of time a connection can be "
            "idle before\n"
            "                           we close it down.\n"
-           "    -p, --path=<path>      AX25 path to route through. Comma "
-           "separated.\n"
-           "    -r, --radio=<radio>    Radio port name per /etc/ax25/axports.\n"
            "    -P, --peer_pub=<file>  Peer public key.\n"
            "    -k, --my_priv=<file>   Local private key.\n"
+           "                           frames.\n"
            "    -l, --paclen=<num>     Max packet length\n"
            "    -w, --window=<num>     The maximum number of unacknowledged "
            "transmitted\n"
-           "                           frames.\n"
-           "    -s, --mycall=<num>     Local callsign\n"
            "    -e, --extseq           Enable extended sequence numbers. Needed "
            "for large\n"
            "                           windows.\n";
 }
 
-std::vector<struct option> common_long_opts()
+std::vector<struct option> SeqPacket::common_long_opts()
 {
     std::vector<struct ::option> ret{
         { "t1", required_argument, 0, int(coptval::t1) },
@@ -186,21 +191,58 @@ std::vector<struct option> common_long_opts()
         { "t3", required_argument, 0, int(coptval::t3) },
         { "n2", required_argument, 0, int(coptval::n2) },
         { "backoff", required_argument, 0, int(coptval::backoff) },
-        { "path", required_argument, 0, 'p' },
         { "peer_pub", required_argument, 0, 'P' },
-        { "radio", required_argument, 0, 'r' },
         { "my_priv", required_argument, 0, 'k' },
         { "paclen", required_argument, 0, 'l' },
         { "window", required_argument, 0, 'w' },
-        { "mycall", required_argument, 0, 's' },
         { "idle", required_argument, 0, int(coptval::idle) },
         { "extseq", no_argument, 0, 'e' },
+    };
+    const auto dgram = DGram::common_long_opts();
+    ret.insert(ret.end(), dgram.begin(), dgram.end());
+    return ret;
+}
+
+std::vector<struct option> DGram::common_long_opts()
+{
+    std::vector<struct ::option> ret{
+        { "path", required_argument, 0, 'p' },
+        { "radio", required_argument, 0, 'r' },
+        { "mycall", required_argument, 0, 's' },
     };
     return ret;
 }
 
-bool common_opt(CommonOpts& o, int opt)
+bool DGram::common_opt(CommonOpts& o, int opt)
 {
+    switch (opt) {
+    case 'p':
+        o.path = split(optarg, ',');
+        break;
+    case 'r': {
+        const auto t = ax25_config_get_addr(optarg);
+        if (t == nullptr) {
+            throw std::runtime_error(std::string("invalid radio \"") + optarg +
+                                     "\": " + strerror(errno));
+        }
+        o.radio = t;
+    } break;
+    case 's':
+        o.src = optarg;
+        break;
+    default:
+        return false;
+    }
+    return true;
+}
+
+bool SeqPacket::common_opt(CommonOpts& o, int opt)
+{
+    const auto dgram = DGram::common_opt(o, opt);
+    if (dgram) {
+        return true;
+    }
+
     switch (opt) {
     case int(coptval::t1):
         o.t1 = parse_uint(optarg);
@@ -222,20 +264,6 @@ bool common_opt(CommonOpts& o, int opt)
         break;
     case 'e':
         o.extended_modulus = true;
-        break;
-    case 'p':
-        o.path = split(optarg, ',');
-        break;
-    case 'r': {
-        const auto t = ax25_config_get_addr(optarg);
-        if (t == nullptr) {
-            throw std::runtime_error(std::string("invalid radio \"") + optarg +
-                                     "\": " + strerror(errno));
-        }
-        o.radio = t;
-    } break;
-    case 's':
-        o.src = optarg;
         break;
     case 'w':
         o.window = parse_uint(optarg);
@@ -290,6 +318,9 @@ DGram::DGram(std::string radio, std::string mycall, std::vector<std::string> dig
     if (sock_ == -1) {
         throw std::runtime_error(std::string("socket(AF_AX25, SOCK_DGRAM, 0): ") +
                                  strerror(errno));
+    }
+    if (mycall_.empty()) {
+        throw std::runtime_error("empty MYCALL provided to SeqPacket");
     }
 
     struct full_sockaddr_ax25 me {

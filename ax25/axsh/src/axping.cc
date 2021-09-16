@@ -10,7 +10,18 @@ using namespace axlib;
 
 [[noreturn]] void usage(const char* av0, int err)
 {
-    fprintf(stderr, "%s: Usage\n", av0);
+    FILE* f = stdout;
+    if (err) {
+        f = stderr;
+    }
+    fprintf(f,
+            "Usage: %s […options…] -r <radio> -s <src call> <dst>\n"
+            "%s\nExample:\n"
+            "   %s -s M0XXX-9 -r radio -p M0ABC-3,M0XYZ-2 "
+            "2E0XXX\n",
+            av0,
+            DGram::common_usage().c_str(),
+            av0);
     exit(err);
 }
 
@@ -18,11 +29,11 @@ int wrapmain(int argc, char** argv)
 {
     CommonOpts copt;
     int opt;
-    auto lopts = common_long_opts();
+    auto lopts = DGram::common_long_opts();
     common_init();
     lopts.push_back({ 0, 0, 0, 0 });
     while ((opt = getopt_long(argc, argv, "ehk:l:P:p:r:s:w:", &lopts[0], NULL)) != -1) {
-        if (common_opt(copt, opt)) {
+        if (DGram::common_opt(copt, opt)) {
             continue;
         }
         switch (opt) {

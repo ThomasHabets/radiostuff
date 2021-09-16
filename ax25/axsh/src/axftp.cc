@@ -24,7 +24,7 @@ namespace {
             "   %s -k my.priv -P peer.pub -s M0XXX-9 -r radio -p M0ABC-3,M0XYZ-2 "
             "2E0XXX\n",
             av0,
-            common_usage().c_str(),
+            SeqPacket::common_usage().c_str(),
             av0);
     exit(err);
 }
@@ -34,11 +34,11 @@ int wrapmain(int argc, char** argv)
 {
     CommonOpts copt;
     int opt;
-    auto lopts = common_long_opts();
+    auto lopts = SeqPacket::common_long_opts();
     common_init();
     lopts.push_back({ 0, 0, 0, 0 });
     while ((opt = getopt_long(argc, argv, "ehk:l:P:p:r:s:w:", &lopts[0], NULL)) != -1) {
-        if (common_opt(copt, opt)) {
+        if (SeqPacket::common_opt(copt, opt)) {
             continue;
         }
         switch (opt) {
@@ -55,7 +55,7 @@ int wrapmain(int argc, char** argv)
     }
     const std::string dst = argv[optind];
 
-    auto sock = make_from_commonopts(copt);
+    auto sock = SeqPacket::make_from_commonopts(copt);
 
     std::clog << "Connecting...\n";
     if (sock->connect(dst)) {

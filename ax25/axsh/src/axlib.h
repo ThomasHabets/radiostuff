@@ -28,6 +28,26 @@ private:
     int fd;
 };
 
+struct CommonOpts {
+    std::string src;
+    std::vector<std::string> path;
+    std::string radio;
+    unsigned int window = 0;
+    bool extended_modulus = false;
+    int packet_length = 200;
+    bool peer_pub_provided = false;
+    std::array<char, 32> peer_pub;
+    bool my_priv_provided = false;
+    std::array<char, 64> my_priv;
+    int t1 = -1;
+    int t2 = -2;
+    int t3 = -1;
+    int n2 = -1;
+    int backoff = -1;
+    int idle = -1;
+};
+
+
 class DGram
 {
 public:
@@ -36,6 +56,10 @@ public:
           std::vector<std::string> digipeaters = {});
     std::pair<std::string, std::string> recv();
     void write(const std::string& dst, const std::string& msg);
+
+    static std::vector<struct option> common_long_opts();
+    static bool common_opt(CommonOpts& o, int opt);
+    static std::string common_usage();
 
 protected:
     Sock sock_;
@@ -81,6 +105,12 @@ public:
     void set_idle(int v);
     int get_fd() const noexcept { return sock_; }
 
+    static std::vector<struct option> common_long_opts();
+    static bool common_opt(CommonOpts& o, int opt);
+    static std::string common_usage();
+    static std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& opt);
+
+
 protected:
     SeqPacket(std::string radio, std::string mycall, int sock, std::string peer)
         : sock_(sock),
@@ -110,25 +140,6 @@ protected:
     int idle_ = -1;
 };
 
-
-struct CommonOpts {
-    std::string src;
-    std::vector<std::string> path;
-    std::string radio;
-    unsigned int window = 0;
-    bool extended_modulus = false;
-    int packet_length = 200;
-    bool peer_pub_provided = false;
-    std::array<char, 32> peer_pub;
-    bool my_priv_provided = false;
-    std::array<char, 64> my_priv;
-    int t1 = -1;
-    int t2 = -2;
-    int t3 = -1;
-    int n2 = -1;
-    int backoff = -1;
-    int idle = -1;
-};
 
 class SignedSeqPacket : public SeqPacket
 {
@@ -164,11 +175,7 @@ private:
     void exchange_nonce();
 };
 
-std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& opt);
 std::vector<std::string> split(std::string s, char splitchar);
-std::string common_usage();
-std::vector<struct option> common_long_opts();
-bool common_opt(CommonOpts& o, int opt);
 void common_init();
 
 template <int size>

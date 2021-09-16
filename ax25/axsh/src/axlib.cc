@@ -226,6 +226,9 @@ bool DGram::common_opt(CommonOpts& o, int opt)
                                      "\": " + strerror(errno));
         }
         o.radio = t;
+        if (o.src.empty()) {
+            o.src = o.radio;
+        }
     } break;
     case 's':
         o.src = optarg;
@@ -299,12 +302,30 @@ std::vector<std::string> split(std::string s, char splitchar)
 void populate_digis(struct full_sockaddr_ax25* sa, const std::vector<std::string>& digis)
 {
     using s_t = decltype(digis.size());
-    sa->fsa_ax25.sax25_ndigis = std::min(digis.size(), s_t(AX25_MAX_DIGIS));
-    for (int i = 0; i < sa->fsa_ax25.sax25_ndigis; i++) {
-        if (-1 == ax25_aton_entry(digis[i].c_str(),
-                                  reinterpret_cast<char*>(&sa->fsa_digipeater[i]))) {
+
+    int offset = sa->fsa_ax25.sax25_ndigis;
+
+    if (false) {
+        std::clog << sa->fsa_ax25.sax25_ndigis << " digis before\n";
+        for (int i = 0; i < sa->fsa_ax25.sax25_ndigis; i++) {
+            std::clog << " " << ax25_ntoa(&sa->fsa_digipeater[i]) << "\n";
+        }
+    }
+
+    sa->fsa_ax25.sax25_ndigis = std::min(digis.size() + offset, s_t(AX25_MAX_DIGIS));
+    for (int i = 0; i < digis.size(); i++) {
+        if (-1 ==
+            ax25_aton_entry(digis[i].c_str(),
+                            reinterpret_cast<char*>(&sa->fsa_digipeater[i + offset]))) {
             throw std::runtime_error("ax25_aton_entry(" + digis[i] +
                                      "): " + strerror(errno));
+        }
+    }
+
+    if (false) {
+        std::clog << sa->fsa_ax25.sax25_ndigis << " digis after\n";
+        for (int i = 0; i < sa->fsa_ax25.sax25_ndigis; i++) {
+            std::clog << "  " << ax25_ntoa(&sa->fsa_digipeater[i]) << "\n";
         }
     }
 }
@@ -360,6 +381,7 @@ void DGram::write(const std::string& peer, const std::string& msg)
     if (-1 == ax25_aton(peer.c_str(), &sa)) {
         throw std::runtime_error("ax25_aton(" + peer + "): " + strerror(errno));
     }
+    // Populate path to destination.
     populate_digis(&sa, digipeaters_);
     const auto rc = sendto(sock_,
                            msg.data(),
@@ -396,6 +418,7 @@ SeqPacket::SeqPacket(std::string radio,
     if (-1 == ax25_aton(mycall_.c_str(), &me)) {
         throw std::runtime_error("ax25_aton(" + mycall_ + "): " + strerror(errno));
     }
+    // Populate path out to the radio.
     populate_digis(&me, { radio_ });
     if (-1 == bind(sock_, reinterpret_cast<struct sockaddr*>(&me), sizeof(me))) {
         throw std::runtime_error("bind to " + mycall_ + " failed: " + strerror(errno));

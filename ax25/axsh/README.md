@@ -63,3 +63,17 @@ axftpd -l 500 -r radio -e -w63 -P client.pub -k server.key -s M6XXX-8
 time echo get 10k.bin | \
   axftp -l 500 -r radio -e -w63 -P server.pub -k client.key -s M0XXX-8 M6XXX-8
 ```
+
+## Source callsign
+
+By default the callsign from `/etc/ax25/axports` is used, but it can
+be overriden by `sudo axparms --assoc M0XXX-3 $USER` to be per-user,
+or by supplying `-s` to the tools in the package.
+
+## Digipeater path
+
+Digipeater path can either be set using `-p`, or by using a
+destination like `M0XXX-1 VIA M6YYY-3`.
+
+I thought it should work to do `axparms --route add radio M0XXX-1
+M6YYY-3`, but it doesn't seem to do anything.

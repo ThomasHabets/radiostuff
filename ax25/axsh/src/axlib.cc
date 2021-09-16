@@ -320,7 +320,7 @@ DGram::DGram(std::string radio, std::string mycall, std::vector<std::string> dig
                                  strerror(errno));
     }
     if (mycall_.empty()) {
-        throw std::runtime_error("empty MYCALL provided to SeqPacket");
+        throw std::runtime_error("empty MYCALL provided to DGram");
     }
 
     struct full_sockaddr_ax25 me {

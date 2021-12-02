@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <cstring>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -674,6 +675,16 @@ int SignedSeqPacket::connect(std::string addr)
     return ret;
 }
 
+std::string str2hex(const std::string& data)
+{
+    std::stringstream ss;
+    for (auto ch : data) {
+        ss << std::hex << std::setw(2) << std::setfill('0')
+           << (static_cast<unsigned int>(ch) & 0xff) << " ";
+    }
+    return ss.str();
+}
+
 std::string SignedSeqPacket::read()
 {
     const auto full = SeqPacket::read();
@@ -686,7 +697,7 @@ std::string SignedSeqPacket::read()
                         peer_pub_)) {
         packet_bad_++;
         throw std::runtime_error("bad signature on packet " +
-                                 std::to_string(packet_good_));
+                                 std::to_string(packet_good_) + ": " + str2hex(full));
     }
     packet_good_++;
     return msg;

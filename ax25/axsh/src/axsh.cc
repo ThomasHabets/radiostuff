@@ -80,10 +80,9 @@ int wrapmain(int argc, char** argv)
                 std::unique_lock<std::mutex> l(m);
                 input_cv.wait(l, [&cmd] { return cmd.empty(); });
             }
-
             const auto line = xgetline(std::cin, sock->max_packet_size());
 
-            if (line.empty() || line == "exit") {
+            if (!std::cin.good() || line == "exit") {
                 break;
             }
             if (!std::cin.good()) {

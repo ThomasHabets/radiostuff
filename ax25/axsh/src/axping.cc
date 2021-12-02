@@ -29,16 +29,20 @@ int wrapmain(int argc, char** argv)
 {
     CommonOpts copt;
     int opt;
+    std::string message = "PING";
     auto lopts = DGram::common_long_opts();
     common_init();
     lopts.push_back({ 0, 0, 0, 0 });
-    while ((opt = getopt_long(argc, argv, "ehk:l:P:p:r:s:w:", &lopts[0], NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "ehk:l:m:P:p:r:s:w:", &lopts[0], NULL)) != -1) {
         if (DGram::common_opt(copt, opt)) {
             continue;
         }
         switch (opt) {
         case 'h':
             usage(argv[0], EXIT_SUCCESS);
+        case 'm':
+            message = optarg;
+            break;
         default: /* '?' */
             usage(argv[0], EXIT_FAILURE);
         }
@@ -51,7 +55,7 @@ int wrapmain(int argc, char** argv)
     const std::string dst = argv[optind];
 
     DGram sock(copt.radio, copt.src, copt.path);
-    sock.write(dst, "hello");
+    sock.write(dst, message);
     for (;;) {
         const auto packet = sock.recv();
         std::clog << "Got packet src=" << packet.first << " data=<" << packet.second

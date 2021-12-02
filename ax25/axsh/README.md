@@ -47,13 +47,15 @@ It's packet over modulated FM (usually 1200bps), so don't expect
 much. Here are some examples with signatures turned on (so an extra
 roundtrip for key negotiation).
 
-| Size | Signed  | Packet size | Time  | bps
-|------|---------|-------------|-------|------
-| 10kB | yes     | 200         | 3m31s | 379
-| 10kB | yes     | 500         | 1m55s | 695
-| 10kB | no      | 500         | 1m23s | 963
-| 10kB | no      | 1000        | 1m12s | 1111
-| 10kB | yes     | 1000        | 1m20s | 1000
+| Baud | Size | Signed  | Packet size | Time    | bps
+|------|------|---------|-------------|---------|------
+| 1200 | 10kB | yes     | 200         | 3m31s   | 379
+| 1200 | 10kB | yes     | 500         | 1m55s   | 695
+| 1200 | 10kB | no      | 500         | 1m23s   | 963
+| 1200 | 10kB | no      | 1000        | 1m12s   | 1111
+| 1200 | 10kB | yes     | 1000        | 1m20s   | 1000
+| 9600 | 10kB | yes     | 1000        | 0m13.5s | 5714
+
 
 This was when downloading from a IC9700/direwolf into a Mobilink TNC3
 using e.g.:

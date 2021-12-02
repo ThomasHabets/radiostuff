@@ -32,6 +32,65 @@ namespace {
             av0);
     exit(err);
 }
+
+void mainloop(SeqPacket* sock,
+              std::mutex& m,
+              std::condition_variable& input_cv,
+              bool& time_to_die,
+              std::string& cmd)
+{
+    // We have to use select() instead of a thread. A thread would be
+    // nicer (no polling needed wakeups), but the Linux kernel doesn't
+    // support threads calling write() and read() at the same time on
+    // the same AX_25 socket. I've sent a patch:
+    // https://marc.info/?l=linux-hams&m=159319049624305&w=2
+    //
+    // Yes, I could make this 100% event-based, but it's just so nice
+    // to not have to deal with partial command buffers that I
+    // preferred this.
+    for (;;) {
+        // Check if done.
+        {
+            std::unique_lock<std::mutex> l(m);
+            if (time_to_die) {
+                break;
+            }
+        }
+
+        // Check if any data is received.
+        {
+            fd_set fds;
+            FD_ZERO(&fds);
+            FD_SET(sock->get_fd(), &fds);
+            struct timeval tv;
+            tv.tv_sec = 0;
+            tv.tv_usec = 100000;
+            const auto rc = select(sock->get_fd() + 1, &fds, NULL, NULL, &tv);
+            if (rc == 1) {
+                const auto data = sock->read();
+                if (data.empty()) {
+                    // EOF.
+                    std::cerr << "Server closed connection\n";
+                    break;
+                }
+                std::cout << data << std::flush;
+            } else if (rc == -1) {
+                throw std::runtime_error(std::string("select(): ") + strerror(errno));
+            }
+        }
+
+        // Write anything queued up to write.
+        {
+            std::unique_lock<std::mutex> l(m);
+            if (!cmd.empty()) {
+                std::clog << "]]] Sending command <" << cmd << ">" << std::endl;
+                sock->write(cmd);
+                cmd = "";
+                input_cv.notify_one();
+            }
+        }
+    }
+}
 } // namespace
 
 int wrapmain(int argc, char** argv)
@@ -95,51 +154,13 @@ int wrapmain(int argc, char** argv)
         std::unique_lock<std::mutex> l(m);
         time_to_die = true;
     });
-
-    // We have to use select() instead of a thread. A thread would be
-    // nicer (no polling needed wakeups), but the Linux kernel doesn't
-    // support threads calling write() and read() at the same time on
-    // the same AX_25 socket. I've sent a patch:
-    // https://marc.info/?l=linux-hams&m=159319049624305&w=2
-    //
-    // Yes, I could make this 100% event-based, but it's just so nice
-    // to not have to deal with partial command buffers that I
-    // preferred this.
-    for (;;) {
-        // Check if done.
-        {
-            std::unique_lock<std::mutex> l(m);
-            if (time_to_die) {
-                break;
-            }
-        }
-
-        // Check if any data is received.
-        {
-            fd_set fds;
-            FD_ZERO(&fds);
-            FD_SET(sock->get_fd(), &fds);
-            struct timeval tv;
-            tv.tv_sec = 0;
-            tv.tv_usec = 100000;
-            const auto rc = select(sock->get_fd() + 1, &fds, NULL, NULL, &tv);
-            if (rc == 1) {
-                std::cout << sock->read() << std::flush;
-            } else if (rc == -1) {
-                throw std::runtime_error(std::string("select(): ") + strerror(errno));
-            }
-        }
-
-        // Write anything queued up to write.
-        {
-            std::unique_lock<std::mutex> l(m);
-            if (!cmd.empty()) {
-                std::clog << "]]] Sending command <" << cmd << ">" << std::endl;
-                sock->write(cmd);
-                cmd = "";
-                input_cv.notify_one();
-            }
-        }
+    sleep(1);
+    try {
+        mainloop(sock.get(), m, input_cv, time_to_die, cmd);
+    } catch (const std::exception& e) {
+        std::cerr << "Exception " << e.what() << "\n";
+        reader.join();
+        throw;
     }
     reader.join();
     return 0;

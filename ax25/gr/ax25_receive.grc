@@ -65,7 +65,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1192, 20.0]
+    coordinate: [1488, 20.0]
     rotation: 0
     state: disabled
 - name: freq
@@ -77,24 +77,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [856, 28.0]
+    coordinate: [1152, 28.0]
     rotation: 0
     state: disabled
-- name: igain
-  id: variable_qtgui_entry
-  parameters:
-    comment: ''
-    gui_hint: 'tabs@0: 1,0'
-    label: ''
-    type: real
-    value: '20'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [448, 100.0]
-    rotation: 0
-    state: enabled
 - name: igain
   id: variable_qtgui_range
   parameters:
@@ -113,9 +98,24 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [968, 20.0]
+    coordinate: [1288, 20.0]
     rotation: 0
     state: disabled
+- name: igain_file
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: 'tabs@0: 2,0'
+    label: ''
+    type: real
+    value: '20'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [448, 100.0]
+    rotation: 0
+    state: enabled
 - name: offset
   id: variable
   parameters:
@@ -125,7 +125,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1104, 20.0]
+    coordinate: [1408, 20.0]
     rotation: 0
     state: disabled
 - name: samp_rate
@@ -159,12 +159,29 @@ blocks:
     gui_hint: 'tabs@0: 2,1'
     label: ''
     type: real
-    value: '-30'
+    value: '-5'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
     coordinate: [408, 252.0]
+    rotation: 0
+    state: true
+- name: analog_const_source_x_0
+  id: analog_const_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [208, 1628.0]
     rotation: 0
     state: true
 - name: analog_nbfm_rx_0
@@ -222,6 +239,23 @@ blocks:
     coordinate: [280, 956.0]
     rotation: 0
     state: true
+- name: audio_sink_0
+  id: audio_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    device_name: ''
+    num_inputs: '1'
+    ok_to_block: 'True'
+    samp_rate: audio_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [872, 484.0]
+    rotation: 0
+    state: disabled
 - name: blocks_char_to_float_0
   id: blocks_char_to_float
   parameters:
@@ -287,6 +321,43 @@ blocks:
     coordinate: [1304, 1016.0]
     rotation: 0
     state: true
+- name: blocks_delay_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [280, 1508.0]
+    rotation: 0
+    state: true
+- name: blocks_file_sink_0
+  id: blocks_file_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    comment: ''
+    file: temp_captured-50ksps.raw
+    type: complex
+    unbuffered: 'False'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [864, 52.0]
+    rotation: 180
+    state: disabled
 - name: blocks_file_source_0
   id: blocks_file_source
   parameters:
@@ -294,7 +365,29 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: aprs1200_50ksps.raw
+    file: /home/thompa/scm/radiostuff/ax25/gr/aprs1200_50ksps.raw
+    length: '0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    repeat: 'False'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [24, 108.0]
+    rotation: 0
+    state: disabled
+- name: blocks_file_source_0_0
+  id: blocks_file_source
+  parameters:
+    affinity: ''
+    alias: ''
+    begin_tag: pmt.PMT_NIL
+    comment: ''
+    file: transmitted-msg4-50ksps.raw
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -306,7 +399,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [24, 108.0]
+    coordinate: [48, 220.0]
     rotation: 0
     state: enabled
 - name: blocks_float_to_complex_0
@@ -344,7 +437,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    const: igain
+    const: igain_file
     maxoutbuf: '0'
     minoutbuf: '0'
     type: complex
@@ -356,6 +449,101 @@ blocks:
     coordinate: [448, 164.0]
     rotation: 0
     state: enabled
+- name: blocks_tag_gate_0
+  id: blocks_tag_gate
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    propagate_tags: 'False'
+    single_key: '"corr_est"'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1604.0, 976]
+    rotation: 270
+    state: true
+- name: blocks_tag_gate_0_0
+  id: blocks_tag_gate
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    propagate_tags: 'False'
+    single_key: '"amp_est"'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1668.0, 976]
+    rotation: 90
+    state: true
+- name: blocks_tag_gate_0_1
+  id: blocks_tag_gate
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    propagate_tags: 'False'
+    single_key: '"corr_start"'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1580.0, 1176]
+    rotation: 270
+    state: true
+- name: blocks_tag_gate_0_1_0
+  id: blocks_tag_gate
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    propagate_tags: 'False'
+    single_key: '"time_est"'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1644.0, 1200]
+    rotation: 270
+    state: true
+- name: blocks_tag_gate_0_1_0_0
+  id: blocks_tag_gate
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    propagate_tags: 'False'
+    single_key: '"phase_est"'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1524.0, 1264]
+    rotation: 270
+    state: true
 - name: blocks_throttle_0
   id: blocks_throttle
   parameters:
@@ -372,9 +560,26 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [248, 140.0]
+    coordinate: [256, 196.0]
     rotation: 0
     state: enabled
+- name: blocks_xor_xx_0
+  id: blocks_xor_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '3'
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [416, 1512.0]
+    rotation: 0
+    state: true
 - name: digital_binary_slicer_fb_0
   id: digital_binary_slicer_fb
   parameters:
@@ -400,7 +605,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     sps: audio_rate/bps
-    symbols: '[1,1,1,1,1,1,1,0]*2'
+    symbols: '[0,0,0,0,0,0,0,1]*8'
     threshold: '0.1'
     threshold_method: digital.THRESHOLD_ABSOLUTE
   states:
@@ -410,42 +615,23 @@ blocks:
     coordinate: [488, 1148.0]
     rotation: 0
     state: enabled
-- name: digital_correlate_access_code_tag_xx_0_0
+- name: digital_correlate_access_code_tag_xx_0
   id: digital_correlate_access_code_tag_xx
   parameters:
-    access_code: '''''.join(str(1-x) for x in [1,1,1,1,1,1,1,0]*3)'
+    access_code: '01111110'
     affinity: ''
     alias: ''
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    tagname: packet_end
+    tagname: flag
     threshold: '0'
     type: byte
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [632, 1556.0]
-    rotation: 0
-    state: true
-- name: digital_correlate_access_code_xx_ts_0
-  id: digital_correlate_access_code_xx_ts
-  parameters:
-    access_code: '''''.join([str(x) for x in [1,1,1,1,1,1,1,0]*3][:-1])'
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    tagname: packet_start
-    threshold: '0'
-    type: byte
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [320, 1556.0]
+    coordinate: [528, 1524.0]
     rotation: 0
     state: true
 - name: digital_symbol_sync_xx_0
@@ -509,44 +695,46 @@ blocks:
       \ a burst starting with one tag\nand ending with another.\n\nIt then takes those\
       \ bits, NRZ unscrambles them, and decodes the bytes\nas LSB by bytes.\n\"\"\"\
       \n\nimport numpy as np\nimport time\nimport tempfile\nfrom gnuradio import gr\n\
-      from gnuradio.gr import pmt\n\n# other base classes are basic_block, decim_block,\
-      \ interp_block\nclass blk(gr.basic_block):\n    \"\"\"Embedded Python Block\
-      \ example - a simple multiply const\"\"\"\n\n    def __init__(self, start_tag=\"\
-      start\", stop_tag=\"stop\"):\n        \"\"\"arguments to this function show\
-      \ up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n         \
-      \   self,\n            name='Embedded Python Block',   # will show up in GRC\n\
-      \            in_sig=[np.byte],\n            out_sig=[]\n        )\n        #\
-      \ if an attribute with the same name as a parameter is found,\n        # a callback\
-      \ is registered (properties work, too).\n        self._data = []\n        self._active\
-      \ = False\n        self._start = start_tag\n        self._stop = stop_tag\n\
-      \        self._pub = pmt.intern(\"bits\")\n        self.message_port_register_out(self._pub)\n\
-      \n    def work(self, input_items, output_items):\n        \"\"\"example: multiply\
-      \ with constant\"\"\"\n        inp = input_items[0]\n\n        tags = self.get_tags_in_window(0,\
-      \ 0, len(inp))\n        tagmap = {}\n        nr = self.nitems_read(0)\n    \
-      \    for tag in tags:\n            key = pmt.to_python(tag.key)\n          \
-      \  tagmap.setdefault(tag.offset-nr, set()).add(key)\n        #print(len(inp),\
-      \ tagmap)\n        for ind, sample in enumerate(inp):\n            if self._start\
-      \ in tagmap.get(ind, set()):\n                print(\"HABETS: Start tag found\"\
-      )\n                # packet\n                self._data = []\n             \
-      \   self._active = True\n            if not self._active:\n                continue\n\
-      \            self._data.append(int(sample))\n            if self._data and self._stop\
-      \ in tagmap.get(ind, set()):\n                print(\"HABETS: Stop tag found\"\
-      )\n\n                # packet\n                bits = []\n                for\
-      \ n in range(1, len(self._data)):\n                    bits.append(1 ^ self._data[n]\
-      \ ^ self._data[n-1])\n                #self.message_port_pub(self._pub, pmt.to_pmt(self._data))\n\
-      \                #print(bits)\n                bits = self._truncate(bits)\n\
-      \                if len(bits):\n                    bits = self._unstuff(bits)\n\
-      \                    byt = self._pack(bits)\n                    print(\"HABETS\
-      \ packet arrived. size %d -> %d\" % (len(bits), len(byt)))\n               \
-      \     self.message_port_pub(self._pub, pmt.to_pmt(byt))\n                  \
-      \  with open('%s/ax25-%s.raw' % (tempfile.gettempdir(), str(time.time())), 'wb')\
-      \ as f:\n                        f.write(b''.join([x.to_bytes(1,byteorder='big')\
-      \ for x in byt]))\n                self._active = False\n                self._data\
-      \ = []\n        self.consume(0, len(inp))\n        return len(output_items)\n\
-      \n    def _truncate(self, bits):\n        a = ''.join(str(b) for b in bits)\n\
-      \        i = a.rfind('01111110')\n        if i < 0:\n            print(\"HABETS:\
-      \ No packet end flag\")\n            # No packet end flag.\n            return\
-      \ []\n        return bits[:i]\n    \n    def _unstuff(self, bits):\n       \
+      from gnuradio.gr import pmt\n\ndebug = False\n\nclass blk(gr.basic_block):\n\
+      \    \"\"\"Blah\"\"\"\n\n    def __init__(self, flag_tag=\"flag\", burst_tag=\"\
+      squelch_sob\"):\n        \"\"\"Init.\"\"\"\n        gr.sync_block.__init__(\n\
+      \            self,\n            name='AX.25 decoder',\n            in_sig=[np.byte],\n\
+      \            out_sig=[]\n        )\n        self._data = []\n        # Ugly\
+      \ state machine:\n        # 0 = waiting for burst tag\n        # 1 = waiting\
+      \ for flag tag\n        # 2 = got flag tag, accumulating data until end-of-packet\
+      \ flag\n        self._state = 0\n        self._flag_tag = flag_tag\n       \
+      \ self._sob_tag = burst_tag\n        self._pub = pmt.intern(\"pdus\")\n    \
+      \    self.message_port_register_out(self._pub)\n\n    def work(self, input_items,\
+      \ output_items):\n        \"\"\"\"\"\"\n        inp = input_items[0]\n\n   \
+      \     # Prep tag map.\n        tags = self.get_tags_in_window(0, 0, len(inp))\n\
+      \        tagmap = {}\n        nr = self.nitems_read(0)\n        for tag in tags:\n\
+      \            key = pmt.to_python(tag.key)\n            ofs = tag.offset-nr\n\
+      \            tagmap.setdefault(ofs, set()).add(key)\n        if tagmap:\n  \
+      \          pass\n            #print(len(inp), tagmap)\n\n        # Fast path:\
+      \ not accumulating.\n        if not self._state and not tagmap:\n          \
+      \  self.consume(0, len(inp))\n            return 0\n\n        for ind, sample\
+      \ in enumerate(inp):\n            if self._sob_tag in tagmap.get(ind, set()):\n\
+      \                if debug:\n                    print(\"AX.25 got sob: state\
+      \ -> 1\")\n                self._state = 1\n            if self._state == 0:\n\
+      \                continue\n\n            if self._flag_tag in tagmap.get(ind,\
+      \ set()):\n                if debug:\n                    print(\"AX.25 got\
+      \ flag\")\n                if self._state == 1:\n                    if debug:\n\
+      \                        print(\"AX.25 got flag: state 1 -> 2\")\n         \
+      \           self._data = []\n                    self._state = 2\n         \
+      \       elif self._state == 2:\n                    if len(self._data) < 24:\n\
+      \                        self._data = []\n                    else:\n      \
+      \                  if debug:\n                            print(\"AX.25 got\
+      \ flag after data: state 2 -> 0\")\n                        self._state = 0\n\
+      \                        bits = self._unstuff(self._data)\n                \
+      \        if debug:\n                            print(bits)\n              \
+      \          byt = self._pack(bits)\n                        self.message_port_pub(self._pub,\
+      \ pmt.to_pmt(byt))\n                        if debug:\n                    \
+      \        print(\"AX.25 packet arrived at %d. size %d -> %d\" % (nr+ind, len(bits),\
+      \ len(byt)))\n                            with open('%s/ax25-%s.raw' % (tempfile.gettempdir(),\
+      \ str(time.time())), 'wb') as f:\n                                f.write(b''.join([x.to_bytes(1,byteorder='big')\
+      \ for x in byt]))\n                        continue\n                \n    \
+      \        self._data.append(int(sample))\n        self.consume(0, len(inp))\n\
+      \        return len(output_items)\n\n    def _unstuff(self, bits):\n       \
       \ out = []\n        n = 0\n        for b in bits:\n            assert b < 6\n\
       \            if b:\n                n += 1\n            else:\n            \
       \    if n == 5:\n                    n = 0\n                    continue\n \
@@ -561,19 +749,18 @@ blocks:
       C: 10000110  01100001\n : 01000000  00000010\nA: 10000010  01000001\n\"\"\"\n"
     affinity: ''
     alias: ''
+    burst_tag: '''squelch_sob'''
     comment: ''
+    flag_tag: '''flag'''
     maxoutbuf: '0'
     minoutbuf: '0'
-    start_tag: '''packet_start'''
-    stop_tag: '''packet_end'''
   states:
-    _io_cache: ('Embedded Python Block', 'blk', [('start_tag', "'start'"), ('stop_tag',
-      "'stop'")], [('0', 'byte', 1)], [('bits', 'message', 1)], 'Embedded Python Block
-      example - a simple multiply const', [])
+    _io_cache: ('AX.25 decoder', 'blk', [('flag_tag', "'flag'"), ('burst_tag', "'squelch_sob'")],
+      [('0', 'byte', 1)], [('pdus', 'message', 1)], 'Blah', [])
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [320, 1780.0]
+    coordinate: [352, 1780.0]
     rotation: 0
     state: true
 - name: freq_xlating_fft_filter_ccc_0
@@ -594,7 +781,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [792, 116.0]
+    coordinate: [1088, 132.0]
     rotation: 180
     state: disabled
 - name: freq_xlating_fir_filter_xxx_0
@@ -857,6 +1044,86 @@ blocks:
     coordinate: [624, 888.0]
     rotation: 0
     state: enabled
+- name: qtgui_freq_sink_x_3
+  id: qtgui_freq_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    average: '1.0'
+    axislabels: 'True'
+    bw: samp_rate
+    color1: '"blue"'
+    color10: '"dark blue"'
+    color2: '"red"'
+    color3: '"green"'
+    color4: '"black"'
+    color5: '"cyan"'
+    color6: '"magenta"'
+    color7: '"yellow"'
+    color8: '"dark red"'
+    color9: '"dark green"'
+    comment: ''
+    ctrlpanel: 'False'
+    fc: '0'
+    fftsize: '1024'
+    freqhalf: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label: Relative Gain
+    label1: ''
+    label10: ''''''
+    label2: ''''''
+    label3: ''''''
+    label4: ''''''
+    label5: ''''''
+    label6: ''''''
+    label7: ''''''
+    label8: ''''''
+    label9: ''''''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    nconnections: '1'
+    showports: 'False'
+    tr_chan: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_tag: '""'
+    type: complex
+    units: dB
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    wintype: firdes.WIN_BLACKMAN_hARRIS
+    ymax: '10'
+    ymin: '-140'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [600, 200.0]
+    rotation: 0
+    state: true
 - name: qtgui_time_sink_x_0
   id: qtgui_time_sink_x
   parameters:
@@ -1664,7 +1931,7 @@ blocks:
     ctrlpanel: 'False'
     entags: 'True'
     grid: 'False'
-    gui_hint: tabs@4
+    gui_hint: 'tabs@4: 0,0'
     label1: Signal 1
     label10: Signal 10
     label2: Signal 2
@@ -1686,7 +1953,7 @@ blocks:
     marker7: '-1'
     marker8: '-1'
     marker9: '-1'
-    name: '""'
+    name: '"Bits"'
     nconnections: '1'
     size: bps*2
     srate: bps
@@ -1706,7 +1973,7 @@ blocks:
     tr_level: '0.0'
     tr_mode: qtgui.TRIG_MODE_TAG
     tr_slope: qtgui.TRIG_SLOPE_POS
-    tr_tag: '"packet_start"'
+    tr_tag: '"flag"'
     type: float
     update_time: '0.10'
     width1: '1'
@@ -1728,6 +1995,103 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1112, 1716.0]
+    rotation: 0
+    state: true
+- name: qtgui_time_sink_x_5_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'False'
+    gui_hint: 'tabs@4: 1,0,3,1'
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"Bits"'
+    nconnections: '1'
+    size: bps*2
+    srate: bps
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0.1'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_TAG
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '"flag"'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '1.5'
+    ymin: '-0.5'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1112, 1828.0]
     rotation: 0
     state: true
 - name: rational_resampler_xxx_0
@@ -2152,7 +2516,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1112, 92.0]
+    coordinate: [1416, 100.0]
     rotation: 180
     state: disabled
 - name: virtual_sink_0
@@ -2217,7 +2581,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1680, 964.0]
+    coordinate: [1744, 916.0]
     rotation: 0
     state: true
 - name: virtual_sink_5
@@ -2230,7 +2594,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 1564.0]
+    coordinate: [896, 1508.0]
     rotation: 0
     state: true
 - name: virtual_sink_6
@@ -2339,38 +2703,49 @@ blocks:
     state: true
 
 connections:
+- [analog_const_source_x_0, '0', blocks_xor_xx_0, '2']
 - [analog_nbfm_rx_0, '0', rational_resampler_xxx_0, '0']
 - [analog_pwr_squelch_xx_0, '0', qtgui_time_sink_x_0_0, '0']
 - [analog_pwr_squelch_xx_0, '0', virtual_sink_0, '0']
 - [analog_quadrature_demod_cf_0, '0', qtgui_time_sink_x_3, '0']
 - [analog_quadrature_demod_cf_0, '0', virtual_sink_3, '0']
 - [blocks_char_to_float_0, '0', qtgui_time_sink_x_5, '0']
+- [blocks_char_to_float_0, '0', qtgui_time_sink_x_5_0, '0']
 - [blocks_complex_to_float_0, '0', qtgui_time_sink_x_4_0, '0']
 - [blocks_complex_to_float_0_0, '0', qtgui_time_sink_x_4_0_0, '0']
 - [blocks_complex_to_float_1, '0', digital_binary_slicer_fb_0, '0']
+- [blocks_delay_0, '0', blocks_xor_xx_0, '0']
 - [blocks_file_source_0, '0', blocks_throttle_0, '0']
+- [blocks_file_source_0_0, '0', blocks_throttle_0, '0']
 - [blocks_float_to_complex_0, '0', digital_corr_est_cc_1, '0']
 - [blocks_float_to_complex_0, '0', digital_symbol_sync_xx_0_0, '0']
 - [blocks_multiply_const_vxx_0, '0', virtual_sink_6, '0']
+- [blocks_tag_gate_0, '0', blocks_tag_gate_0_0, '0']
+- [blocks_tag_gate_0_0, '0', blocks_tag_gate_0_1_0, '0']
+- [blocks_tag_gate_0_1, '0', blocks_tag_gate_0_1_0_0, '0']
+- [blocks_tag_gate_0_1_0, '0', blocks_tag_gate_0_1, '0']
+- [blocks_tag_gate_0_1_0_0, '0', virtual_sink_4, '0']
 - [blocks_throttle_0, '0', blocks_multiply_const_vxx_0, '0']
-- [digital_binary_slicer_fb_0, '0', virtual_sink_4, '0']
+- [blocks_throttle_0, '0', qtgui_freq_sink_x_3, '0']
+- [blocks_xor_xx_0, '0', digital_correlate_access_code_tag_xx_0, '0']
+- [digital_binary_slicer_fb_0, '0', blocks_tag_gate_0, '0']
 - [digital_corr_est_cc_1, '0', digital_symbol_sync_xx_0, '0']
 - [digital_corr_est_cc_1, '0', qtgui_time_sink_x_4, '0']
 - [digital_corr_est_cc_1, '1', qtgui_time_sink_x_4, '1']
-- [digital_correlate_access_code_tag_xx_0_0, '0', blocks_char_to_float_0, '0']
-- [digital_correlate_access_code_tag_xx_0_0, '0', virtual_sink_5, '0']
-- [digital_correlate_access_code_xx_ts_0, '0', digital_correlate_access_code_tag_xx_0_0,
-  '0']
+- [digital_correlate_access_code_tag_xx_0, '0', blocks_char_to_float_0, '0']
+- [digital_correlate_access_code_tag_xx_0, '0', virtual_sink_5, '0']
 - [digital_symbol_sync_xx_0, '0', blocks_complex_to_float_0, '0']
 - [digital_symbol_sync_xx_0, '0', blocks_complex_to_float_1, '0']
 - [digital_symbol_sync_xx_0, '1', qtgui_time_sink_x_4_0, '1']
 - [digital_symbol_sync_xx_0_0, '0', blocks_complex_to_float_0_0, '0']
 - [digital_symbol_sync_xx_0_0, '1', qtgui_time_sink_x_4_0_0, '1']
-- [epy_block_0, bits, blocks_message_debug_0, print]
+- [epy_block_0, pdus, blocks_message_debug_0, print]
+- [freq_xlating_fft_filter_ccc_0, '0', blocks_file_sink_0, '0']
 - [freq_xlating_fft_filter_ccc_0, '0', virtual_sink_6, '0']
 - [freq_xlating_fir_filter_xxx_0, '0', qtgui_freq_sink_x_2, '0']
 - [freq_xlating_fir_filter_xxx_0, '0', qtgui_time_sink_x_1, '0']
 - [freq_xlating_fir_filter_xxx_0, '0', virtual_sink_2, '0']
+- [rational_resampler_xxx_0, '0', audio_sink_0, '0']
 - [rational_resampler_xxx_0, '0', qtgui_freq_sink_x_0, '0']
 - [rational_resampler_xxx_0, '0', qtgui_time_sink_x_2, '0']
 - [rational_resampler_xxx_0, '0', virtual_sink_1, '0']
@@ -2382,7 +2757,8 @@ connections:
 - [virtual_source_3, '0', analog_quadrature_demod_cf_0, '0']
 - [virtual_source_4, '0', blocks_float_to_complex_0, '0']
 - [virtual_source_4, '0', qtgui_freq_sink_x_1, '0']
-- [virtual_source_5, '0', digital_correlate_access_code_xx_ts_0, '0']
+- [virtual_source_5, '0', blocks_delay_0, '0']
+- [virtual_source_5, '0', blocks_xor_xx_0, '1']
 - [virtual_source_6, '0', epy_block_0, '0']
 
 metadata:

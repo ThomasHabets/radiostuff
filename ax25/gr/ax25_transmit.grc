@@ -71,13 +71,17 @@ blocks:
 - name: idle_buffer_len
   id: variable
   parameters:
-    comment: ''
-    value: '1000'
+    comment: 'How many (1200bps) samples
+
+      worth of time to turn off
+
+      tx after a packet.'
+    value: '2000'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [304, 452.0]
+    coordinate: [344, 316.0]
     rotation: 0
     state: true
 - name: monitor_volume
@@ -110,7 +114,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [808, 1252.0]
+    coordinate: [968, 1092.0]
     rotation: 0
     state: true
 - name: ogain
@@ -132,6 +136,22 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1480, 1116.0]
+    rotation: 0
+    state: true
+- name: quiet_buffer_len
+  id: variable
+  parameters:
+    comment: 'How many (1200bps) samples
+
+      worth of quiet audio
+
+      before stopping tx'
+    value: '100'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [344, 428.0]
     rotation: 0
     state: true
 - name: samp_rate
@@ -158,7 +178,52 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [176, 428.0]
+    coordinate: [224, 316.0]
+    rotation: 0
+    state: true
+- name: tag_packet_quiet
+  id: variable_tag_object
+  parameters:
+    comment: ''
+    key: pmt.intern("packet_len")
+    offset: '0'
+    src: pmt.intern("src")
+    value: pmt.to_pmt(quiet_buffer_len)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [224, 428.0]
+    rotation: 0
+    state: true
+- name: tag_sound_off
+  id: variable_tag_object
+  parameters:
+    comment: ''
+    key: pmt.intern("sound")
+    offset: '0'
+    src: pmt.intern("src")
+    value: pmt.to_pmt(0)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 428.0]
+    rotation: 0
+    state: true
+- name: tag_sound_on
+  id: variable_tag_object
+  parameters:
+    comment: ''
+    key: pmt.intern("sound")
+    offset: '0'
+    src: pmt.intern("src")
+    value: pmt.to_pmt(1)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [120, 428.0]
     rotation: 0
     state: true
 - name: tag_tx_off
@@ -173,7 +238,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [80, 316.0]
+    coordinate: [16, 316.0]
     rotation: 0
     state: true
 - name: tag_tx_on
@@ -188,7 +253,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [72, 428.0]
+    coordinate: [112, 316.0]
     rotation: 0
     state: true
 - name: volume
@@ -203,7 +268,7 @@ blocks:
     start: '0'
     step: '0.01'
     stop: '1'
-    value: '0.1'
+    value: '0'
     widget: counter_slider
   states:
     bus_sink: false
@@ -230,7 +295,7 @@ blocks:
     bus_structure: null
     coordinate: [384, 1144.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: analog_nbfm_tx_0
   id: analog_nbfm_tx
   parameters:
@@ -284,7 +349,7 @@ blocks:
     bus_structure: null
     coordinate: [688, 1212.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_add_const_vxx_0
   id: blocks_add_const_vxx
   parameters:
@@ -429,10 +494,27 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [528, 288.0]
+    coordinate: [504, 160.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_multiply_by_tag_value_cc_0
+  id: blocks_multiply_by_tag_value_cc
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    tagname: sound
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [776, 844.0]
+    rotation: 0
+    state: true
+- name: blocks_multiply_by_tag_value_cc_0_0
   id: blocks_multiply_by_tag_value_cc
   parameters:
     affinity: ''
@@ -446,7 +528,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [776, 844.0]
+    coordinate: [656, 908.0]
     rotation: 0
     state: true
 - name: blocks_multiply_const_vxx_0
@@ -520,7 +602,7 @@ blocks:
     bus_structure: null
     coordinate: [584, 1132.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_pdu_to_tagged_stream_0
   id: blocks_pdu_to_tagged_stream
   parameters:
@@ -594,6 +676,42 @@ blocks:
     coordinate: [912, 96.0]
     rotation: 0
     state: true
+- name: blocks_tag_share_0_0
+  id: blocks_tag_share
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    io_type: byte
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    share_type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [952, 416.0]
+    rotation: 0
+    state: true
+- name: blocks_tag_share_0_0_0
+  id: blocks_tag_share
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    io_type: byte
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    share_type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [896, 208.0]
+    rotation: 0
+    state: true
 - name: blocks_tagged_stream_mux_0
   id: blocks_tagged_stream_mux
   parameters:
@@ -603,7 +721,7 @@ blocks:
     lengthtagname: packet_len
     maxoutbuf: '0'
     minoutbuf: '0'
-    ninputs: '2'
+    ninputs: '3'
     tag_preserve_head_pos: '0'
     type: byte
     vlen: '1'
@@ -641,7 +759,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     repeat: 'True'
-    tags: '[tag_tx_on]'
+    tags: '[tag_tx_on, tag_sound_on]'
     type: byte
     vector: '[0]'
     vlen: '1'
@@ -650,6 +768,46 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [672, 108.0]
+    rotation: 0
+    state: true
+- name: blocks_vector_source_x_0_0
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[tag_tx_off]'
+    type: byte
+    vector: '[0]'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [728, 476.0]
+    rotation: 0
+    state: true
+- name: blocks_vector_source_x_0_0_0
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[tag_tx_on, tag_sound_off]'
+    type: byte
+    vector: '[0]'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [664, 284.0]
     rotation: 0
     state: true
 - name: blocks_vector_source_x_1
@@ -661,7 +819,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     repeat: 'True'
-    tags: '[tag_tx_off, tag_packet_idle]'
+    tags: '[tag_packet_idle]'
     type: byte
     vector: '[0]*idle_buffer_len'
     vlen: '1'
@@ -669,57 +827,75 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [856, 212.0]
+    coordinate: [696, 396.0]
+    rotation: 0
+    state: true
+- name: blocks_vector_source_x_1_0
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[tag_packet_quiet]'
+    type: byte
+    vector: '[0]*quiet_buffer_len'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [640, 188.0]
     rotation: 0
     state: true
 - name: epy_block_0
   id: epy_block
   parameters:
-    _source_code: "\"\"\"\nEmbedded Python Blocks:\n\nEach time this file is saved,\
-      \ GRC will instantiate the first class it finds\nto get ports and parameters\
-      \ of your block. The arguments to __init__  will\nbe the parameters. All of\
-      \ them are required to have default values!\n\"\"\"\n\nimport numpy as np\n\
-      from gnuradio import gr\nfrom gnuradio.gr import pmt\n\ndef stuff(bits):\n \
-      \   stuffed = []\n    n = 0\n    for bit in bits:\n        if bit:\n       \
-      \     n += 1\n            if n == 6:\n                n = 1\n              \
-      \  stuffed.append(0)\n        else:\n            n = 0\n        stuffed.append(bit)\n\
-      \    return stuffed\n    \ndef scramble(bits):\n    scrambled = []\n    for\
-      \ n, bit in enumerate(bits):\n        if n == 0:\n            scrambled.append(bit)\n\
-      \            continue\n        scrambled.append(1 ^ bit ^ scrambled[n-1])\n\
-      \    return scrambled\n\ndef invert(bits):\n    return [(x ^ 1) for x in bits]\n\
-      \ndef unpack(byts):\n    bits = []\n    for byt in byts:\n        for b in [1,2,4,8,16,32,64,128]:\n\
-      \            bits.append(0 + (not not (byt & b)))\n    return bits\n\ndef encode(byts):\n\
-      \    bits = unpack(byts)\n\n    head = ([0] + [1]*6 + [0]) * 24\n    tail =\
-      \ ([0] + [1]*6 + [0]) * 2\n    bits = head+stuff(bits)+tail\n    # correct so\
-      \ far\n\n    # Scramble\n    bits = scramble(bits)\n    print(bits)\n    return\
-      \ bits\n\nif False:\n    print(encode([1]))\n    assert encode([1]) == [0,0,1,1,1,1,1,0,1]\n\
-      \    print(encode([2]))\n    assert encode([2]) == [1,0,0,1,1,1,1,1]\n\n   \
-      \ print(encode([0xf0]))\n    assert encode([0xf0]) == [1,1,1,1,0,1,1,1]\n  \
-      \  print(encode([0xff]))\n    assert encode([0xff]) == [0,1,1,1,1,1,0,1,1]\n\
-      \n    print(encode([0x55]))\n    assert encode([0x55]) == [0,0,0,0,0,0,0,0]\n\
-      \n    print(encode([0xAA]))\n    assert encode([0xAA]) == [1,0,0,0,0,0,0,0]\n\
-      \n    print(encode([\n        1,\n        2,\n        0xf0,\n        0xff,\n\
-      \        0,\n        0x55,\n        0xaa,\n    ]))\n\n    assert encode([\n\
-      \        1,\n        2,\n        0xf0,\n        0xff,\n        0,\n        0x55,\n\
-      \        0xAA,\n    ]) == [\n        1,1,0,0,0,0,0,0,   # 1\n        0,1,1,0,0,0,0,0,\
-      \   # 2\n        0,0,0,0,1,0,0,0,   # 0xf0\n        0,0,0,0,0,0,0,0,   # 0xff\
-      \ with prev bit\n        1,0,0,0,0,0,0,0,   # 0 with prev bit\n        1,1,1,1,1,0,1,1,1,\
-      \ # 0x55\n        0,1,1,1,1,1,0,1,1, # 0xAA with prev bit\n    ]\n\nclass blk(gr.basic_block):\
-      \  # other base classes are basic_block, decim_block, interp_block\n    \"\"\
-      \"Embedded Python Block example - a simple multiply const\"\"\"\n\n    def __init__(self):\n\
-      \        \"\"\"arguments to this function show up as parameters in GRC\"\"\"\
-      \n        gr.sync_block.__init__(\n            self,\n            name='AX.25\
-      \ bit encoding',\n            in_sig=[],\n            out_sig=[]\n        )\n\
-      \        \n        self._in = pmt.intern(\"in\")\n        self._out = pmt.intern(\"\
+    _source_code: "\"\"\"AX.25 encoder block.\n\nTakes an AX.25 frame and turns it\
+      \ into encoded bits ready for Bell 202\ntones.\n\"\"\"\n\nimport numpy as np\n\
+      from gnuradio import gr\nfrom gnuradio.gr import pmt\n\ndebug = False\n\ndef\
+      \ stuff(bits):\n    \"\"\"Stuff bits to prevent long runs of ones.\n\n    Long\
+      \ runs of ones can be confused with the flag.\n    See spec section 3.6.\n \
+      \   \"\"\"\n    stuffed = []\n    n = 0\n    for bit in bits:\n        if bit:\n\
+      \            n += 1\n            if n == 6:\n                n = 1\n       \
+      \         stuffed.append(0)\n        else:\n            n = 0\n        stuffed.append(bit)\n\
+      \    return stuffed\n    \ndef scramble(bits):\n    \"\"\"Scramble bits.\n\n\
+      \    Grandiose name for just xoring with previous output in a CBC-like\n   \
+      \ fashion.\n    \"\"\"\n    scrambled = []\n    for n, bit in enumerate(bits):\n\
+      \        if n == 0:\n            scrambled.append(bit)\n            continue\n\
+      \        scrambled.append(1 ^ bit ^ scrambled[n-1])\n    return scrambled\n\n\
+      def unpack(byts):\n    \"\"\"Unpack bytes into bits.\"\"\"\n    bits = []\n\
+      \    for byt in byts:\n        for b in [1,2,4,8,16,32,64,128]:\n          \
+      \  bits.append(0 + (not not (byt & b)))\n    return bits\n\ndef invert(bits):\n\
+      \    return [(x^1) for x in bits]\n\ndef encode(byts, flags=None):\n    \"\"\
+      \"Encode in the AX.25 persuation.\"\"\"\n    if flags is None:\n        flags\
+      \ = (24, 2)\n\n    # Unpack to bits.\n    bits = unpack(byts)\n\n    # Stuff\
+      \ to avoid long series of ones.\n    bits = stuff(bits)\n\n    # Add header\
+      \ and trailer.\n    head = ([0] + [1]*6 + [0]) * flags[0]\n    tail = ([0] +\
+      \ [1]*6 + [0]) * flags[1]\n    bits = head+bits+tail\n\n    # Scramble\n   \
+      \ #tail = [0,1,1,1,1,1,1,0] * flags[1]\n    bits = scramble(bits)\n    return\
+      \ bits\n\nif True:\n    # without headers\n    for i, want in [\n          \
+      \  ([1],[1,0,1,0,1,0,1,0]),\n            ([2],[0,0,1,0,1,0,1,0]),\n        \
+      \    ([0xf0],[0,1,0,1,1,1,1,1]),\n            ([0xff],[1,1,1,1,1,0,0,0,0]),\n\
+      \            ([0x55],[1,0,0,1,1,0,0,1]),\n            ([0xaa],[0,0,1,1,0,0,1,1]),\n\
+      \            ([0x7E],[0,0,0,0,0,0,1,1,0]),\n    ]:\n        got = encode(i,\
+      \ flags=(0,0))\n        assert got == want, \"Failed encoding %s. got %s, want\
+      \ %s\" % (i, got, want)\n\nclass blk(gr.basic_block):  # other base classes\
+      \ are basic_block, decim_block, interp_block\n    \"\"\"Embedded Python Block\
+      \ example - a simple multiply const\"\"\"\n\n    def __init__(self):\n     \
+      \   \"\"\"arguments to this function show up as parameters in GRC\"\"\"\n  \
+      \      gr.sync_block.__init__(\n            self,\n            name='AX.25 bit\
+      \ encoding',\n            in_sig=[],\n            out_sig=[]\n        )\n  \
+      \      \n        self._in = pmt.intern(\"in\")\n        self._out = pmt.intern(\"\
       out\")\n        self.message_port_register_in(self._in)\n        self.message_port_register_out(self._out)\n\
       \        self.set_msg_handler(self._in, self._handle)\n\n    def _handle(self,\
-      \ pdu):\n        byts = pmt.to_python(pmt.cdr(pdu))\n        print(\"AX.25 bytes:\
-      \ %d\" % len(byts))\n        bits = encode(byts)\n        print(\"AX.25: Publishing\
-      \ %d bits\" % len(bits))\n        v = pmt.init_u8vector(len(bits), bits)\n \
-      \       out = pmt.cons(pmt.PMT_NIL, v)\n        self.message_port_pub(self._out,\
-      \ out)\n        \n    def work(self, input_items, output_items):\n        \"\
-      \"\"example: multiply with constant\"\"\"\n        output_items[0][:] = input_items[0]\
-      \ * self.example_param\n        return len(output_items[0])\n"
+      \ pdu):\n        byts = pmt.to_python(pmt.cdr(pdu))\n        if debug:\n   \
+      \         print(\"AX.25 bytes: %d\" % len(byts))\n        bits = encode(byts)\n\
+      \        if debug:\n            print(\"AX.25: Publishing %d bits\" % len(bits))\n\
+      \        v = pmt.init_u8vector(len(bits), bits)\n        out = pmt.cons(pmt.PMT_NIL,\
+      \ v)\n        self.message_port_pub(self._out, out)\n"
     affinity: ''
     alias: ''
     comment: ''
@@ -1635,7 +1811,7 @@ blocks:
 connections:
 - [analog_nbfm_rx_0, '0', blocks_multiply_const_vxx_3, '0']
 - [analog_nbfm_tx_0, '0', analog_nbfm_rx_0, '0']
-- [analog_nbfm_tx_0, '0', rational_resampler_xxx_0, '0']
+- [analog_nbfm_tx_0, '0', blocks_multiply_by_tag_value_cc_0_0, '0']
 - [blocks_add_const_vxx_0, '0', blocks_float_to_complex_0, '0']
 - [blocks_char_to_float_0, '0', blocks_multiply_const_vxx_0, '0']
 - [blocks_char_to_float_1, '0', qtgui_time_sink_x_1, '0']
@@ -1647,6 +1823,7 @@ connections:
 - [blocks_float_to_complex_0, '0', blocks_complex_to_real_0, '0']
 - [blocks_float_to_complex_0_0, '0', blocks_multiply_by_tag_value_cc_0, '0']
 - [blocks_multiply_by_tag_value_cc_0, '0', blocks_complex_to_real_0_0, '0']
+- [blocks_multiply_by_tag_value_cc_0_0, '0', rational_resampler_xxx_0, '0']
 - [blocks_multiply_const_vxx_0, '0', blocks_add_const_vxx_0, '0']
 - [blocks_multiply_const_vxx_1, '0', audio_sink_0, '0']
 - [blocks_multiply_const_vxx_2, '0', analog_nbfm_tx_0, '0']
@@ -1656,11 +1833,16 @@ connections:
 - [blocks_socket_pdu_0, pdus, blocks_message_debug_0, print_pdu]
 - [blocks_socket_pdu_0, pdus, epy_block_0, in]
 - [blocks_tag_share_0, '0', blocks_tagged_stream_mux_0, '0']
+- [blocks_tag_share_0_0, '0', blocks_tagged_stream_mux_0, '2']
+- [blocks_tag_share_0_0_0, '0', blocks_tagged_stream_mux_0, '1']
 - [blocks_tagged_stream_mux_0, '0', blocks_char_to_float_1, '0']
 - [blocks_tagged_stream_mux_0, '0', virtual_sink_1, '0']
 - [blocks_vco_f_0, '0', blocks_float_to_complex_0_0, '0']
 - [blocks_vector_source_x_0, '0', blocks_tag_share_0, '1']
-- [blocks_vector_source_x_1, '0', blocks_tagged_stream_mux_0, '1']
+- [blocks_vector_source_x_0_0, '0', blocks_tag_share_0_0, '1']
+- [blocks_vector_source_x_0_0_0, '0', blocks_tag_share_0_0_0, '1']
+- [blocks_vector_source_x_1, '0', blocks_tag_share_0_0, '0']
+- [blocks_vector_source_x_1_0, '0', blocks_tag_share_0_0_0, '0']
 - [epy_block_0, out, blocks_message_debug_0, print_pdu]
 - [epy_block_0, out, blocks_pdu_to_tagged_stream_0, pdus]
 - [freq_xlating_fft_filter_ccc_0, '0', qtgui_time_sink_x_2, '0']

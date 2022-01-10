@@ -1,6 +1,7 @@
 options:
   parameters:
     author: Thomas Habets
+    catch_exceptions: 'True'
     category: '[GRC Hier Blocks]'
     cmake_opt: ''
     comment: ''
@@ -22,7 +23,6 @@ options:
     sizing_mode: fixed
     thread_safe_setters: ''
     title: AX.25 transmit
-    window_size: ''
   states:
     bus_sink: false
     bus_source: false
@@ -91,7 +91,7 @@ blocks:
     gui_hint: ''
     label: ''
     min_len: '200'
-    orient: Qt.Horizontal
+    orient: QtCore.Qt.Horizontal
     rangeType: float
     start: '0'
     step: '0.01'
@@ -124,7 +124,7 @@ blocks:
     gui_hint: ''
     label: ''
     min_len: '200'
-    orient: Qt.Horizontal
+    orient: QtCore.Qt.Horizontal
     rangeType: float
     start: '0'
     step: '0.01'
@@ -263,7 +263,7 @@ blocks:
     gui_hint: ''
     label: ''
     min_len: '200'
-    orient: Qt.Horizontal
+    orient: QtCore.Qt.Horizontal
     rangeType: float
     start: '0'
     step: '0.01'
@@ -490,6 +490,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
+    en_uvec: 'True'
   states:
     bus_sink: false
     bus_source: false
@@ -1385,7 +1386,7 @@ blocks:
     showports: 'False'
     type: complex
     update_time: '0.10'
-    wintype: firdes.WIN_BLACKMAN_hARRIS
+    wintype: window.WIN_BLACKMAN_hARRIS
   states:
     bus_sink: false
     bus_source: false
@@ -1598,6 +1599,38 @@ blocks:
     gain7: '0'
     gain8: '0'
     gain9: '0'
+    gain_type0: default
+    gain_type1: default
+    gain_type10: default
+    gain_type11: default
+    gain_type12: default
+    gain_type13: default
+    gain_type14: default
+    gain_type15: default
+    gain_type16: default
+    gain_type17: default
+    gain_type18: default
+    gain_type19: default
+    gain_type2: default
+    gain_type20: default
+    gain_type21: default
+    gain_type22: default
+    gain_type23: default
+    gain_type24: default
+    gain_type25: default
+    gain_type26: default
+    gain_type27: default
+    gain_type28: default
+    gain_type29: default
+    gain_type3: default
+    gain_type30: default
+    gain_type31: default
+    gain_type4: default
+    gain_type5: default
+    gain_type6: default
+    gain_type7: default
+    gain_type8: default
+    gain_type9: default
     len_tag_name: ''
     lo_export0: 'False'
     lo_export1: 'False'
@@ -1666,38 +1699,6 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     nchan: '1'
-    norm_gain0: 'True'
-    norm_gain1: 'False'
-    norm_gain10: 'False'
-    norm_gain11: 'False'
-    norm_gain12: 'False'
-    norm_gain13: 'False'
-    norm_gain14: 'False'
-    norm_gain15: 'False'
-    norm_gain16: 'False'
-    norm_gain17: 'False'
-    norm_gain18: 'False'
-    norm_gain19: 'False'
-    norm_gain2: 'False'
-    norm_gain20: 'False'
-    norm_gain21: 'False'
-    norm_gain22: 'False'
-    norm_gain23: 'False'
-    norm_gain24: 'False'
-    norm_gain25: 'False'
-    norm_gain26: 'False'
-    norm_gain27: 'False'
-    norm_gain28: 'False'
-    norm_gain29: 'False'
-    norm_gain3: 'False'
-    norm_gain30: 'False'
-    norm_gain31: 'False'
-    norm_gain4: 'False'
-    norm_gain5: 'False'
-    norm_gain6: 'False'
-    norm_gain7: 'False'
-    norm_gain8: 'False'
-    norm_gain9: 'False'
     num_mboards: '1'
     otw: ''
     samp_rate: samp_rate
@@ -1710,6 +1711,7 @@ blocks:
     sd_spec6: ''
     sd_spec7: ''
     show_lo_controls: 'False'
+    start_time: '-1.0'
     stream_args: ''
     stream_chans: '[]'
     sync: sync

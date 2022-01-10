@@ -14,6 +14,8 @@
 #include <fstream>
 #include <map>
 #include <vector>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 int parse_band(std::string_view s)
 {
@@ -43,66 +45,55 @@ void print_lines(int tod,
         if (!st.count) {
             continue;
         }
-        outs[n] << tod << " " << (st.sum / st.count) << " " << (st.count / st.days_seen)
-                << "\n";
+        outs[n] << tod << " " << (st.sum / st.count) << " " << "\n";
     }
 }
 
+struct State {
+  double sum = 0.0;
+  int count = 0;
+};
 
 int main(int argc, char** argv)
 {
+  constexpr int period = 15;
     std::ios_base::sync_with_stdio(false);
     assert("IO91" == maidenhead_from_index(maidenhead_to_index("IO91")));
 
+    std::string outbasedir = argv[1];
+    
     const std::vector<int> bands{ 20, 40 };
-    std::vector<std::vector<DistState>> dist_states;
-    auto state_reset = [&dist_states, &bands] {
-        dist_states.clear();
-        for (long unsigned int b = 0; b < bands.size(); b++) {
-            dist_states.emplace_back(maiden_count);
-        }
-    };
-    state_reset();
 
-    // Open output files.
-    std::vector<std::vector<std::ofstream>> outs;
-    for (const auto band : bands) {
-        std::vector<std::ofstream> t;
-        for (int n = 0; n < maiden_count; n++) {
-            auto f = std::ofstream("out.distday/" + maidenhead_from_index(n) + "." +
-                                   std::to_string(band));
-            if (!f.good()) {
-                throw std::runtime_error(std::string("failed to open output file: ") +
-                                         strerror(errno));
-            }
-            t.push_back(std::move(f));
-        }
-        outs.push_back(std::move(t));
+    // band_index -> coord_index -> time_index
+    std::vector<std::vector<std::vector<State>>> state(bands.size());
+    for (auto& o : state) {
+      o.resize(maiden_count);
+      for (int n = 0; n < maiden_count; n++) {
+	o[n].resize(86400/15);
+      }
     }
-
-    int cur_tod = -1;
+    mkdir(outbasedir.c_str(), 0755);
     for (auto line : StreamLines(std::cin)) {
-        // std::cerr << "LINE: <" << line << ">\n";
-        const auto cols = split<7>(line);
+        const auto cols = split<6>(line);
         if (cols[0].empty()) {
             // Splitting failed.
-            std::cerr << "Split failed\n";
+	  std::cerr << "Split failed on " << line << "\n";
             continue;
         }
-        auto& src = cols[5];
-        auto& dst = cols[6];
+        auto& src = cols[4];
+        auto& dst = cols[5];
         if (dst.size() < 4) {
             continue;
         }
         if (src.size() < 4) {
             continue;
         }
-        const auto band = parse_band(cols[2]);
+        const auto band = parse_band(cols[1]);
         if (band == -1) {
             // Unknown band.
             continue;
         }
-        auto& mode = cols[3];
+        auto& mode = cols[2];
         if (mode != "FT8") {
             continue;
         }
@@ -110,43 +101,35 @@ int main(int argc, char** argv)
         const std::string_view src4(src.begin(), src.begin() + 4);
         const auto dstindex = maidenhead_to_index(dst4);
         const auto srcindex = maidenhead_to_index(src4);
-        // const auto tod = ((parse_int(cols[0])%86400) / period) * period;
-        const auto tod = parse_int(cols[0]);
-        const auto day = parse_int(cols[1]) / 86400; // TODO: parse_int64
+         const auto tod = ((parse_int(cols[0])%86400) / period) * period;
+	 //const auto tod = parse_int(cols[0]);
+        //const auto day = parse_int(cols[1]) / 86400; // TODO: parse_int64
         const auto coord_src = decode_maidenhead(src);
         const auto coord_dst = decode_maidenhead(dst);
-        if (cur_tod != tod) {
-            for (size_t oband = 0; oband < bands.size(); oband++) {
-                print_lines(cur_tod, outs[oband], dist_states[oband]);
-            }
-            state_reset();
-            cur_tod = tod;
-        }
-        for (auto index : std::array<int, 2>{ dstindex, srcindex }) {
-            auto& dist_entry = dist_states[band][index];
-            dist_entry.sum += dist(coord_src, coord_dst);
-            if (dist_entry.last_day_seen != day) {
-                dist_entry.days_seen++;
-                dist_entry.last_day_seen = day;
-            }
-            dist_entry.count++;
-        }
-        // std::cout << line << " " << band << "\n";
-    }
 
-    std::cerr << "todistday: Flushing and closing output files…\n";
-    ThreadPool pool(get_nprocs() * 20);
-    // std::vector<std::jthread> threads;
-    for (auto& os : outs) {
-        for (auto& out : os) {
-            pool.add([&out] {
-                out.close();
-                if (out.fail()) {
-                    throw std::runtime_error(
-                        std::string("Failed to flush/close output file: ") +
-                        strerror(errno));
-                }
-            });
-        }
+	const auto distance = dist(coord_src, coord_dst);
+        for (const auto index : std::array<int, 2>{ dstindex, srcindex }) {
+	  auto& entry = state[band][index][tod];
+	  entry.count++;
+	  entry.sum += distance;
+	}
+    }
+    for (size_t bi = 0; bi < bands.size(); bi++) {
+      for (int n = 0; n < maiden_count; n++) {
+	const auto& entries = state[bi][n];
+	if (!std::any_of(entries.begin(), entries.end(), [](const auto& e){return e.count;})) {
+	  continue;
+	}
+	std::ofstream f(outbasedir + "/" + maidenhead_from_index(n) + "." +
+			       std::to_string(bands[bi]));
+	for (int t = 0; t < 86400 / 15; t++) {
+	  const auto avg = entries[t].count ? (entries[t].sum / entries[t].count) : 0;
+	  f << (t*15) << " " << avg << "\n";
+	}
+	if (!f.good()) {
+	  throw std::runtime_error(std::string("failed to open output file: ") +
+				   strerror(errno));
+	}
+      }
     }
 }

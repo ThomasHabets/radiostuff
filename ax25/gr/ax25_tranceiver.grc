@@ -86,7 +86,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [104, 324.0]
+    coordinate: [592, 324.0]
     rotation: 0
     state: true
 - name: offset
@@ -119,7 +119,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [232, 604.0]
+    coordinate: [592, 444.0]
     rotation: 0
     state: true
 - name: samp_rate
@@ -150,7 +150,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [584, 172.0]
+    coordinate: [1040, 156.0]
     rotation: 0
     state: true
 - name: ax25_hier_tx_0
@@ -170,7 +170,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [784, 388.0]
+    coordinate: [1152, 412.0]
     rotation: 180
     state: enabled
 - name: blocks_message_debug_0
@@ -184,9 +184,23 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 264.0]
+    coordinate: [1288, 248.0]
     rotation: 0
-    state: true
+    state: enabled
+- name: blocks_message_debug_0_0
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    en_uvec: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1568, 80.0]
+    rotation: 0
+    state: disabled
 - name: blocks_socket_pdu_0
   id: blocks_socket_pdu
   parameters:
@@ -204,7 +218,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [840, 164.0]
+    coordinate: [1296, 148.0]
     rotation: 0
     state: enabled
 - name: freq_xlating_fft_filter_ccc_0
@@ -225,8 +239,29 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [336, 156.0]
+    coordinate: [792, 140.0]
     rotation: 0
+    state: true
+- name: freq_xlating_fft_filter_ccc_1
+  id: freq_xlating_fft_filter_ccc
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: -offset
+    comment: ''
+    decim: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    nthreads: '1'
+    samp_delay: '0'
+    samp_rate: samp_rate
+    taps: firdes.complex_band_pass(1, samp_rate, offset-12500, offset+12500, 500)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [704, 588.0]
+    rotation: 180
     state: true
 - name: habets39_pdu_file_writer_0
   id: habets39_pdu_file_writer
@@ -239,7 +274,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [816, 100.0]
+    coordinate: [1272, 84.0]
     rotation: 0
     state: true
 - name: rational_resampler_xxx_0
@@ -259,8 +294,50 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [536, 428.0]
+    coordinate: [952, 412.0]
     rotation: 180
+    state: true
+- name: soapy_limesdr_sink_0
+  id: soapy_limesdr_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bandwidth: '0.0'
+    center_freq: freq-offset
+    comment: ''
+    dev_args: ''
+    freq_correction: '0'
+    gain: ogain*(64+12)-12
+    samp_rate: samp_rate
+    type: fc32
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [48, 560.0]
+    rotation: 180
+    state: true
+- name: soapy_limesdr_source_0
+  id: soapy_limesdr_source
+  parameters:
+    affinity: ''
+    alias: ''
+    bandwidth: '0.0'
+    center_freq: freq-offset
+    comment: ''
+    dev_args: ''
+    freq_correction: '0'
+    gain: '20.0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    type: fc32
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [64, 444.0]
+    rotation: 0
     state: true
 - name: uhd_usrp_sink_0
   id: uhd_usrp_sink
@@ -331,7 +408,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: freq
+    center_freq0: freq-offset
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -536,9 +613,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [184, 468.0]
+    coordinate: [80, 292.0]
     rotation: 180
-    state: true
+    state: disabled
 - name: uhd_usrp_source_0
   id: uhd_usrp_source
   parameters:
@@ -974,6 +1051,84 @@ blocks:
     bus_structure: null
     coordinate: [80, 148.0]
     rotation: 0
+    state: disabled
+- name: virtual_sink_0
+  id: virtual_sink
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: air_rx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [328, 196.0]
+    rotation: 0
+    state: disabled
+- name: virtual_sink_0_0
+  id: virtual_sink
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: air_rx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [304, 452.0]
+    rotation: 0
+    state: true
+- name: virtual_sink_1
+  id: virtual_sink
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: air_tx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [528, 620.0]
+    rotation: 180
+    state: true
+- name: virtual_source_0
+  id: virtual_source
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: air_rx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [576, 172.0]
+    rotation: 0
+    state: true
+- name: virtual_source_1
+  id: virtual_source
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: air_tx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [368, 348.0]
+    rotation: 180
+    state: disabled
+- name: virtual_source_1_0
+  id: virtual_source
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: air_tx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [304, 556.0]
+    rotation: 180
     state: true
 
 connections:
@@ -982,9 +1137,15 @@ connections:
 - [ax25_hier_rx_ng_0, out, habets39_pdu_file_writer_0, in]
 - [ax25_hier_tx_0, '0', rational_resampler_xxx_0, '0']
 - [blocks_socket_pdu_0, pdus, ax25_hier_tx_0, in]
+- [blocks_socket_pdu_0, pdus, blocks_message_debug_0_0, print_pdu]
 - [freq_xlating_fft_filter_ccc_0, '0', ax25_hier_rx_ng_0, '0']
-- [rational_resampler_xxx_0, '0', uhd_usrp_sink_0, '0']
-- [uhd_usrp_source_0, '0', freq_xlating_fft_filter_ccc_0, '0']
+- [freq_xlating_fft_filter_ccc_1, '0', virtual_sink_1, '0']
+- [rational_resampler_xxx_0, '0', freq_xlating_fft_filter_ccc_1, '0']
+- [soapy_limesdr_source_0, '0', virtual_sink_0_0, '0']
+- [uhd_usrp_source_0, '0', virtual_sink_0, '0']
+- [virtual_source_0, '0', freq_xlating_fft_filter_ccc_0, '0']
+- [virtual_source_1, '0', uhd_usrp_sink_0, '0']
+- [virtual_source_1_0, '0', soapy_limesdr_sink_0, '0']
 
 metadata:
   file_format: 1

@@ -30,10 +30,12 @@ void set_window_size_fd(int fd, unsigned int window_size)
     if (window_size > 0) {
         if (-1 ==
             setsockopt(fd, SOL_AX25, AX25_WINDOW, &window_size, sizeof(window_size))) {
+	  std::clog << "lolfail?!\n";
             throw std::runtime_error(std::string("setting AX25_WINDOW ") +
                                      std::to_string(window_size) + ": " +
                                      strerror(errno));
         }
+	std::clog << "Success?!\n";
     }
 }
 
@@ -354,6 +356,13 @@ DGram::DGram(std::string radio, std::string mycall, std::vector<std::string> dig
     populate_digis(&me, { radio_ });
     if (-1 == bind(sock_, reinterpret_cast<struct sockaddr*>(&me), sizeof(me))) {
         throw std::runtime_error("bind to " + mycall_ + " failed: " + strerror(errno));
+    }
+    if (false) {
+        const char* dev = "radio6";
+        if (-1 == setsockopt(sock_, SOL_AX25, SO_BINDTODEVICE, dev, strlen(dev))) {
+            throw std::runtime_error(std::string("setting AX25_BINDTODEVICE ") + dev +
+                                     ": " + strerror(errno));
+        }
     }
 }
 

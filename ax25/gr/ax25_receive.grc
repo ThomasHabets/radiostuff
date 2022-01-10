@@ -108,7 +108,7 @@ blocks:
     gui_hint: 'tabs@0: 2,0'
     label: ''
     type: real
-    value: '20'
+    value: '1'
   states:
     bus_sink: false
     bus_source: false
@@ -387,7 +387,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: transmitted-msg4-50ksps.raw
+    file: generated-50ksps.raw
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -728,25 +728,26 @@ blocks:
       \                        bits = self._unstuff(self._data)\n                \
       \        if debug:\n                            print(bits)\n              \
       \          byt = self._pack(bits)\n                        self.message_port_pub(self._pub,\
-      \ pmt.to_pmt(byt))\n                        if debug:\n                    \
-      \        print(\"AX.25 packet arrived at %d. size %d -> %d\" % (nr+ind, len(bits),\
-      \ len(byt)))\n                            with open('%s/ax25-%s.raw' % (tempfile.gettempdir(),\
-      \ str(time.time())), 'wb') as f:\n                                f.write(b''.join([x.to_bytes(1,byteorder='big')\
-      \ for x in byt]))\n                        continue\n                \n    \
-      \        self._data.append(int(sample))\n        self.consume(0, len(inp))\n\
-      \        return len(output_items)\n\n    def _unstuff(self, bits):\n       \
-      \ out = []\n        n = 0\n        for b in bits:\n            assert b < 6\n\
-      \            if b:\n                n += 1\n            else:\n            \
-      \    if n == 5:\n                    n = 0\n                    continue\n \
-      \               n = 0\n            out.append(b)\n        return out\n\n   \
-      \ def _pack(self, bits):\n        byt = []\n        while len(bits) > 8:\n \
-      \           b, bits = bits[:8], bits[8:]\n            t = 1\n            by\
-      \ = 0\n            for sym in b:\n                if sym:\n                \
-      \    by += t\n                t *= 2\n            if by == 0x7E and len(byt):\n\
-      \                break\n            if by != 0x7E:\n                byt.append(by)\n\
-      \        return byt\n            \n\n\"\"\"\nB: 12345678  87654321\n--\nM: 10011010\
-      \  01011001\n0: 01100000  00000110\nT: 10101000  00010101\nH: 10010000  00001001\n\
-      C: 10000110  01100001\n : 01000000  00000010\nA: 10000010  01000001\n\"\"\"\n"
+      \ pmt.to_pmt(byt))\n                        if debug or True:\n            \
+      \                print(\"AX.25 packet arrived at %d. size %d -> %d\" % (nr+ind,\
+      \ len(bits), len(byt)))\n                            with open('%s/ax25-%s.raw'\
+      \ % (tempfile.gettempdir(), str(time.time())), 'wb') as f:\n               \
+      \                 f.write(b''.join([x.to_bytes(1,byteorder='big') for x in byt]))\n\
+      \                        continue\n                \n            self._data.append(int(sample))\n\
+      \        self.consume(0, len(inp))\n        return len(output_items)\n\n   \
+      \ def _unstuff(self, bits):\n        out = []\n        n = 0\n        for b\
+      \ in bits:\n            assert b < 6\n            if b:\n                n +=\
+      \ 1\n            else:\n                if n == 5:\n                    n =\
+      \ 0\n                    continue\n                n = 0\n            out.append(b)\n\
+      \        return out\n\n    def _pack(self, bits):\n        byt = []\n      \
+      \  while len(bits) > 8:\n            b, bits = bits[:8], bits[8:]\n        \
+      \    t = 1\n            by = 0\n            for sym in b:\n                if\
+      \ sym:\n                    by += t\n                t *= 2\n            if\
+      \ by == 0x7E and len(byt):\n                break\n            if by != 0x7E:\n\
+      \                byt.append(by)\n        return byt\n            \n\n\"\"\"\n\
+      B: 12345678  87654321\n--\nM: 10011010  01011001\n0: 01100000  00000110\nT:\
+      \ 10101000  00010101\nH: 10010000  00001001\nC: 10000110  01100001\n : 01000000\
+      \  00000010\nA: 10000010  01000001\n\"\"\"\n"
     affinity: ''
     alias: ''
     burst_tag: '''squelch_sob'''

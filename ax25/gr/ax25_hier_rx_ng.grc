@@ -23,6 +23,7 @@ options:
     sizing_mode: fixed
     thread_safe_setters: ''
     title: AX.25 RX ng
+    window_size: (1000,1000)
   states:
     bus_sink: false
     bus_source: false
@@ -32,6 +33,27 @@ options:
     state: enabled
 
 blocks:
+- name: monitor_volume
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: ''
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '0'
+    step: '0.01'
+    stop: '1'
+    value: '0.01'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [552, 124.0]
+    rotation: 0
+    state: true
 - name: analog_const_source_x_0
   id: analog_const_source_x
   parameters:
@@ -101,6 +123,23 @@ blocks:
     coordinate: [256, 28.0]
     rotation: 0
     state: true
+- name: audio_sink_0
+  id: audio_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    device_name: ''
+    num_inputs: '1'
+    ok_to_block: 'True'
+    samp_rate: audio_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [928, 236.0]
+    rotation: 0
+    state: disabled
 - name: blocks_char_to_float_0
   id: blocks_char_to_float
   parameters:
@@ -169,6 +208,24 @@ blocks:
     coordinate: [296, 688.0]
     rotation: 0
     state: true
+- name: blocks_multiply_const_vxx_0
+  id: blocks_multiply_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: monitor_volume
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [736, 172.0]
+    rotation: 0
+    state: disabled
 - name: blocks_tag_gate_0
   id: blocks_tag_gate
   parameters:
@@ -275,7 +332,7 @@ blocks:
     bus_structure: null
     coordinate: [552, 1076.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: digital_correlate_access_code_tag_xx_0_0
   id: digital_correlate_access_code_tag_xx
   parameters:
@@ -292,7 +349,24 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [256, 1076.0]
+    coordinate: [304, 1076.0]
+    rotation: 0
+    state: enabled
+- name: digital_hdlc_deframer_bp_0
+  id: digital_hdlc_deframer_bp
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    max: '500'
+    maxoutbuf: '0'
+    min: '32'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [520, 1276.0]
     rotation: 0
     state: true
 - name: digital_symbol_sync_xx_0
@@ -437,9 +511,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1072, 1192.0]
+    coordinate: [1064, 1172.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: habets39_pdu_pack_0
   id: habets39_pdu_pack
   parameters:
@@ -453,9 +527,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1272, 1188.0]
+    coordinate: [1288, 1172.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: habets39_tag2pdu_0
   id: habets39_tag2pdu
   parameters:
@@ -473,7 +547,7 @@ blocks:
     bus_structure: null
     coordinate: [848, 1172.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: pad_sink_0
   id: pad_sink
   parameters:
@@ -489,7 +563,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1448, 1188.0]
+    coordinate: [1512, 1244.0]
     rotation: 0
     state: true
 - name: pad_source_0
@@ -565,9 +639,9 @@ blocks:
     marker7: '-1'
     marker8: '-1'
     marker9: '-1'
-    name: '""'
+    name: '"Air"'
     nconnections: '1'
-    size: '1024'
+    size: samp_rate
     srate: samp_rate
     stemplot: 'False'
     style1: '1'
@@ -948,7 +1022,7 @@ blocks:
     legend: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: '""'
+    name: '"Air"'
     nconnections: '1'
     showports: 'False'
     type: complex
@@ -1005,7 +1079,7 @@ blocks:
     comment: ''
     gui_hint: ''
     label0: Air
-    label1: Quad
+    label1: Audio
     label10: Tab 10
     label11: Tab 11
     label12: Tab 12
@@ -1016,15 +1090,15 @@ blocks:
     label17: Tab 17
     label18: Tab 18
     label19: Tab 19
-    label2: Clocked
-    label3: Bits
-    label4: Tab 4
+    label2: Quad
+    label3: Clocked
+    label4: Bits
     label5: Tab 5
     label6: Tab 6
     label7: Tab 7
     label8: Tab 8
     label9: Tab 9
-    num_tabs: '4'
+    num_tabs: '5'
   states:
     bus_sink: false
     bus_source: false
@@ -1146,6 +1220,7 @@ connections:
 - [blocks_complex_to_float_1, '0', digital_binary_slicer_fb_0, '0']
 - [blocks_delay_0, '0', blocks_xor_xx_0, '1']
 - [blocks_float_to_complex_0, '0', digital_corr_est_cc_1, '0']
+- [blocks_multiply_const_vxx_0, '0', audio_sink_0, '0']
 - [blocks_tag_gate_0, '0', virtual_sink_5, '0']
 - [blocks_xor_xx_0, '0', blocks_tag_gate_0, '0']
 - [digital_binary_slicer_fb_0, '0', blocks_delay_0, '0']
@@ -1156,6 +1231,7 @@ connections:
 - [digital_correlate_access_code_tag_xx_0, '0', habets39_tag2pdu_0, '0']
 - [digital_correlate_access_code_tag_xx_0_0, '0', digital_correlate_access_code_tag_xx_0,
   '0']
+- [digital_hdlc_deframer_bp_0, out, pad_sink_0, in]
 - [digital_symbol_sync_xx_0, '0', qtgui_time_sink_x_2, '0']
 - [digital_symbol_sync_xx_0, '0', virtual_sink_2, '0']
 - [epy_block_0, out, epy_block_2, in]
@@ -1165,6 +1241,7 @@ connections:
 - [habets39_tag2pdu_0, pdus, epy_block_2, in]
 - [habets39_tag2pdu_0, pdus, habets39_hdlc_unstuff_0, in]
 - [pad_source_0, '0', virtual_sink_0, '0']
+- [rational_resampler_xxx_0, '0', blocks_multiply_const_vxx_0, '0']
 - [rational_resampler_xxx_0, '0', freq_xlating_fir_filter_xxx_0, '0']
 - [virtual_source_0, '0', analog_nbfm_rx_0, '0']
 - [virtual_source_0, '0', qtgui_time_sink_x_0, '0']
@@ -1172,6 +1249,7 @@ connections:
 - [virtual_source_1, '0', blocks_float_to_complex_0, '0']
 - [virtual_source_2, '0', blocks_complex_to_float_1, '0']
 - [virtual_source_6, '0', digital_correlate_access_code_tag_xx_0_0, '0']
+- [virtual_source_6, '0', digital_hdlc_deframer_bp_0, '0']
 
 metadata:
   file_format: 1

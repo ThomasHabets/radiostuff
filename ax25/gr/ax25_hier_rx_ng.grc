@@ -304,7 +304,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     sps: audio_rate/bps
-    symbols: '[0,0,0,0,0,0,0,1]*8'
+    symbols: '[1,1,1,1,1,1,1,-1]*8'
     threshold: '0.1'
     threshold_method: digital.THRESHOLD_ABSOLUTE
   states:

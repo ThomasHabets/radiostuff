@@ -23,6 +23,7 @@ options:
     sizing_mode: fixed
     thread_safe_setters: ''
     title: AX.25 transmit
+    window_size: (1000,1000)
   states:
     bus_sink: false
     bus_source: false
@@ -604,23 +605,6 @@ blocks:
     coordinate: [584, 1132.0]
     rotation: 0
     state: disabled
-- name: blocks_pdu_to_tagged_stream_0
-  id: blocks_pdu_to_tagged_stream
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    tag: packet_len
-    type: byte
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [520, 60.0]
-    rotation: 0
-    state: true
 - name: blocks_repeat_0
   id: blocks_repeat
   parameters:
@@ -658,7 +642,7 @@ blocks:
     bus_structure: null
     coordinate: [64, 132.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_tag_share_0
   id: blocks_tag_share
   parameters:
@@ -851,64 +835,20 @@ blocks:
     coordinate: [640, 188.0]
     rotation: 0
     state: true
-- name: epy_block_0
-  id: epy_block
+- name: digital_hdlc_framer_pb_0
+  id: digital_hdlc_framer_pb
   parameters:
-    _source_code: "\"\"\"AX.25 encoder block.\n\nTakes an AX.25 frame and turns it\
-      \ into encoded bits ready for Bell 202\ntones.\n\"\"\"\n\nimport numpy as np\n\
-      from gnuradio import gr\nfrom gnuradio.gr import pmt\n\ndebug = False\n\ndef\
-      \ stuff(bits):\n    \"\"\"Stuff bits to prevent long runs of ones.\n\n    Long\
-      \ runs of ones can be confused with the flag.\n    See spec section 3.6.\n \
-      \   \"\"\"\n    stuffed = []\n    n = 0\n    for bit in bits:\n        if bit:\n\
-      \            n += 1\n            if n == 6:\n                n = 1\n       \
-      \         stuffed.append(0)\n        else:\n            n = 0\n        stuffed.append(bit)\n\
-      \    return stuffed\n    \ndef scramble(bits):\n    \"\"\"Scramble bits.\n\n\
-      \    Grandiose name for just xoring with previous output in a CBC-like\n   \
-      \ fashion.\n    \"\"\"\n    scrambled = []\n    for n, bit in enumerate(bits):\n\
-      \        if n == 0:\n            scrambled.append(bit)\n            continue\n\
-      \        scrambled.append(1 ^ bit ^ scrambled[n-1])\n    return scrambled\n\n\
-      def unpack(byts):\n    \"\"\"Unpack bytes into bits.\"\"\"\n    bits = []\n\
-      \    for byt in byts:\n        for b in [1,2,4,8,16,32,64,128]:\n          \
-      \  bits.append(0 + (not not (byt & b)))\n    return bits\n\ndef invert(bits):\n\
-      \    return [(x^1) for x in bits]\n\ndef encode(byts, flags=None):\n    \"\"\
-      \"Encode in the AX.25 persuation.\"\"\"\n    if flags is None:\n        flags\
-      \ = (24, 2)\n\n    # Unpack to bits.\n    bits = unpack(byts)\n\n    # Stuff\
-      \ to avoid long series of ones.\n    bits = stuff(bits)\n\n    # Add header\
-      \ and trailer.\n    head = ([0] + [1]*6 + [0]) * flags[0]\n    tail = ([0] +\
-      \ [1]*6 + [0]) * flags[1]\n    bits = head+bits+tail\n\n    # Scramble\n   \
-      \ #tail = [0,1,1,1,1,1,1,0] * flags[1]\n    bits = scramble(bits)\n    return\
-      \ bits\n\nif True:\n    # without headers\n    for i, want in [\n          \
-      \  ([1],[1,0,1,0,1,0,1,0]),\n            ([2],[0,0,1,0,1,0,1,0]),\n        \
-      \    ([0xf0],[0,1,0,1,1,1,1,1]),\n            ([0xff],[1,1,1,1,1,0,0,0,0]),\n\
-      \            ([0x55],[1,0,0,1,1,0,0,1]),\n            ([0xaa],[0,0,1,1,0,0,1,1]),\n\
-      \            ([0x7E],[0,0,0,0,0,0,1,1,0]),\n    ]:\n        got = encode(i,\
-      \ flags=(0,0))\n        assert got == want, \"Failed encoding %s. got %s, want\
-      \ %s\" % (i, got, want)\n\nclass blk(gr.basic_block):  # other base classes\
-      \ are basic_block, decim_block, interp_block\n    \"\"\"Embedded Python Block\
-      \ example - a simple multiply const\"\"\"\n\n    def __init__(self):\n     \
-      \   \"\"\"arguments to this function show up as parameters in GRC\"\"\"\n  \
-      \      gr.sync_block.__init__(\n            self,\n            name='AX.25 bit\
-      \ encoding',\n            in_sig=[],\n            out_sig=[]\n        )\n  \
-      \      \n        self._in = pmt.intern(\"in\")\n        self._out = pmt.intern(\"\
-      out\")\n        self.message_port_register_in(self._in)\n        self.message_port_register_out(self._out)\n\
-      \        self.set_msg_handler(self._in, self._handle)\n\n    def _handle(self,\
-      \ pdu):\n        byts = pmt.to_python(pmt.cdr(pdu))\n        if debug:\n   \
-      \         print(\"AX.25 bytes: %d\" % len(byts))\n        bits = encode(byts)\n\
-      \        if debug:\n            print(\"AX.25: Publishing %d bits\" % len(bits))\n\
-      \        v = pmt.init_u8vector(len(bits), bits)\n        out = pmt.cons(pmt.PMT_NIL,\
-      \ v)\n        self.message_port_pub(self._out, out)\n"
     affinity: ''
     alias: ''
     comment: ''
+    frame_tag_name: packet_len
     maxoutbuf: '0'
     minoutbuf: '0'
   states:
-    _io_cache: ('AX.25 bit encoding', 'blk', [], [('in', 'message', 1)], [('out',
-      'message', 1)], 'Embedded Python Block example - a simple multiply const', [])
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [272, 88.0]
+    coordinate: [536, 68.0]
     rotation: 0
     state: true
 - name: freq_xlating_fft_filter_ccc_0
@@ -943,6 +883,26 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [464, 12.0]
+    rotation: 0
+    state: true
+- name: network_socket_pdu_0
+  id: network_socket_pdu
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    host: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mtu: '10000'
+    port: '52001'
+    tcp_no_delay: 'False'
+    type: UDP_SERVER
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [80, 180.0]
     rotation: 0
     state: true
 - name: qtgui_time_sink_x_0
@@ -1830,10 +1790,8 @@ connections:
 - [blocks_multiply_const_vxx_1, '0', audio_sink_0, '0']
 - [blocks_multiply_const_vxx_2, '0', analog_nbfm_tx_0, '0']
 - [blocks_multiply_const_vxx_3, '0', audio_sink_1, '0']
-- [blocks_pdu_to_tagged_stream_0, '0', blocks_tag_share_0, '0']
 - [blocks_repeat_0, '0', blocks_vco_f_0, '0']
 - [blocks_socket_pdu_0, pdus, blocks_message_debug_0, print_pdu]
-- [blocks_socket_pdu_0, pdus, epy_block_0, in]
 - [blocks_tag_share_0, '0', blocks_tagged_stream_mux_0, '0']
 - [blocks_tag_share_0_0, '0', blocks_tagged_stream_mux_0, '2']
 - [blocks_tag_share_0_0_0, '0', blocks_tagged_stream_mux_0, '1']
@@ -1845,11 +1803,11 @@ connections:
 - [blocks_vector_source_x_0_0_0, '0', blocks_tag_share_0_0_0, '1']
 - [blocks_vector_source_x_1, '0', blocks_tag_share_0_0, '0']
 - [blocks_vector_source_x_1_0, '0', blocks_tag_share_0_0_0, '0']
-- [epy_block_0, out, blocks_message_debug_0, print_pdu]
-- [epy_block_0, out, blocks_pdu_to_tagged_stream_0, pdus]
+- [digital_hdlc_framer_pb_0, '0', blocks_tag_share_0, '0']
 - [freq_xlating_fft_filter_ccc_0, '0', qtgui_time_sink_x_2, '0']
 - [freq_xlating_fft_filter_ccc_0, '0', qtgui_waterfall_sink_x_0, '0']
 - [freq_xlating_fft_filter_ccc_0, '0', uhd_usrp_sink_0, '0']
+- [network_socket_pdu_0, pdus, digital_hdlc_framer_pb_0, in]
 - [rational_resampler_xxx_0, '0', freq_xlating_fft_filter_ccc_0, '0']
 - [rational_resampler_xxx_0, '0', rational_resampler_xxx_1, '0']
 - [rational_resampler_xxx_1, '0', blocks_file_sink_0, '0']

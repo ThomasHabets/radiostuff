@@ -1,9 +1,18 @@
+// This Project.
+#include "axlib.h"
+
+// External libraries.
+#include <histedit.h>
+
+// System.
 #include <condition_variable>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <sys/select.h>
+#include <termios.h>
 #include <unistd.h>
+#include <cstdio>
 #include <functional>
 #include <iostream>
 #include <mutex>
@@ -11,7 +20,6 @@
 #include <string>
 #include <thread>
 
-#include "axlib.h"
 
 using namespace axlib;
 
@@ -33,11 +41,21 @@ namespace {
     exit(err);
 }
 
+std::pair<std::string, std::string> splitline(const std::string& sv)
+{
+    const auto i = sv.find('\n');
+    if (i == std::string::npos) {
+        return { "", std::string(sv) };
+    }
+    return { sv.substr(0, i + 1), sv.substr(i + 1) };
+}
+
 void mainloop(SeqPacket* sock,
               std::mutex& m,
               std::condition_variable& input_cv,
               bool& time_to_die,
-              std::string& cmd)
+              std::string& cmd,
+              EditLine* el)
 {
     // We have to use select() instead of a thread. A thread would be
     // nicer (no polling needed wakeups), but the Linux kernel doesn't
@@ -48,6 +66,7 @@ void mainloop(SeqPacket* sock,
     // Yes, I could make this 100% event-based, but it's just so nice
     // to not have to deal with partial command buffers that I
     // preferred this.
+    std::string buf;
     for (;;) {
         // Check if done.
         {
@@ -66,16 +85,31 @@ void mainloop(SeqPacket* sock,
             tv.tv_sec = 0;
             tv.tv_usec = 100000;
             const auto rc = select(sock->get_fd() + 1, &fds, NULL, NULL, &tv);
+            if (rc == -1) {
+                throw std::runtime_error(std::string("select(): ") + strerror(errno));
+            }
             if (rc == 1) {
                 const auto data = sock->read();
                 if (data.empty()) {
                     // EOF.
+                    std::cout << buf << std::flush;
                     std::cerr << "Server closed connection\n";
                     break;
                 }
-                std::cout << data << std::flush;
-            } else if (rc == -1) {
-                throw std::runtime_error(std::string("select(): ") + strerror(errno));
+                buf += data;
+                for (;;) {
+                    std::string line;
+                    std::tie(line, buf) = splitline(buf);
+                    if (line.empty()) {
+                        break;
+                    }
+                    struct winsize ws;
+                    if (!ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws)) {
+                        std::cout << "\r" << std::string(ws.ws_col - 1, ' ') << "\r";
+                    }
+                    std::cout << line << std::flush;
+                }
+                el_set(el, EL_REFRESH);
             }
         }
 
@@ -91,6 +125,36 @@ void mainloop(SeqPacket* sock,
         }
     }
 }
+
+std::string get_command(EditLine* el, size_t max)
+{
+    if (!el) {
+        return xgetline(std::cin, max);
+    }
+
+    for (;;) {
+        int count = 0;
+        const char* buf = el_gets(el, &count);
+        if (!buf) {
+            return "";
+        }
+        std::string s = buf;
+        while (!s.empty() && (s.back() == '\r' || s.back() == '\n')) {
+            s.pop_back();
+        }
+
+        if (!s.empty()) {
+            return s;
+        }
+    }
+}
+
+const char* prompt([[maybe_unused]] EditLine* el)
+{
+    static const char* prompt = "\1axsh>\1 ";
+    return prompt;
+}
+
 } // namespace
 
 int wrapmain(int argc, char** argv)
@@ -118,6 +182,19 @@ int wrapmain(int argc, char** argv)
     }
     const std::string dst = argv[optind];
 
+    EditLine* el = nullptr;
+    HistEvent ev;
+    History* hist = nullptr;
+    if (true) {
+        el = el_init(argv[0], stdin, stdout, stderr);
+        el_set(el, EL_EDITOR, "emacs");
+        el_set(el, EL_PROMPT, prompt, '\1');
+
+        hist = history_init();
+        history(hist, &ev, H_SETSIZE, 1000);
+        el_set(el, EL_HIST, history, hist);
+    }
+
     auto sock = SeqPacket::make_from_commonopts(copt);
 
     std::clog << "Connecting...\n";
@@ -132,22 +209,19 @@ int wrapmain(int argc, char** argv)
     std::string cmd;
     bool time_to_die = false;
     std::condition_variable input_cv;
-    std::thread reader([&] {
+    std::thread user_input([&] {
         for (;;) {
             // Wait for last command to finish.
             {
                 std::unique_lock<std::mutex> l(m);
                 input_cv.wait(l, [&cmd] { return cmd.empty(); });
             }
-            const auto line = xgetline(std::cin, sock->max_packet_size());
-
-            if (!std::cin.good() || line == "exit") {
+            const auto line = get_command(el, sock->max_packet_size());
+            if (line == "" || line == "exit") {
                 break;
             }
-            if (!std::cin.good()) {
-                throw std::runtime_error(std::string("stdin read failure: ") +
-                                         strerror(errno));
-            }
+            const bool continuation = false;
+            history(hist, &ev, continuation ? H_APPEND : H_ENTER, line.c_str());
             std::unique_lock<std::mutex> l(m);
             cmd = line;
         }
@@ -156,12 +230,12 @@ int wrapmain(int argc, char** argv)
     });
     sleep(1);
     try {
-        mainloop(sock.get(), m, input_cv, time_to_die, cmd);
+        mainloop(sock.get(), m, input_cv, time_to_die, cmd, el);
     } catch (const std::exception& e) {
         std::cerr << "Exception " << e.what() << "\n";
-        reader.join();
+        user_input.join();
         throw;
     }
-    reader.join();
+    user_input.join();
     return 0;
 }

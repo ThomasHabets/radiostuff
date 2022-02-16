@@ -13,6 +13,7 @@ AC_PROG_INSTALL
 # Checks for libraries.
 #AC_CHECK_LIB([nsl], [netname2user])
 AC_CHECK_LIB([sodium], [sodium_init])
+AC_CHECK_LIB([edit], [el_init])
 AC_CHECK_LIB([ax25], [ax25_aton])
 AC_CHECK_LIB([pthread], [pthread_create])
 

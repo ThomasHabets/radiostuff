@@ -30,12 +30,10 @@ void set_window_size_fd(int fd, unsigned int window_size)
     if (window_size > 0) {
         if (-1 ==
             setsockopt(fd, SOL_AX25, AX25_WINDOW, &window_size, sizeof(window_size))) {
-	  std::clog << "lolfail?!\n";
             throw std::runtime_error(std::string("setting AX25_WINDOW ") +
                                      std::to_string(window_size) + ": " +
                                      strerror(errno));
         }
-	std::clog << "Success?!\n";
     }
 }
 

@@ -172,6 +172,9 @@ void handle(std::unique_ptr<SeqPacket> conn)
         handle2(std::move(conn));
     } catch (const std::exception& e) {
         std::cerr << "Exception in client handler: " << e.what() << std::endl;
+    } catch (...) {
+        std::cerr << "Unknown exception in client handler";
+        throw;
     }
 }
 

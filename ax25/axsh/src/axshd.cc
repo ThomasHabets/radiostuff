@@ -130,15 +130,20 @@ void shellout(const std::string& cmd, SeqPacket* conn)
             std::clog << "Write to shellout failed: " << e.what();
         }
     });
-    for (;;) {
-        auto out = o.read();
-        if (out.empty()) {
-            break;
+    try {
+        for (;;) {
+            auto out = o.read();
+            if (out.empty()) {
+                break;
+            }
+            const int step = conn->max_packet_size();
+            for (size_t pos = 0; pos < out.size(); pos += step) {
+                conn->write(out.substr(pos, step));
+            }
         }
-        const int step = conn->max_packet_size();
-        for (size_t pos = 0; pos < out.size(); pos += step) {
-            conn->write(out.substr(pos, step));
-        }
+    } catch (...) {
+        th.join();
+        throw;
     }
     th.join();
     int status;

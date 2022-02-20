@@ -12,10 +12,18 @@ AC_PROG_INSTALL
 
 # Checks for libraries.
 #AC_CHECK_LIB([nsl], [netname2user])
-AC_CHECK_LIB([sodium], [sodium_init])
-AC_CHECK_LIB([edit], [el_init])
 AC_CHECK_LIB([ax25], [ax25_aton])
 AC_CHECK_LIB([pthread], [pthread_create])
+
+PKG_CHECK_MODULES([LIBSODIUM], [libsodium])
+CXXFLAGS="$CXXFLAGS $LIBSODIUM_CFLAGS"
+LDFLAGS="$LDFLAGS $LIBSODIUM_LDFLAGS"
+LIBS="$LIBS $LIBSODIUM_LIBS"
+
+PKG_CHECK_MODULES([LIBEDIT], [libedit])
+CXXFLAGS="$CXXFLAGS $LIBEDIT_CFLAGS"
+LDFLAGS="$LDFLAGS $LIBEDIT_LDFLAGS"
+LIBS="$LIBS $LIBEDIT_LIBS"
 
 # Checks for header files.
 #AC_FUNC_ALLOCA
@@ -37,6 +45,6 @@ echo "
   $PACKAGE_NAME version $PACKAGE_VERSION
   Prefix.........: $prefix
   Debug Build....: $debug
-  C++ Compiler...: $CXX $CFLAGS $CPPFLAGS
+  C++ Compiler...: $CXX $CXXFLAGS $CPPFLAGS
   Linker.........: $LD $LDFLAGS $LIBS
 "

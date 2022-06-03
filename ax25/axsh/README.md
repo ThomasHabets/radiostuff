@@ -79,3 +79,10 @@ destination like `M0XXX-1 VIA M6YYY-3`.
 
 I thought it should work to do `axparms --route add radio M0XXX-1
 M6YYY-3`, but it doesn't seem to do anything.
+
+## Related
+
+There is [another spec][another] for authenticated AX25, but it
+requires preshared symmetric keys and not great replay protection.
+
+[another]: https://www.ka2ddo.org/ka2ddo/ARETF-APRS-Authentication.txt

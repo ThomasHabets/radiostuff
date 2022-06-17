@@ -85,6 +85,11 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
+    if (argc != optind) {
+        fprintf(stderr, "Trailing args on the command line\n");
+        return EXIT_FAILURE;
+    }
+
     /*
      * Set up UDP.
      */

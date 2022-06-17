@@ -1,4 +1,5 @@
 #include "queue.h"
+#include "selectloop.h"
 
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -22,58 +23,6 @@
 namespace {
 constexpr int mtu = 1500;
 
-int innerloop(Ingress& side1, Ingress& side2)
-{
-    for (;;) {
-        fd_set rfds;
-        FD_ZERO(&rfds);
-
-        // Always check for data to read.
-        FD_SET(side1.fd(), &rfds);
-        FD_SET(side2.fd(), &rfds);
-        int max = std::max(side1.fd(), side2.fd());
-
-        // Conditionally wait for ready to write.
-        fd_set wfds;
-        FD_ZERO(&wfds);
-        if (!side1.out().empty()) {
-            const auto t = side1.out().fd();
-            FD_SET(t, &wfds);
-            max = std::max(max, t);
-        }
-        if (!side2.out().empty()) {
-            const auto t = side2.out().fd();
-            FD_SET(t, &wfds);
-            max = std::max(max, t);
-        }
-
-        const auto rc = select(max + 1, &rfds, &wfds, NULL, NULL);
-        if (rc < 0) {
-            throw std::system_error(errno, std::generic_category(), "select()");
-        }
-
-        if (rc == 0) {
-            // Shouldn't happen.
-            continue;
-        }
-
-        if (FD_ISSET(side1.fd(), &rfds)) {
-            side1.read();
-        }
-
-        if (FD_ISSET(side2.fd(), &rfds)) {
-            side2.read();
-        }
-
-        if (FD_ISSET(side1.out().fd(), &wfds)) {
-            side1.out().send();
-        }
-        if (FD_ISSET(side2.out().fd(), &wfds)) {
-            side2.out().send();
-        }
-    }
-}
-
 int mainloop(const int sock, const int axfd, const struct sockaddr_in6* dst)
 {
     UDPQueue sockout(sock, mtu, *dst);
@@ -82,7 +31,7 @@ int mainloop(const int sock, const int axfd, const struct sockaddr_in6* dst)
     UDPIngress sockin(sock, mtu, tunout);
     KISSIngress tunin(axfd, mtu, sockout);
 
-    return innerloop(sockin, tunin);
+    return selectloop(sockin, tunin);
 }
 
 void usage(const char* av0, int err)

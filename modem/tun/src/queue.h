@@ -1,4 +1,6 @@
 // -*- c++ -*-
+#ifndef __RADIOSTUFF_TUN_INCLUDE_QUEUE_H__
+#define __RADIOSTUFF_TUN_INCLUDE_QUEUE_H__
 #include <netinet/in.h>
 #include <deque>
 #include <vector>
@@ -42,6 +44,7 @@ private:
     };
 };
 
+// KISS escape and frame.
 class KISSQueue : public Queue
 {
 public:
@@ -65,6 +68,7 @@ protected:
     Queue& out_;
 };
 
+// Use recv instead of read().
 class UDPIngress : public Ingress
 {
 public:
@@ -72,6 +76,15 @@ public:
     void read() override;
 };
 
+// Take tun header into account.
+class TunIngress : public Ingress
+{
+public:
+    TunIngress(int fd, int mtu, Queue& out) : Ingress(fd, mtu, out) {}
+    void read() override;
+};
+
+// Unescape.
 class KISSIngress : public Ingress
 {
 public:
@@ -81,3 +94,4 @@ public:
 protected:
     std::vector<char> unparsed_;
 };
+#endif

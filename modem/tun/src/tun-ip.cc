@@ -1,4 +1,5 @@
 #include "queue.h"
+#include "selectloop.h"
 
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -28,56 +29,10 @@ int mainloop(const int sock, const int tunfd, const struct sockaddr_in6* dst)
     const int mtu = 1500;
     UDPQueue sockout(sock, mtu, *dst);
     TunQueue tunout(tunfd, mtu, ETH_P_IPV6);
-    for (;;) {
-        fd_set rfds;
-        FD_ZERO(&rfds);
-        FD_SET(sock, &rfds);
-        FD_SET(tunfd, &rfds);
 
-        fd_set wfds;
-        FD_ZERO(&wfds);
-        if (!sockout.empty()) {
-            FD_SET(sock, &wfds);
-        }
-        if (!tunout.empty()) {
-            FD_SET(tunfd, &wfds);
-        }
-        const auto rc = select(std::max(sock, tunfd) + 1, &rfds, &wfds, NULL, NULL);
-
-        if (rc < 0) {
-            throw std::runtime_error("select()");
-        }
-        if (rc == 0) {
-            // Shouldn't happen.
-            continue;
-        }
-
-        if (FD_ISSET(tunfd, &rfds)) {
-            std::vector<char> buf(mtu);
-            const auto rc = read(tunfd, buf.data(), buf.size());
-            if (rc > sizeof(struct tun_pi)) {
-                buf.resize(rc);
-                constexpr auto hlen = sizeof(struct tun_pi);
-                sockout.enqueue({ buf.begin() + hlen, buf.end() });
-            }
-        }
-
-        if (FD_ISSET(sock, &rfds)) {
-            std::vector<char> buf(mtu);
-            const auto rc = recv(sock, buf.data(), buf.size(), 0);
-            if (rc > 0) {
-                buf.resize(rc);
-                tunout.enqueue(std::move(buf));
-            }
-        }
-
-        if (FD_ISSET(sock, &wfds)) {
-            sockout.send();
-        }
-        if (FD_ISSET(tunfd, &wfds)) {
-            tunout.send();
-        }
-    }
+    UDPIngress sockin(sock, mtu, tunout);
+    TunIngress tunin(tunfd, mtu, sockout);
+    return selectloop(sockin, tunin);
 }
 
 void usage(const char* av0, int err)
@@ -95,7 +50,7 @@ int main(int argc, char** argv)
     int listenport;
     {
         int opt;
-        while ((opt = getopt(argc, argv, "d:l:t:"))) {
+        while ((opt = getopt(argc, argv, "d:l:t:")) != -1) {
             switch (opt) {
             case 'd':
                 dev = optarg;
@@ -135,7 +90,7 @@ int main(int argc, char** argv)
 
     struct sockaddr_in6 me {};
     me.sin6_family = AF_INET6;
-    me.sin6_port = htons(53002);
+    me.sin6_port = htons(listenport);
 
     struct addrinfo hints {};
     hints.ai_family = AF_INET6;

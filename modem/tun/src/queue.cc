@@ -109,6 +109,20 @@ void UDPIngress::read()
     std::cerr << "UDPIngress: failed to read: " << strerror(errno) << "\n";
 }
 
+void TunIngress::read()
+{
+    constexpr auto hlen = sizeof(struct tun_pi);
+    std::vector<char> buf(mtu_ + hlen);
+    const auto rc = ::read(fd_, buf.data(), buf.size());
+    if (rc <= hlen) {
+        std::cerr << "UDPIngress: failed to read: " << strerror(errno) << "\n";
+        return;
+    }
+    buf.resize(rc);
+    // TODO: Sanity check the header.
+    out_.enqueue({ buf.begin() + hlen, buf.end() });
+}
+
 void KISSIngress::read()
 {
     {

@@ -22,6 +22,58 @@
 namespace {
 constexpr int mtu = 1500;
 
+int innerloop(Ingress& side1, Ingress& side2)
+{
+    for (;;) {
+        fd_set rfds;
+        FD_ZERO(&rfds);
+
+        // Always check for data to read.
+        FD_SET(side1.fd(), &rfds);
+        FD_SET(side2.fd(), &rfds);
+        int max = std::max(side1.fd(), side2.fd());
+
+        // Conditionally wait for ready to write.
+        fd_set wfds;
+        FD_ZERO(&wfds);
+        if (!side1.out().empty()) {
+            const auto t = side1.out().fd();
+            FD_SET(t, &wfds);
+            max = std::max(max, t);
+        }
+        if (!side2.out().empty()) {
+            const auto t = side2.out().fd();
+            FD_SET(t, &wfds);
+            max = std::max(max, t);
+        }
+
+        const auto rc = select(max + 1, &rfds, &wfds, NULL, NULL);
+        if (rc < 0) {
+            throw std::system_error(errno, std::generic_category(), "select()");
+        }
+
+        if (rc == 0) {
+            // Shouldn't happen.
+            continue;
+        }
+
+        if (FD_ISSET(side1.fd(), &rfds)) {
+            side1.read();
+        }
+
+        if (FD_ISSET(side2.fd(), &rfds)) {
+            side2.read();
+        }
+
+        if (FD_ISSET(side1.out().fd(), &wfds)) {
+            side1.out().send();
+        }
+        if (FD_ISSET(side2.out().fd(), &wfds)) {
+            side2.out().send();
+        }
+    }
+}
+
 int mainloop(const int sock, const int axfd, const struct sockaddr_in6* dst)
 {
     UDPQueue sockout(sock, mtu, *dst);
@@ -30,49 +82,7 @@ int mainloop(const int sock, const int axfd, const struct sockaddr_in6* dst)
     UDPIngress sockin(sock, mtu, tunout);
     KISSIngress tunin(axfd, mtu, sockout);
 
-    for (;;) {
-        fd_set rfds;
-        FD_ZERO(&rfds);
-
-        // Always check for data to read.
-        FD_SET(sock, &rfds);
-        FD_SET(axfd, &rfds);
-
-        // Conditionally wait for ready to write.
-        fd_set wfds;
-        FD_ZERO(&wfds);
-        if (!sockout.empty()) {
-            FD_SET(sock, &wfds);
-        }
-        if (!tunout.empty()) {
-            FD_SET(axfd, &wfds);
-        }
-
-        const auto rc = select(std::max(sock, axfd) + 1, &rfds, &wfds, NULL, NULL);
-        if (rc < 0) {
-            throw std::runtime_error("select()");
-        }
-
-        if (rc == 0) {
-            // Shouldn't happen.
-            continue;
-        }
-
-        if (FD_ISSET(axfd, &rfds)) {
-            tunin.read();
-        }
-
-        if (FD_ISSET(sock, &rfds)) {
-            sockin.read();
-        }
-
-        if (FD_ISSET(sock, &wfds)) {
-            sockout.send();
-        }
-        if (FD_ISSET(axfd, &wfds)) {
-            tunout.send();
-        }
-    }
+    return innerloop(sockin, tunin);
 }
 
 void usage(const char* av0, int err)
@@ -89,7 +99,7 @@ int main(int argc, char** argv)
     int listenport;
     {
         int opt;
-        while ((opt = getopt(argc, argv, "l:t:"))) {
+        while ((opt = getopt(argc, argv, "l:t:")) != -1) {
             switch (opt) {
             case 't': {
                 const auto c = strchr(optarg, ':');
@@ -111,6 +121,7 @@ int main(int argc, char** argv)
                 break;
             }
             default:
+                fprintf(stderr, "Unknown option <%c>\n", opt);
                 usage(argv[0], EXIT_FAILURE);
             }
         }

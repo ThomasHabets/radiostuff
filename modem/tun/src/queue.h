@@ -13,6 +13,7 @@ public:
     virtual void enqueue(std::vector<char>&& packet);
     bool empty() const noexcept { return queue_.empty(); }
     virtual void send();
+    int fd() const { return fd_; }
 
 protected:
     const int fd_;
@@ -55,6 +56,8 @@ class Ingress
 public:
     Ingress(int fd, int mtu, Queue& out) : fd_(fd), mtu_(mtu), out_(out) {}
     virtual void read();
+    int fd() const { return fd_; }
+    Queue& out() { return out_; }
 
 protected:
     const int fd_;

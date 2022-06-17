@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 {
     std::string sock_dst_host;
     std::string sock_dst_port;
-    int listenport;
+    int listenport = -1;
     {
         int opt;
         while ((opt = getopt(argc, argv, "l:t:")) != -1) {
@@ -74,6 +74,10 @@ int main(int argc, char** argv)
                 usage(argv[0], EXIT_FAILURE);
             }
         }
+    }
+    if (listenport < 0) {
+        fprintf(stderr, "-l <port> is mandatory\n");
+        return EXIT_FAILURE;
     }
 
     /*

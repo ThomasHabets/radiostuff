@@ -5,14 +5,14 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <deque>
 #include <iostream>
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     std::string dev = "radiotun";
     std::string sock_dst_host;
     std::string sock_dst_port;
-    int listenport;
+    int listenport = -1;
     {
         int opt;
         while ((opt = getopt(argc, argv, "d:l:t:")) != -1) {
@@ -78,6 +78,11 @@ int main(int argc, char** argv)
                 usage(argv[0], EXIT_FAILURE);
             }
         }
+    }
+
+    if (listenport < 0) {
+        fprintf(stderr, "-l <port> is mandatory\n");
+        return EXIT_FAILURE;
     }
 
     /*

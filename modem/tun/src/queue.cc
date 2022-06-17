@@ -17,7 +17,7 @@ void Queue::send()
 {
     auto buf = queue_.front();
     const auto rc = write(fd_, buf.data(), buf.size());
-    if (rc != buf.size()) {
+    if (static_cast<size_t>(rc) != buf.size()) {
         fprintf(stderr, "write()=%zd: %s", rc, strerror(errno));
         return;
     }
@@ -53,10 +53,10 @@ void UDPQueue::send()
     queue_.pop_front();
 }
 
-constexpr char FEND = 0xC0;
-constexpr char FESC = 0xDB;
-constexpr char TFEND = 0xDC;
-constexpr char TFESC = 0xDD;
+constexpr auto FEND = static_cast<char>(0xC0);
+constexpr auto FESC = static_cast<char>(0xDB);
+constexpr auto TFEND = static_cast<char>(0xDC);
+constexpr auto TFESC = static_cast<char>(0xDD);
 
 void KISSQueue::enqueue(std::vector<char>&& buf)
 {
@@ -111,7 +111,7 @@ void UDPIngress::read()
 
 void TunIngress::read()
 {
-    constexpr auto hlen = sizeof(struct tun_pi);
+    constexpr ssize_t hlen = sizeof(struct tun_pi);
     std::vector<char> buf(mtu_ + hlen);
     const auto rc = ::read(fd_, buf.data(), buf.size());
     if (rc <= hlen) {
@@ -138,7 +138,7 @@ void KISSIngress::read()
     bool fail = false;
 
     std::vector<char> packet;
-    for (int i = 0; i < unparsed_.size(); i++) {
+    for (size_t i = 0; i < unparsed_.size(); i++) {
         if (fail) {
             if (unparsed_[i] == FEND) {
                 fail = false;

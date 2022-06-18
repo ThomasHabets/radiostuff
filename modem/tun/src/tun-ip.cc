@@ -24,9 +24,10 @@
 #include <linux/if_tun.h>
 
 namespace {
+int mtu = 1500;
+
 int mainloop(const int sock, const int tunfd, const struct sockaddr_in6* dst)
 {
-    const int mtu = 1500;
     UDPQueue sockout(sock, mtu, *dst);
     TunQueue tunout(tunfd, mtu, ETH_P_IPV6);
 
@@ -37,7 +38,13 @@ int mainloop(const int sock, const int tunfd, const struct sockaddr_in6* dst)
 
 void usage(const char* av0, int err)
 {
-    printf("Usage: %s -l <port> -t <host:port>\n", av0);
+    printf("Usage: %s -l <port> -t <host:port>\n"
+           "  -l <port>        UDP port to receive on.\n"
+           "  -t <host:port>   UDP address to send packets to.\n"
+           "  -d <name>        Name of device.\n"
+           "  -h               Show this help text\n"
+           "  -m <mtu>         MTU.\n",
+           av0);
     exit(err);
 }
 } // namespace
@@ -50,8 +57,10 @@ int main(int argc, char** argv)
     int listenport = -1;
     {
         int opt;
-        while ((opt = getopt(argc, argv, "d:l:t:")) != -1) {
+        while ((opt = getopt(argc, argv, "hd:l:t:m:")) != -1) {
             switch (opt) {
+            case 'h':
+                usage(argv[0], EXIT_SUCCESS);
             case 'd':
                 dev = optarg;
                 break;
@@ -70,6 +79,15 @@ int main(int argc, char** argv)
                 listenport = strtol(optarg, &end, 0);
                 if (*end) {
                     fprintf(stderr, "Need port to be a number. Was <%s>\n", optarg);
+                    return EXIT_FAILURE;
+                }
+                break;
+            }
+            case 'm': {
+                char* end = nullptr;
+                mtu = strtol(optarg, &end, 0);
+                if (*end || mtu < 1) {
+                    fprintf(stderr, "MTU must be >0. Was <%s>\n", optarg);
                     return EXIT_FAILURE;
                 }
                 break;

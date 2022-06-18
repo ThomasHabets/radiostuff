@@ -21,7 +21,7 @@
 #include <vector>
 
 namespace {
-constexpr int mtu = 1500;
+int mtu = 1500;
 
 int mainloop(const int sock, const int axfd, const struct sockaddr_in6* dst)
 {
@@ -36,7 +36,12 @@ int mainloop(const int sock, const int axfd, const struct sockaddr_in6* dst)
 
 void usage(const char* av0, int err)
 {
-    printf("Usage: %s -l <port> -t <host:port>\n", av0);
+    printf("Usage: %s -l <port> -t <host:port>\n"
+           "  -l <port>        UDP port to receive on.\n"
+           "  -t <host:port>   UDP address to send packets to.\n"
+           "  -h               Show this help text\n"
+           "  -m <mtu>         MTU.\n",
+           av0);
     exit(err);
 }
 } // namespace
@@ -48,8 +53,10 @@ int main(int argc, char** argv)
     int listenport = -1;
     {
         int opt;
-        while ((opt = getopt(argc, argv, "l:t:")) != -1) {
+        while ((opt = getopt(argc, argv, "hl:t:m:")) != -1) {
             switch (opt) {
+            case 'h':
+                usage(argv[0], EXIT_SUCCESS);
             case 't': {
                 const auto c = strchr(optarg, ':');
                 if (c == nullptr) {
@@ -65,6 +72,15 @@ int main(int argc, char** argv)
                 listenport = strtol(optarg, &end, 0);
                 if (*end) {
                     fprintf(stderr, "Need port to be a number. Was <%s>\n", optarg);
+                    return EXIT_FAILURE;
+                }
+                break;
+            }
+            case 'm': {
+                char* end = nullptr;
+                mtu = strtol(optarg, &end, 0);
+                if (*end || mtu < 1) {
+                    fprintf(stderr, "MTU must be >0. Was <%s>\n", optarg);
                     return EXIT_FAILURE;
                 }
                 break;

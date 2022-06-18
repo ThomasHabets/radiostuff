@@ -58,7 +58,7 @@ class Ingress
 {
 public:
     Ingress(int fd, int mtu, Queue& out) : fd_(fd), mtu_(mtu), out_(out) {}
-    virtual void read();
+    virtual bool read();
     int fd() const { return fd_; }
     Queue& out() { return out_; }
 
@@ -73,7 +73,7 @@ class UDPIngress : public Ingress
 {
 public:
     UDPIngress(int fd, int mtu, Queue& out) : Ingress(fd, mtu, out) {}
-    void read() override;
+    bool read() override;
 };
 
 // Take tun header into account.
@@ -81,7 +81,7 @@ class TunIngress : public Ingress
 {
 public:
     TunIngress(int fd, int mtu, Queue& out) : Ingress(fd, mtu, out) {}
-    void read() override;
+    bool read() override;
 };
 
 // Unescape.
@@ -89,7 +89,7 @@ class KISSIngress : public Ingress
 {
 public:
     KISSIngress(int fd, int mtu, Queue& out) : Ingress(fd, mtu, out) {}
-    void read() override;
+    bool read() override;
 
 protected:
     std::vector<char> unparsed_;

@@ -85,52 +85,55 @@ void KISSQueue::enqueue(std::vector<char>&& buf)
     queue_.push_back(std::move(t));
 }
 
-void Ingress::read()
+bool Ingress::read()
 {
     std::vector<char> buf(mtu_);
     const auto rc = ::read(fd_, buf.data(), buf.size());
-    if (rc > 0) {
-        buf.resize(rc);
-        out_.enqueue(std::move(buf));
-        return;
+    if (rc <= 0) {
+        std::cerr << "Failed to read: " << strerror(errno) << "\n";
+        return false;
     }
-    std::cerr << "Failed to read: " << strerror(errno) << "\n";
+    buf.resize(rc);
+    out_.enqueue(std::move(buf));
+    return true;
 }
 
-void UDPIngress::read()
+bool UDPIngress::read()
 {
     std::vector<char> buf(mtu_);
     const auto rc = recv(fd_, buf.data(), buf.size(), 0);
-    if (rc > 0) {
-        buf.resize(rc);
-        out_.enqueue(std::move(buf));
-        return;
+    if (rc <= 0) {
+        std::cerr << "UDPIngress: failed to read: " << strerror(errno) << "\n";
+        return false;
     }
-    std::cerr << "UDPIngress: failed to read: " << strerror(errno) << "\n";
+    buf.resize(rc);
+    out_.enqueue(std::move(buf));
+    return true;
 }
 
-void TunIngress::read()
+bool TunIngress::read()
 {
     constexpr ssize_t hlen = sizeof(struct tun_pi);
     std::vector<char> buf(mtu_ + hlen);
     const auto rc = ::read(fd_, buf.data(), buf.size());
     if (rc <= hlen) {
-        std::cerr << "UDPIngress: failed to read: " << strerror(errno) << "\n";
-        return;
+        std::cerr << "TunIngress: failed to read: " << strerror(errno) << "\n";
+        return false;
     }
     buf.resize(rc);
     // TODO: Sanity check the header.
     out_.enqueue({ buf.begin() + hlen, buf.end() });
+    return true;
 }
 
-void KISSIngress::read()
+bool KISSIngress::read()
 {
     {
         std::vector<char> buf(mtu_);
         const auto rc = ::read(fd_, buf.data(), buf.size());
         if (rc <= 0) {
-            std::cerr << "UDPIngress: failed to read: " << strerror(errno) << "\n";
-            return;
+            std::cerr << "KISSIngress: failed to read: " << strerror(errno) << "\n";
+            return false;
         }
         buf.resize(rc);
         unparsed_.insert(unparsed_.end(), buf.begin(), buf.end());
@@ -152,7 +155,7 @@ void KISSIngress::read()
             i++;
             if (i == unparsed_.size()) {
                 // Packet in the middle of an escape.
-                return;
+                return true;
             }
             switch (unparsed_[i]) {
             case TFEND:
@@ -180,4 +183,5 @@ void KISSIngress::read()
         }
         packet.push_back(unparsed_[i]);
     }
+    return true;
 }

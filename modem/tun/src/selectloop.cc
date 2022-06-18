@@ -41,11 +41,15 @@ int selectloop(Ingress& side1, Ingress& side2)
         }
 
         if (FD_ISSET(side1.fd(), &rfds)) {
-            side1.read();
+            if (!side1.read()) {
+                return EXIT_FAILURE;
+            }
         }
 
         if (FD_ISSET(side2.fd(), &rfds)) {
-            side2.read();
+            if (!side2.read()) {
+                return EXIT_FAILURE;
+            }
         }
 
         if (FD_ISSET(side1.out().fd(), &wfds)) {

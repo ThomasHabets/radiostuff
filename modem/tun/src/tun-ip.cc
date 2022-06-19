@@ -160,6 +160,11 @@ int main(int argc, char** argv)
         throw std::system_error(errno, std::generic_category(), "ioctl() for tunnel");
     }
 
+    ifr.ifr_mtu = mtu;
+    if (ioctl(sock, SIOCSIFMTU, reinterpret_cast<caddr_t*>(&ifr)) < 0) {
+        throw std::system_error(errno, std::generic_category(), "ioctl() to set MTU");
+    }
+
     /*
      * Run.
      */

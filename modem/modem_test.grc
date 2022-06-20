@@ -37,7 +37,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '1200'
+    value: '120000'
   states:
     bus_sink: false
     bus_source: false
@@ -70,7 +70,7 @@ blocks:
     bus_structure: null
     coordinate: [680, 80.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_multiply_const_vxx_0
   id: blocks_multiply_const_vxx
   parameters:
@@ -94,17 +94,37 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
+    baud: baud
     comment: ''
     gui_hint: ''
     maxoutbuf: '0'
     minoutbuf: '0'
+    samp_rate: '200000'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
     coordinate: [280, 272.0]
     rotation: 0
-    state: true
+    state: disabled
+- name: modem_qpsk_0
+  id: modem_qpsk
+  parameters:
+    affinity: ''
+    alias: ''
+    baud: baud
+    comment: ''
+    gui_hint: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [272, 152.0]
+    rotation: 0
+    state: enabled
 - name: network_socket_pdu_0
   id: network_socket_pdu
   parameters:
@@ -145,6 +165,67 @@ blocks:
     coordinate: [680, 188.0]
     rotation: 0
     state: true
+- name: qtgui_waterfall_sink_x_0
+  id: qtgui_waterfall_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    axislabels: 'True'
+    bw: samp_rate
+    color1: '0'
+    color10: '0'
+    color2: '0'
+    color3: '0'
+    color4: '0'
+    color5: '0'
+    color6: '0'
+    color7: '0'
+    color8: '0'
+    color9: '0'
+    comment: ''
+    fc: '0'
+    fftsize: '1024'
+    freqhalf: 'True'
+    grid: 'False'
+    gui_hint: ''
+    int_max: '10'
+    int_min: '-140'
+    label1: ''
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    nconnections: '1'
+    showports: 'False'
+    type: complex
+    update_time: '0.10'
+    wintype: window.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [696, 364.0]
+    rotation: 0
+    state: true
 - name: virtual_sink_0
   id: virtual_sink
   parameters:
@@ -173,12 +254,18 @@ blocks:
     state: true
 
 connections:
+- [blocks_multiply_const_vxx_0, '0', qtgui_waterfall_sink_x_0, '0']
 - [blocks_multiply_const_vxx_0, '0', virtual_sink_0, '0']
 - [modem_fsk_0, '0', blocks_multiply_const_vxx_0, '0']
 - [modem_fsk_0, outpdu, blocks_message_debug_0, print]
 - [modem_fsk_0, outpdu, network_socket_pdu_1, pdus]
+- [modem_qpsk_0, '0', blocks_multiply_const_vxx_0, '0']
+- [modem_qpsk_0, pduout, blocks_message_debug_0, print]
+- [modem_qpsk_0, pduout, network_socket_pdu_1, pdus]
 - [network_socket_pdu_0, pdus, modem_fsk_0, inpdu]
+- [network_socket_pdu_0, pdus, modem_qpsk_0, pduin]
 - [virtual_source_0, '0', modem_fsk_0, '0']
+- [virtual_source_0, '0', modem_qpsk_0, '0']
 
 metadata:
   file_format: 1

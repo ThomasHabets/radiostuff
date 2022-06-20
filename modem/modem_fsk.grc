@@ -33,30 +33,6 @@ options:
     state: enabled
 
 blocks:
-- name: baud
-  id: variable
-  parameters:
-    comment: ''
-    value: '1200'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [288, 12.0]
-    rotation: 0
-    state: enabled
-- name: samp_rate
-  id: variable
-  parameters:
-    comment: ''
-    value: '200000'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [368, 12.0]
-    rotation: 0
-    state: enabled
 - name: analog_quadrature_demod_cf_0
   id: analog_quadrature_demod_cf
   parameters:
@@ -71,6 +47,23 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [184, 436.0]
+    rotation: 0
+    state: true
+- name: baud
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '1200'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [248, 28.0]
     rotation: 0
     state: true
 - name: blocks_add_const_vxx_0
@@ -1074,6 +1067,23 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [2976, 28.0]
+    rotation: 0
+    state: true
+- name: samp_rate
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '200000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [344, 28.0]
     rotation: 0
     state: true
 - name: tabs

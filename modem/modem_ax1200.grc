@@ -57,6 +57,27 @@ blocks:
     coordinate: [1112, 36.0]
     rotation: 0
     state: true
+- name: volume
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: TX Volume
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '0'
+    step: '0.01'
+    stop: '1'
+    value: '0.1'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1096, 436.0]
+    rotation: 0
+    state: true
 - name: analog_const_source_x_0
   id: analog_const_source_x
   parameters:
@@ -225,7 +246,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    amplitude: '1'
+    amplitude: volume
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -287,8 +308,9 @@ blocks:
       \       self._in = pmt.intern(\"in\")\n        self._out = pmt.intern(\"out\"\
       )\n        self.message_port_register_in(self._in)\n        self.message_port_register_out(self._out)\n\
       \        self.set_msg_handler(self._in, self.handle_msg)\n\n    def handle_msg(self,\
-      \ msg):\n        sync = [0,1,1,1,1,1,1,0]\n        val = pmt.to_python(pmt.cdr(msg))\n\
-      \        val = sync * 100 + list(val) + sync * 10\n        self.message_port_pub(self._out,\
+      \ msg):\n        sync = [0, 1,1,1, 1,1,1, 0]\n        usync = [(1-x) for x in\
+      \ sync]\n        val = pmt.to_python(pmt.cdr(msg))\n        val = sync * 20\
+      \ + list(val) + sync * 10 + [0] * 100\n        self.message_port_pub(self._out,\
       \ pmt.cons(pmt.car(msg),\n                                                 \
       \ pmt.init_u8vector(len(val), val)))\n"
     affinity: ''
@@ -302,7 +324,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [888, 232.0]
+    coordinate: [712, 232.0]
     rotation: 0
     state: enabled
 - name: epy_block_1
@@ -322,7 +344,7 @@ blocks:
       \        self.message_port_register_out(self._out)\n        self.set_msg_handler(self._in,\
       \ self.handle_msg)\n\n    def handle_msg(self, msg):\n        val = pmt.to_python(pmt.cdr(msg))\n\
       \        last = 0\n        for n in range(len(val)):\n            val[n] ^=\
-      \ last\n            last = val[n]\n        self.message_port_pub(self._out,\
+      \ 1 ^ last\n            last = val[n]\n        self.message_port_pub(self._out,\
       \ pmt.cons(pmt.car(msg),\n                                                 \
       \ pmt.init_u8vector(len(val), val)))\n"
     affinity: ''
@@ -336,7 +358,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [720, 232.0]
+    coordinate: [904, 232.0]
     rotation: 0
     state: true
 - name: import_0
@@ -693,13 +715,13 @@ connections:
 - [blocks_vco_f_0, '0', analog_nbfm_tx_0, '0']
 - [blocks_xor_xx_0, '0', virtual_sink_0, '0']
 - [digital_hdlc_framer_pb_0, '0', pdu_tagged_stream_to_pdu_0, '0']
-- [epy_block_0, out, pdu_pdu_to_tagged_stream_0, pdus]
-- [epy_block_1, out, epy_block_0, in]
+- [epy_block_0, out, epy_block_1, in]
+- [epy_block_1, out, pdu_pdu_to_tagged_stream_0, pdus]
 - [low_pass_filter_0, '0', pad_sink_1, '0']
 - [pad_source_0, out, digital_hdlc_framer_pb_0, in]
 - [pad_source_1, '0', ax25_hier_rx_ng_0, '0']
 - [pdu_pdu_to_tagged_stream_0, '0', blocks_xor_xx_0, '1']
-- [pdu_tagged_stream_to_pdu_0, pdus, epy_block_1, in]
+- [pdu_tagged_stream_to_pdu_0, pdus, epy_block_0, in]
 - [rational_resampler_xxx_0, '0', low_pass_filter_0, '0']
 - [virtual_source_0, '0', blocks_char_to_float_0_1, '0']
 

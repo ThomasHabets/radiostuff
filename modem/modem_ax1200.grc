@@ -287,10 +287,10 @@ blocks:
       \       self._in = pmt.intern(\"in\")\n        self._out = pmt.intern(\"out\"\
       )\n        self.message_port_register_in(self._in)\n        self.message_port_register_out(self._out)\n\
       \        self.set_msg_handler(self._in, self.handle_msg)\n\n    def handle_msg(self,\
-      \ msg):\n        val = pmt.to_python(pmt.cdr(msg))\n        val = [1,0] * 100\
-      \ + list(val) + [1,0] * 10\n        self.message_port_pub(self._out, pmt.cons(pmt.car(msg),\n\
-      \                                                  pmt.init_u8vector(len(val),\
-      \ val)))\n"
+      \ msg):\n        sync = [0,1,1,1,1,1,1,0]\n        val = pmt.to_python(pmt.cdr(msg))\n\
+      \        val = sync * 100 + list(val) + sync * 10\n        self.message_port_pub(self._out,\
+      \ pmt.cons(pmt.car(msg),\n                                                 \
+      \ pmt.init_u8vector(len(val), val)))\n"
     affinity: ''
     alias: ''
     comment: ''

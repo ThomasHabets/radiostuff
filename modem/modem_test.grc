@@ -57,6 +57,42 @@ blocks:
     coordinate: [184, 12]
     rotation: 0
     state: enabled
+- name: blocks_file_sink_0
+  id: blocks_file_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    comment: ''
+    file: gen-ax1200.c32
+    type: complex
+    unbuffered: 'False'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [928, 204.0]
+    rotation: 0
+    state: disabled
+- name: blocks_file_sink_1
+  id: blocks_file_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    comment: ''
+    file: gen-ax1200-200ksps.c32
+    type: complex
+    unbuffered: 'False'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [912, 468.0]
+    rotation: 0
+    state: true
 - name: blocks_message_debug_0
   id: blocks_message_debug
   parameters:
@@ -86,7 +122,26 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [528, 300.0]
+    coordinate: [680, 300.0]
+    rotation: 0
+    state: true
+- name: modem_ax1200_0
+  id: modem_ax1200
+  parameters:
+    affinity: ''
+    alias: ''
+    audio_rate: '12000'
+    baud: '1200'
+    comment: ''
+    gui_hint: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [280, 364.0]
     rotation: 0
     state: true
 - name: modem_fsk_0
@@ -124,7 +179,7 @@ blocks:
     bus_structure: null
     coordinate: [272, 152.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: network_socket_pdu_0
   id: network_socket_pdu
   parameters:
@@ -213,7 +268,7 @@ blocks:
     legend: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: '""'
+    name: '"Transmitted air"'
     nconnections: '1'
     showports: 'False'
     type: complex
@@ -223,7 +278,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [696, 364.0]
+    coordinate: [912, 356.0]
     rotation: 0
     state: true
 - name: virtual_sink_0
@@ -236,7 +291,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [752, 300.0]
+    coordinate: [952, 292.0]
     rotation: 0
     state: true
 - name: virtual_source_0
@@ -251,19 +306,26 @@ blocks:
     bus_structure: null
     coordinate: [56, 300.0]
     rotation: 0
-    state: true
+    state: enabled
 
 connections:
+- [blocks_multiply_const_vxx_0, '0', blocks_file_sink_0, '0']
+- [blocks_multiply_const_vxx_0, '0', blocks_file_sink_1, '0']
 - [blocks_multiply_const_vxx_0, '0', qtgui_waterfall_sink_x_0, '0']
 - [blocks_multiply_const_vxx_0, '0', virtual_sink_0, '0']
+- [modem_ax1200_0, '0', blocks_multiply_const_vxx_0, '0']
+- [modem_ax1200_0, pduout, blocks_message_debug_0, print]
+- [modem_ax1200_0, pduout, network_socket_pdu_1, pdus]
 - [modem_fsk_0, '0', blocks_multiply_const_vxx_0, '0']
 - [modem_fsk_0, outpdu, blocks_message_debug_0, print]
 - [modem_fsk_0, outpdu, network_socket_pdu_1, pdus]
 - [modem_qpsk_0, '0', blocks_multiply_const_vxx_0, '0']
 - [modem_qpsk_0, pduout, blocks_message_debug_0, print]
 - [modem_qpsk_0, pduout, network_socket_pdu_1, pdus]
+- [network_socket_pdu_0, pdus, modem_ax1200_0, pduin]
 - [network_socket_pdu_0, pdus, modem_fsk_0, inpdu]
 - [network_socket_pdu_0, pdus, modem_qpsk_0, pduin]
+- [virtual_source_0, '0', modem_ax1200_0, '0']
 - [virtual_source_0, '0', modem_fsk_0, '0']
 - [virtual_source_0, '0', modem_qpsk_0, '0']
 

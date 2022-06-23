@@ -174,14 +174,16 @@ blocks:
     bps: '1200'
     comment: ''
     gui_hint: ''
+    max_packet: '500'
     maxoutbuf: '0'
+    min_packet: '4'
     minoutbuf: '0'
     samp_rate: samp_rate
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1608, 364.0]
+    coordinate: [1600, 484.0]
     rotation: 0
     state: disabled
 - name: ax25_hier_tx_0
@@ -292,6 +294,27 @@ blocks:
     coordinate: [336, 236.0]
     rotation: 0
     state: true
+- name: freq_xlating_fft_filter_ccc_1
+  id: freq_xlating_fft_filter_ccc
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: -ofs
+    comment: ''
+    decim: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    nthreads: '1'
+    samp_delay: '0'
+    samp_rate: samp_rate
+    taps: firdes.complex_band_pass(1,samp_rate,ofs-12500,ofs+12500,1000)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1880, 492.0]
+    rotation: 0
+    state: true
 - name: low_pass_filter_0
   id: low_pass_filter
   parameters:
@@ -316,22 +339,43 @@ blocks:
     coordinate: [904, 324.0]
     rotation: 0
     state: true
+- name: modem_ax1200_0
+  id: modem_ax1200
+  parameters:
+    affinity: ''
+    alias: ''
+    audio_rate: '12000'
+    baud: baud
+    comment: ''
+    gui_hint: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1608, 356.0]
+    rotation: 0
+    state: true
 - name: modem_fsk_0
   id: modem_fsk
   parameters:
     affinity: ''
     alias: ''
+    baud: '1200'
     comment: ''
     gui_hint: tabs@2
     maxoutbuf: '0'
     minoutbuf: '0'
+    samp_rate: '200000'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
     coordinate: [1616, 256.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: network_socket_pdu_0
   id: network_socket_pdu
   parameters:
@@ -530,6 +574,67 @@ blocks:
     coordinate: [548.0, 464]
     rotation: 270
     state: true
+- name: qtgui_waterfall_sink_x_1
+  id: qtgui_waterfall_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    axislabels: 'True'
+    bw: samp_rate
+    color1: '0'
+    color10: '0'
+    color2: '0'
+    color3: '0'
+    color4: '0'
+    color5: '0'
+    color6: '0'
+    color7: '0'
+    color8: '0'
+    color9: '0'
+    comment: ''
+    fc: '0'
+    fftsize: '1024'
+    freqhalf: 'True'
+    grid: 'False'
+    gui_hint: ''
+    int_max: '10'
+    int_min: '-140'
+    label1: ''
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"To tx"'
+    nconnections: '1'
+    showports: 'False'
+    type: complex
+    update_time: '0.10'
+    wintype: window.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2088, 668.0]
+    rotation: 0
+    state: true
 - name: tabs
   id: qtgui_tab_widget
   parameters:
@@ -633,7 +738,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: txfreq
+    center_freq0: txfreq-ofs
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -838,7 +943,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1936, 324.0]
+    coordinate: [2064, 332.0]
     rotation: 0
     state: true
 - name: uhd_usrp_source_0
@@ -1283,18 +1388,25 @@ connections:
 - [ax25_hier_rx_ng_0, out, network_socket_pdu_1, pdus]
 - [ax25_hier_tx_0, '0', uhd_usrp_sink_0, '0']
 - [blocks_burst_tagger_0, '0', ax25_hier_rx_ng_0, '0']
+- [blocks_burst_tagger_0, '0', modem_ax1200_0, '0']
 - [blocks_burst_tagger_0, '0', modem_fsk_0, '0']
 - [blocks_complex_to_mag_0, '0', low_pass_filter_0, '0']
 - [blocks_float_to_short_0, '0', blocks_burst_tagger_0, '1']
 - [freq_xlating_fft_filter_ccc_0, '0', blocks_burst_tagger_0, '0']
 - [freq_xlating_fft_filter_ccc_0, '0', blocks_complex_to_mag_0, '0']
 - [freq_xlating_fft_filter_ccc_0, '0', qtgui_waterfall_sink_x_0, '0']
+- [freq_xlating_fft_filter_ccc_1, '0', qtgui_waterfall_sink_x_1, '0']
+- [freq_xlating_fft_filter_ccc_1, '0', uhd_usrp_sink_0, '0']
 - [low_pass_filter_0, '0', blocks_float_to_short_0, '0']
 - [low_pass_filter_0, '0', qtgui_time_sink_x_0, '0']
+- [modem_ax1200_0, '0', freq_xlating_fft_filter_ccc_1, '0']
+- [modem_ax1200_0, pduout, blocks_message_debug_0, print]
+- [modem_ax1200_0, pduout, network_socket_pdu_1, pdus]
 - [modem_fsk_0, '0', uhd_usrp_sink_0, '0']
 - [modem_fsk_0, outpdu, blocks_message_debug_0, print]
 - [modem_fsk_0, outpdu, network_socket_pdu_1, pdus]
 - [network_socket_pdu_0, pdus, ax25_hier_tx_0, in]
+- [network_socket_pdu_0, pdus, modem_ax1200_0, pduin]
 - [network_socket_pdu_0, pdus, modem_fsk_0, inpdu]
 - [uhd_usrp_source_0, '0', freq_xlating_fft_filter_ccc_0, '0']
 

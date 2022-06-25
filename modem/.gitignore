@@ -1,0 +1,6 @@
+*.py
+*.yml
+__pycache__
+*.c32
+*.f32
+*.bak

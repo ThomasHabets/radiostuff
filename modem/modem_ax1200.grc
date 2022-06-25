@@ -78,23 +78,6 @@ blocks:
     coordinate: [1096, 436.0]
     rotation: 0
     state: true
-- name: analog_const_source_x_0
-  id: analog_const_source_x
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    const: '0'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    type: byte
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1120, 144.0]
-    rotation: 0
-    state: true
 - name: analog_nbfm_tx_0
   id: analog_nbfm_tx
   parameters:
@@ -176,7 +159,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    const: '1200'
+    const: '2200'
     maxoutbuf: '0'
     minoutbuf: '0'
     type: float
@@ -211,7 +194,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    const: '1000'
+    const: '-1000'
     maxoutbuf: '0'
     minoutbuf: '0'
     type: float
@@ -257,23 +240,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1096, 348.0]
-    rotation: 0
-    state: true
-- name: blocks_xor_xx_0
-  id: blocks_xor_xx
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    num_inputs: '2'
-    type: byte
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1376, 200.0]
     rotation: 0
     state: true
 - name: digital_hdlc_framer_pb_0
@@ -344,7 +310,7 @@ blocks:
       \        self.message_port_register_out(self._out)\n        self.set_msg_handler(self._in,\
       \ self.handle_msg)\n\n    def handle_msg(self, msg):\n        val = pmt.to_python(pmt.cdr(msg))\n\
       \        last = 0\n        for n in range(len(val)):\n            val[n] ^=\
-      \ 1 ^ last\n            last = val[n]\n        self.message_port_pub(self._out,\
+      \ last\n            last = val[n]\n        self.message_port_pub(self._out,\
       \ pmt.cons(pmt.car(msg),\n                                                 \
       \ pmt.init_u8vector(len(val), val)))\n"
     affinity: ''
@@ -738,7 +704,6 @@ blocks:
     state: true
 
 connections:
-- [analog_const_source_x_0, '0', blocks_xor_xx_0, '0']
 - [analog_nbfm_tx_0, '0', rational_resampler_xxx_0, '0']
 - [ax25_hier_rx_ng_0, out, pad_sink_0, in]
 - [blocks_add_const_vxx_0, '0', blocks_repeat_0, '0']
@@ -747,14 +712,13 @@ connections:
 - [blocks_multiply_const_vxx_0, '0', blocks_add_const_vxx_0, '0']
 - [blocks_repeat_0, '0', blocks_vco_f_0, '0']
 - [blocks_vco_f_0, '0', analog_nbfm_tx_0, '0']
-- [blocks_xor_xx_0, '0', virtual_sink_0, '0']
 - [digital_hdlc_framer_pb_0, '0', pdu_tagged_stream_to_pdu_0, '0']
 - [epy_block_0, out, epy_block_1, in]
 - [epy_block_1, out, pdu_pdu_to_tagged_stream_0, pdus]
 - [low_pass_filter_0, '0', pad_sink_1, '0']
 - [pad_source_0, out, digital_hdlc_framer_pb_0, in]
 - [pad_source_1, '0', ax25_hier_rx_ng_0, '0']
-- [pdu_pdu_to_tagged_stream_0, '0', blocks_xor_xx_0, '1']
+- [pdu_pdu_to_tagged_stream_0, '0', virtual_sink_0, '0']
 - [pdu_tagged_stream_to_pdu_0, pdus, epy_block_0, in]
 - [rational_resampler_xxx_0, '0', low_pass_filter_0, '0']
 - [virtual_source_0, '0', blocks_char_to_float_0_1, '0']

@@ -137,13 +137,13 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    audio_rate: '12000'
-    bps: '1200'
+    audio_rate: audio_rate
+    bps: baud
     comment: ''
     gui_hint: tabs@1
-    max_packet: '500'
+    max_packet: max_packet
     maxoutbuf: '0'
-    min_packet: '4'
+    min_packet: min_packet
     minoutbuf: '0'
     samp_rate: samp_rate
   states:
@@ -396,6 +396,40 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1824, 316.0]
+    rotation: 0
+    state: true
+- name: max_packet
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '500'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [376, 100.0]
+    rotation: 0
+    state: true
+- name: min_packet
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '32'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [272, 100.0]
     rotation: 0
     state: true
 - name: pad_sink_0

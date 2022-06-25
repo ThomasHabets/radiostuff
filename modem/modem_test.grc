@@ -92,7 +92,7 @@ blocks:
     bus_structure: null
     coordinate: [912, 468.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_message_debug_0
   id: blocks_message_debug
   parameters:

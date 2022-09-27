@@ -335,9 +335,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1768, 400.0]
+    coordinate: [1816, 376.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_float_to_complex_0
   id: blocks_float_to_complex
   parameters:
@@ -456,7 +456,7 @@ blocks:
     bus_structure: null
     coordinate: [1960, 360.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: digital_constellation_decoder_cb_0
   id: digital_constellation_decoder_cb
   parameters:
@@ -533,40 +533,6 @@ blocks:
     coordinate: [760, 364.0]
     rotation: 0
     state: true
-- name: epy_block_0
-  id: epy_block
-  parameters:
-    _source_code: "\"\"\"\nEmbedded Python Blocks:\n\nEach time this file is saved,\
-      \ GRC will instantiate the first class it finds\nto get ports and parameters\
-      \ of your block. The arguments to __init__  will\nbe the parameters. All of\
-      \ them are required to have default values!\n\"\"\"\n\nimport numpy as np\n\
-      from gnuradio import gr\nfrom gnuradio.gr import pmt\n\nclass blk(gr.basic_block):\
-      \  # other base classes are basic_block, decim_block, interp_block\n    \"\"\
-      \"Embedded Python Block example - a simple multiply const\"\"\"\n\n    def __init__(self):\n\
-      \        \"\"\"arguments to this function show up as parameters in GRC\"\"\"\
-      \n        gr.sync_block.__init__(\n            self,\n            name='PDU\
-      \ prepender',\n            in_sig=[],\n            out_sig=[]\n        )\n \
-      \       self._in = pmt.intern(\"in\")\n        self._out = pmt.intern(\"out\"\
-      )\n        self.message_port_register_in(self._in)\n        self.message_port_register_out(self._out)\n\
-      \        self.set_msg_handler(self._in, self.handle_msg)\n\n    def handle_msg(self,\
-      \ msg):\n        val = pmt.to_python(pmt.cdr(msg))\n        val = [1,0,0,1]\
-      \ * 40 + list(val) + [1,0,0,1] * 10\n        self.message_port_pub(self._out,\
-      \ pmt.cons(pmt.car(msg),\n                                                 \
-      \ pmt.init_u8vector(len(val), val)))\n"
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-  states:
-    _io_cache: ('PDU prepender', 'blk', [], [('in', 'message', 1)], [('out', 'message',
-      1)], 'Embedded Python Block example - a simple multiply const', [])
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [784, 48.0]
-    rotation: 0
-    state: disabled
 - name: epy_block_0_0
   id: epy_block
   parameters:
@@ -616,8 +582,8 @@ blocks:
       \ = pmt.intern(\"in\")\n        self._out = pmt.intern(\"out\")\n        self.message_port_register_in(self._in)\n\
       \        self.message_port_register_out(self._out)\n        self.set_msg_handler(self._in,\
       \ self.handle_msg)\n\n    def handle_msg(self, msg):\n        val = pmt.to_python(pmt.cdr(msg))\n\
-      \        last = 0\n        for n in range(len(val)):\n            val[n] ^=\
-      \ last\n            last = not val[n]\n        self.message_port_pub(self._out,\
+      \        last = 1\n        for n in range(len(val)):\n            val[n] ^=\
+      \ last ^ 1\n            last = not val[n]\n        self.message_port_pub(self._out,\
       \ pmt.cons(pmt.car(msg),\n                                                 \
       \ pmt.init_u8vector(len(val), val)))\n"
     affinity: ''
@@ -631,9 +597,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [728, 160.0]
+    coordinate: [704, 200.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: filter_fft_rrc_filter_0
   id: filter_fft_rrc_filter
   parameters:
@@ -2025,10 +1991,8 @@ connections:
 - [blocks_multiply_const_vxx_0, '0', qtgui_time_sink_x_2, '0']
 - [blocks_pack_k_bits_bb_0, '0', pdu_tagged_stream_to_pdu_0_0, '0']
 - [blocks_repeat_0, '0', blocks_vco_c_0, '0']
-- [blocks_unpack_k_bits_bb_0, '0', blocks_char_to_float_2_0, '0']
 - [blocks_unpack_k_bits_bb_0, '0', blocks_delay_0_0, '0']
 - [blocks_unpack_k_bits_bb_0, '0', blocks_xor_xx_0_0, '0']
-- [blocks_unpack_k_bits_bb_0, '0', digital_hdlc_deframer_bp_0, '0']
 - [blocks_vco_c_0, '0', pad_sink_1, '0']
 - [blocks_vco_c_0, '0', qtgui_waterfall_sink_x_0, '0']
 - [blocks_xor_xx_0_0, '0', blocks_char_to_float_2_0, '0']
@@ -2043,9 +2007,7 @@ connections:
 - [digital_symbol_sync_xx_0, '1', qtgui_time_sink_x_0_0, '1']
 - [digital_symbol_sync_xx_0, '2', blocks_add_const_vxx_1, '0']
 - [digital_symbol_sync_xx_0, '3', blocks_add_const_vxx_1_0, '0']
-- [epy_block_0, out, pdu_pdu_to_tagged_stream_0, pdus]
 - [epy_block_0_0, out, pdu_pdu_to_tagged_stream_0_0, pdus]
-- [epy_block_1, out, epy_block_0, in]
 - [epy_block_1, out, pdu_pdu_to_tagged_stream_0, pdus]
 - [filter_fft_rrc_filter_0, '0', digital_symbol_sync_xx_0, '0']
 - [filter_fft_rrc_filter_0, '0', qtgui_time_sink_x_0_0_0, '0']
@@ -2055,7 +2017,6 @@ connections:
 - [pdu_pdu_to_tagged_stream_0, '0', blocks_pack_k_bits_bb_0, '0']
 - [pdu_pdu_to_tagged_stream_0_0, '0', blocks_char_to_float_0, '0']
 - [pdu_tagged_stream_to_pdu_0, pdus, epy_block_1, in]
-- [pdu_tagged_stream_to_pdu_0, pdus, pdu_pdu_to_tagged_stream_0, pdus]
 - [pdu_tagged_stream_to_pdu_0_0, pdus, epy_block_0_0, in]
 - [virtual_source_0, '0', blocks_delay_0, '0']
 

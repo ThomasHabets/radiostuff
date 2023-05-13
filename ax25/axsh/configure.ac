@@ -12,7 +12,7 @@ AC_PROG_INSTALL
 
 # Checks for libraries.
 #AC_CHECK_LIB([nsl], [netname2user])
-AC_CHECK_LIB([ax25], [ax25_aton], [], [AC_MSGERROR("libax25-dev missing")])
+AC_CHECK_LIB([ax25], [ax25_aton], [], [AC_MSG_ERROR("libax25-dev missing")])
 AC_CHECK_LIB([pthread], [pthread_create])
 
 PKG_CHECK_MODULES([LIBSODIUM], [libsodium])

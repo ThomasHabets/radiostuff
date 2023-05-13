@@ -4,6 +4,7 @@ bin_PROGRAMS = axkeys \
 axftp axftpd \
 axsh axshd \
 axping axpingd \
+axpipe \
 examples/client examples/server \
 examples/client_lockcheck \
 examples/client_sign examples/server_sign
@@ -16,6 +17,7 @@ axftp_SOURCES=src/main.cc src/axftp.cc src/axlib.cc src/crypto.cc
 axftpd_SOURCES=src/main.cc src/axftpd.cc src/axlib.cc src/crypto.cc
 axsh_SOURCES=src/main.cc src/axsh.cc src/axlib.cc src/crypto.cc
 axshd_SOURCES=src/main.cc src/axshd.cc src/axlib.cc src/crypto.cc
+axpipe_SOURCES=src/main.cc src/axpipe.cc src/axlib.cc src/crypto.cc
 
 # Examples
 examples_client_SOURCES=examples/client.cc src/axlib.cc src/crypto.cc

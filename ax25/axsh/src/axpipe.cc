@@ -2,15 +2,17 @@
 
 #include <sys/select.h>
 #include <unistd.h>
+#include <charconv>
 #include <cstdio>
 #include <cstring>
 #include <iostream>
+#include <optional>
 
 using namespace axlib;
 
 namespace {
 
-size_t max_read_size = 120;
+size_t stdin_chunk_size = 120;
 
 [[noreturn]] void usage(const char* av0, int err)
 {
@@ -18,15 +20,32 @@ size_t max_read_size = 120;
     if (err) {
         f = stderr;
     }
-    fprintf(f,
-            "Usage: %s […options…] -r <radio> -s <src call> [ -c <dst> ]\n"
-            "%s\nExample:\n"
-            "   %s -k my.priv -P peer.pub -s M0XXX-9 -r radio -p M0ABC-3,M0XYZ-2 "
-            "-c 2E0XXX-9\n",
-            av0,
-            SeqPacket::common_usage().c_str(),
-            av0);
+    fprintf(
+        f,
+        "Usage: %s […options…] -r <radio> -s <src call> [ -c <dst> ]\n"
+        "%s\n"
+        "    -C <chunk size>        Amount to read from stdin and send as seqpacket.\n"
+        "Example:\n"
+        "   %s -k my.priv -P peer.pub -s M0XXX-9 -r radio -p M0ABC-3,M0XYZ-2 "
+        "-c 2E0XXX-9\n",
+        av0,
+        SeqPacket::common_usage().c_str(),
+        av0);
     exit(err);
+}
+
+template <typename T>
+std::optional<T> parse_int(std::string_view sv)
+{
+    T i;
+    const auto [ptr, ec] = std::from_chars(sv.begin(), sv.end(), i);
+    if (ec != std::errc()) {
+        return {};
+    }
+    if (ptr != sv.end()) {
+        return {};
+    }
+    return i;
 }
 
 void handle(SeqPacket& conn)
@@ -57,7 +76,7 @@ void handle(SeqPacket& conn)
             }
         }
         if (FD_ISSET(STDIN_FILENO, &fds)) {
-            std::vector<char> buf(max_read_size);
+            std::vector<char> buf(stdin_chunk_size);
             const auto rc = read(STDIN_FILENO, buf.data(), buf.size());
             if (rc == -1) {
                 throw std::system_error(
@@ -85,7 +104,7 @@ int wrapmain(int argc, char** argv)
     lopts.push_back({ 0, 0, 0, 0 }); // End of list.
     {
         int opt;
-        while ((opt = getopt_long(argc, argv, "c:ehk:l:P:p:r:s:w:", &lopts[0], NULL)) !=
+        while ((opt = getopt_long(argc, argv, "c:C:ehk:l:P:p:r:s:w:", &lopts[0], NULL)) !=
                -1) {
             if (SeqPacket::common_opt(copt, opt)) {
                 continue;
@@ -93,6 +112,14 @@ int wrapmain(int argc, char** argv)
             switch (opt) {
             case 'c':
                 dst = optarg;
+                break;
+            case 'C':
+                if (auto v = parse_int<size_t>(optarg); !v) {
+                    std::cerr << "Chunk size given is not a number: " << optarg << "\n";
+                    exit(EXIT_FAILURE);
+                } else {
+                    stdin_chunk_size = v.value();
+                }
                 break;
             case 'h':
                 usage(argv[0], EXIT_SUCCESS);

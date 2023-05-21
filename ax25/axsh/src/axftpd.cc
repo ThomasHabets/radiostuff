@@ -72,7 +72,7 @@ void handle_get(SeqPacket* conn, const std::vector<std::string>& args)
             if (ferror(f)) {
                 const auto err = errno;
                 fclose(f);
-                throw std::runtime_error(std::string("reading stdin: ") + strerror(err));
+                throw std::system_error(errno, std::generic_category(), "reading stdin");
             }
         }
         std::clog << "Sending packet of size " << n << std::endl;
@@ -86,7 +86,7 @@ void handle_list(SeqPacket* conn, [[maybe_unused]] const std::vector<std::string
     std::string buf;
     auto dir = opendir(".");
     if (dir == nullptr) {
-        throw std::runtime_error(std::string("opendir(.): ") + strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "opendir(.)");
     }
     while (auto f = readdir(dir)) {
         if (f->d_name[0] == '.') {

@@ -86,7 +86,7 @@ void mainloop(SeqPacket* sock,
             tv.tv_usec = 100000;
             const auto rc = select(sock->get_fd() + 1, &fds, NULL, NULL, &tv);
             if (rc == -1) {
-                throw std::runtime_error(std::string("select(): ") + strerror(errno));
+                throw std::system_error(errno, std::generic_category(), "select()");
             }
             if (rc == 1) {
                 const auto data = sock->read();

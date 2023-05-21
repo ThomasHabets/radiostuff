@@ -30,9 +30,10 @@ void set_window_size_fd(int fd, unsigned int window_size)
     if (window_size > 0) {
         if (-1 ==
             setsockopt(fd, SOL_AX25, AX25_WINDOW, &window_size, sizeof(window_size))) {
-            throw std::runtime_error(std::string("setting AX25_WINDOW ") +
-                                     std::to_string(window_size) + ": " +
-                                     strerror(errno));
+            throw std::system_error(errno,
+                                    std::generic_category(),
+                                    "setting AX25_WINDOW to " +
+                                        std::to_string(window_size));
         }
     }
 }
@@ -41,9 +42,10 @@ void set_int_fd(int fd, int opt, int val)
 {
     if (val > 0) {
         if (-1 == setsockopt(fd, SOL_AX25, opt, &val, sizeof(val))) {
-            throw std::runtime_error(std::string("setting opt ") + std::to_string(opt) +
-                                     " to " + std::to_string(val) + ": " +
-                                     strerror(errno));
+            throw std::system_error(errno,
+                                    std::generic_category(),
+                                    "setting opt " + std::to_string(opt) + " to " +
+                                        std::to_string(val));
         }
     }
 }
@@ -52,8 +54,9 @@ void set_extended_modulus_fd(int fd, bool onoff)
 {
     const unsigned int on = onoff ? 1 : 0;
     if (-1 == setsockopt(fd, SOL_AX25, AX25_EXTSEQ, &on, sizeof(on))) {
-        throw std::runtime_error(std::string("setting AX25_EXTSEQ ") +
-                                 std::to_string(on) + ": " + strerror(errno));
+        throw std::system_error(errno,
+                                std::generic_category(),
+                                "setting AX25_EXTSEQ to " + std::to_string(on));
     }
 }
 void set_packet_length_fd(int fd, unsigned int len)
@@ -62,8 +65,9 @@ void set_packet_length_fd(int fd, unsigned int len)
         return;
     }
     if (-1 == setsockopt(fd, SOL_AX25, AX25_PACLEN, &len, sizeof(len))) {
-        throw std::runtime_error(std::string("setting AX25_PACLEN ") +
-                                 std::to_string(len) + ": " + strerror(errno));
+        throw std::system_error(errno,
+                                std::generic_category(),
+                                "setting AX25_PACLEN to " + std::to_string(len));
     }
 }
 
@@ -223,8 +227,12 @@ bool DGram::common_opt(CommonOpts& o, int opt)
     case 'r': {
         const auto t = ax25_config_get_addr(optarg);
         if (t == nullptr) {
-            throw std::runtime_error(std::string("invalid radio \"") + optarg +
-                                     "\": " + strerror(errno));
+            if (errno == 0) {
+                throw std::runtime_error(std::string("invalid radio \"") + optarg + "\"");
+            }
+            throw std::system_error(errno,
+                                    std::generic_category(),
+                                    std::string("invalid radio \"") + optarg + "\"");
         }
         o.radio = t;
         if (o.src.empty()) {
@@ -318,8 +326,8 @@ void populate_digis(struct full_sockaddr_ax25* sa, const std::vector<std::string
         if (-1 ==
             ax25_aton_entry(digis[i].c_str(),
                             reinterpret_cast<char*>(&sa->fsa_digipeater[i + offset]))) {
-            throw std::runtime_error("ax25_aton_entry(" + digis[i] +
-                                     "): " + strerror(errno));
+            throw std::system_error(
+                errno, std::generic_category(), "ax25_aton_entry(" + digis[i] + ")");
         }
     }
 
@@ -338,8 +346,8 @@ DGram::DGram(std::string radio, std::string mycall, std::vector<std::string> dig
       digipeaters_(std::move(digipeaters))
 {
     if (sock_ == -1) {
-        throw std::runtime_error(std::string("socket(AF_AX25, SOCK_DGRAM, 0): ") +
-                                 strerror(errno));
+        throw std::system_error(
+            errno, std::generic_category(), "socket(AF_AX25, SOCK_DGRAM, 0)");
     }
     if (mycall_.empty()) {
         throw std::runtime_error("empty MYCALL provided to DGram");
@@ -349,17 +357,19 @@ DGram::DGram(std::string radio, std::string mycall, std::vector<std::string> dig
     };
     me.fsa_ax25.sax25_family = AF_AX25;
     if (-1 == ax25_aton(mycall_.c_str(), &me)) {
-        throw std::runtime_error("ax25_aton(" + mycall_ + "): " + strerror(errno));
+        throw std::system_error(
+            errno, std::generic_category(), "ax25_aton(" + mycall_ + ")");
     }
     populate_digis(&me, { radio_ });
     if (-1 == bind(sock_, reinterpret_cast<struct sockaddr*>(&me), sizeof(me))) {
-        throw std::runtime_error("bind to " + mycall_ + " failed: " + strerror(errno));
+        throw std::system_error(
+            errno, std::generic_category(), "bind to " + mycall_ + " failed");
     }
     if (false) {
-        const char* dev = "radio6";
-        if (-1 == setsockopt(sock_, SOL_AX25, SO_BINDTODEVICE, dev, strlen(dev))) {
-            throw std::runtime_error(std::string("setting AX25_BINDTODEVICE ") + dev +
-                                     ": " + strerror(errno));
+        if (-1 ==
+            setsockopt(sock_, SOL_AX25, SO_BINDTODEVICE, radio.c_str(), radio.size())) {
+            throw std::system_error(
+                errno, std::generic_category(), "setting AX25_BINDTODEVICE " + radio);
         }
     }
 }
@@ -377,7 +387,7 @@ std::pair<std::string, std::string> DGram::recv()
                              reinterpret_cast<struct sockaddr*>(&sa),
                              &salen);
     if (rc == -1) {
-        throw std::runtime_error(std::string("recvfrom(): ") + strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "recvfrom()");
     }
     return std::make_pair("TODO", std::string(buf.data(), buf.data() + rc));
 }
@@ -387,7 +397,8 @@ void DGram::write(const std::string& peer, const std::string& msg)
     struct full_sockaddr_ax25 sa {
     };
     if (-1 == ax25_aton(peer.c_str(), &sa)) {
-        throw std::runtime_error("ax25_aton(" + peer + "): " + strerror(errno));
+        throw std::system_error(
+            errno, std::generic_category(), "ax25_aton(" + peer + ")");
     }
     // Populate path to destination.
     populate_digis(&sa, digipeaters_);
@@ -398,7 +409,7 @@ void DGram::write(const std::string& peer, const std::string& msg)
                            reinterpret_cast<struct sockaddr*>(&sa),
                            sizeof(sa));
     if (rc == -1) {
-        throw std::runtime_error(std::string("sendto(): ") + strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "sendto()");
     }
 }
 
@@ -411,8 +422,8 @@ SeqPacket::SeqPacket(std::string radio,
       digipeaters_(std::move(digipeaters))
 {
     if (sock_ == -1) {
-        throw std::runtime_error(std::string("socket(AF_AX25, SOCK_SEQPACKET, 0): ") +
-                                 strerror(errno));
+        throw std::system_error(
+            errno, std::generic_category(), "socket(AF_AX25, SOCK_SEQPACKET, 0)");
     }
     if (mycall_.empty()) {
         throw std::runtime_error("empty MYCALL provided to SeqPacket");
@@ -424,12 +435,14 @@ SeqPacket::SeqPacket(std::string radio,
     };
     me.fsa_ax25.sax25_family = AF_AX25;
     if (-1 == ax25_aton(mycall_.c_str(), &me)) {
-        throw std::runtime_error("ax25_aton(" + mycall_ + "): " + strerror(errno));
+        throw std::system_error(
+            errno, std::generic_category(), "ax25_aton(" + mycall_ + ")");
     }
     // Populate path out to the radio.
     populate_digis(&me, { radio_ });
     if (-1 == bind(sock_, reinterpret_cast<struct sockaddr*>(&me), sizeof(me))) {
-        throw std::runtime_error("bind to " + mycall_ + " failed: " + strerror(errno));
+        throw std::system_error(
+            errno, std::generic_category(), "bind to " + mycall_ + " failed");
     }
 }
 
@@ -441,7 +454,8 @@ int SeqPacket::connect(std::string addr)
     peer.fsa_ax25.sax25_family = AF_AX25;
     if (-1 == ax25_aton_entry(peer_addr_.c_str(),
                               reinterpret_cast<char*>(&peer.fsa_ax25.sax25_call))) {
-        throw std::runtime_error("ax25_aton_entry(" + mycall_ + "): " + strerror(errno));
+        throw std::system_error(
+            errno, std::generic_category(), "ax25_aton_entry(" + mycall_ + ")");
     }
     peer.fsa_ax25.sax25_ndigis =
         std::min(digipeaters_.size(), decltype(digipeaters_)::size_type(AX25_MAX_DIGIS));
@@ -460,7 +474,7 @@ void SeqPacket::write(const std::string& msg)
         rc = ::write(sock_, msg.data(), msg.size());
     } while (rc == -1 && errno == EINTR);
     if (static_cast<size_t>(rc) != msg.size()) {
-        throw std::runtime_error(std::string("write(): ") + strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "write()");
     }
 }
 
@@ -472,6 +486,7 @@ void SeqPacket::write_chunked(const std::string& msg)
     for (size_t pos = 0; pos < size; pos += len) {
         const auto from = data + pos;
         const auto to = std::min(from + len, data + size);
+        // TODO: check for error.
         write(std::string(from, to));
     }
 }
@@ -487,7 +502,7 @@ std::string SeqPacket::read()
         if (errno == ENOTCONN) {
             return "";
         }
-        throw std::runtime_error(std::string("read(): ") + strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "read()");
     }
     return std::string(&buf[0], &buf[rc]);
 }
@@ -495,7 +510,7 @@ std::string SeqPacket::read()
 void SeqPacket::listen(std::function<void(std::unique_ptr<SeqPacket>)> cb)
 {
     if (-1 == ::listen(sock_, 5)) {
-        throw std::runtime_error(std::string("listen(): ") + strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "listen()");
     }
 
     for (;;) {
@@ -594,7 +609,7 @@ unsigned int SeqPacket::window_size() const
     unsigned int ret;
     socklen_t len = sizeof(ret);
     if (-1 == getsockopt(sock_, SOL_AX25, AX25_WINDOW, &ret, &len)) {
-        throw std::runtime_error(std::string("getting AX25_WINDOW: ") + strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "getting AX25_WINDOW");
     }
     return ret;
 }
@@ -604,7 +619,7 @@ unsigned int SeqPacket::packet_length() const
     unsigned int ret;
     socklen_t len = sizeof(ret);
     if (-1 == getsockopt(sock_, SOL_AX25, AX25_PACLEN, &ret, &len)) {
-        throw std::runtime_error(std::string("getting AX25_PACLEN: ") + strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "getting AX25_PACLEN");
     }
     return ret;
 }
@@ -660,7 +675,7 @@ void SignedSeqPacket::exchange_nonce()
     std::vector<char> n(nonce_size_);
     const auto rc = getrandom(&n[0], n.size(), 0);
     if (rc == -1) {
-        throw std::runtime_error(std::string("getrandom(): ") + strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "getrandom()");
     }
     if (static_cast<size_t>(rc) != n.size()) {
         throw std::runtime_error("too few random bytes(): " + std::to_string(rc) + "<" +
@@ -729,8 +744,10 @@ std::array<char, size> load_key(const std::string& fn)
         pf.read(buf.data(), buf.size());
     }
     if (pf.fail()) {
-        throw std::runtime_error("loading key of size " + std::to_string(size) +
-                                 " from file '" + fn + "': " + strerror(errno));
+        throw std::system_error(errno,
+                                std::generic_category(),
+                                "loading key of size " + std::to_string(size) +
+                                    " from file '" + fn + "'");
     }
     return buf;
 }

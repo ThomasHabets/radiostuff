@@ -39,7 +39,7 @@ void handle(SeqPacket& conn)
         const auto rc = select(
             std::max(conn.get_fd(), STDIN_FILENO) + 1, &fds, nullptr, nullptr, nullptr);
         if (rc == -1) {
-            throw std::runtime_error(std::string("select(): ") + strerror(errno));
+            throw std::system_error(errno, std::generic_category(), "select()");
         }
         if (FD_ISSET(conn.get_fd(), &fds)) {
             const auto data = conn.read();
@@ -50,8 +50,8 @@ void handle(SeqPacket& conn)
             for (std::string_view part = data; !part.empty();) {
                 const auto rc = write(STDOUT_FILENO, part.data(), part.size());
                 if (rc == -1) {
-                    throw std::runtime_error(std::string("write(STDOUT_FILENO): ") +
-                                             strerror(errno));
+                    throw std::system_error(
+                        errno, std::generic_category(), "write(STDOUT_FILENO)");
                 }
                 part = part.substr(rc);
             }
@@ -60,8 +60,8 @@ void handle(SeqPacket& conn)
             std::vector<char> buf(max_read_size);
             const auto rc = read(STDIN_FILENO, buf.data(), buf.size());
             if (rc == -1) {
-                throw std::runtime_error(std::string("read(STDIN_FILENO): ") +
-                                         strerror(errno));
+                throw std::system_error(
+                    errno, std::generic_category(), "read(STDIN_FILENO)");
             }
             const std::string data(&buf[0], &buf[rc]);
             if (data.empty()) {
@@ -119,7 +119,7 @@ int wrapmain(int argc, char** argv)
         const auto rc = sock->connect(dst);
         if (rc) {
             std::clog << "Failed to connect: " << strerror(rc) << std::endl;
-	    return 1;
+            return 1;
         }
         std::clog << "Connected!\n";
         handle(*sock);

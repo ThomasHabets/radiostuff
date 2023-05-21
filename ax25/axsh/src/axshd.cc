@@ -19,7 +19,7 @@ namespace {
 void xdup2(int old, int newfd)
 {
     if (-1 == dup2(old, newfd)) {
-        throw std::runtime_error(std::string("dup2(): ") + strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "dup2()");
     }
 }
 
@@ -30,7 +30,7 @@ public:
     {
         int p[2];
         if (-1 == pipe(p)) {
-            throw std::runtime_error(std::string("pipe(): ") + strerror(errno));
+            throw std::system_error(errno, std::generic_category(), "pipe()");
         }
         r = p[0];
         w = p[1];
@@ -64,7 +64,7 @@ public:
         for (;;) {
             const auto rc = ::write(w, p, left);
             if (rc == -1) {
-                throw std::runtime_error(std::string("pipe.write(): ") + strerror(errno));
+                throw std::system_error(errno, std::generic_category(), "pipe.write()");
             }
             left -= rc;
             p += rc;
@@ -82,7 +82,7 @@ public:
             char buf[128];
             const auto rc = ::read(r, buf, sizeof(buf));
             if (rc == -1) {
-                throw std::runtime_error(std::string("pipe.read(): ") + strerror(errno));
+                throw std::system_error(errno, std::generic_category(), "pipe.read()");
             }
             if (rc == 0) {
                 return ret;
@@ -104,7 +104,7 @@ void shellout(const std::string& cmd, SeqPacket* conn)
     Pipe o;
     const pid_t pid = fork();
     if (pid == -1) {
-        throw std::runtime_error(std::string("fork(): ") + strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "fork()");
     }
 
     if (pid == 0) {
@@ -148,7 +148,7 @@ void shellout(const std::string& cmd, SeqPacket* conn)
     th.join();
     int status;
     if (-1 == waitpid(pid, &status, 0)) {
-        throw std::runtime_error(std::string("waitpid(): ") + strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "waitpid()");
     }
     if (WIFEXITED(status)) {
         conn->write(">>> Exit status " + std::to_string(WEXITSTATUS(status)) + "\n");

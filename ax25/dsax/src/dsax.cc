@@ -1,3 +1,6 @@
+// Tool to shuffle data through D-Star, removing XON/XOFF.
+//
+// TODO: rate limit to 950bps/3840bps
 #include <fcntl.h>
 #include <poll.h>
 #include <pty.h>

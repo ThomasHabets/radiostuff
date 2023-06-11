@@ -117,8 +117,7 @@ protected:
           radio_(std::move(radio)),
           mycall_(std::move(mycall)),
           peer_addr_(peer)
-    {
-    }
+    {}
     void set_parms(int fd);
     void copy_parms(SeqPacket& other) const noexcept;
 
@@ -152,8 +151,7 @@ public:
         : SeqPacket(std::move(radio), std::move(mycall), std::move(digipeaters)),
           my_priv_(priv),
           peer_pub_(pub)
-    {
-    }
+    {}
     void listen(std::function<void(std::unique_ptr<SeqPacket>)> cb) override;
     void write(const std::string& msg) override;
     std::string read() override;

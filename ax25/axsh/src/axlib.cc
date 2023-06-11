@@ -353,8 +353,7 @@ DGram::DGram(std::string radio, std::string mycall, std::vector<std::string> dig
         throw std::runtime_error("empty MYCALL provided to DGram");
     }
 
-    struct full_sockaddr_ax25 me {
-    };
+    struct full_sockaddr_ax25 me {};
     me.fsa_ax25.sax25_family = AF_AX25;
     if (-1 == ax25_aton(mycall_.c_str(), &me)) {
         throw std::system_error(
@@ -376,8 +375,7 @@ DGram::DGram(std::string radio, std::string mycall, std::vector<std::string> dig
 
 std::pair<std::string, std::string> DGram::recv()
 {
-    struct full_sockaddr_ax25 sa {
-    };
+    struct full_sockaddr_ax25 sa {};
     socklen_t salen = sizeof(sa);
     std::array<char, 4196> buf;
     const auto rc = recvfrom(sock_,
@@ -394,8 +392,7 @@ std::pair<std::string, std::string> DGram::recv()
 
 void DGram::write(const std::string& peer, const std::string& msg)
 {
-    struct full_sockaddr_ax25 sa {
-    };
+    struct full_sockaddr_ax25 sa {};
     if (-1 == ax25_aton(peer.c_str(), &sa)) {
         throw std::system_error(
             errno, std::generic_category(), "ax25_aton(" + peer + ")");
@@ -431,8 +428,7 @@ SeqPacket::SeqPacket(std::string radio,
 
     set_parms(sock_);
 
-    struct full_sockaddr_ax25 me {
-    };
+    struct full_sockaddr_ax25 me {};
     me.fsa_ax25.sax25_family = AF_AX25;
     if (-1 == ax25_aton(mycall_.c_str(), &me)) {
         throw std::system_error(
@@ -449,8 +445,7 @@ SeqPacket::SeqPacket(std::string radio,
 int SeqPacket::connect(std::string addr)
 {
     peer_addr_ = std::move(addr);
-    struct full_sockaddr_ax25 peer {
-    };
+    struct full_sockaddr_ax25 peer {};
     peer.fsa_ax25.sax25_family = AF_AX25;
     if (-1 == ax25_aton_entry(peer_addr_.c_str(),
                               reinterpret_cast<char*>(&peer.fsa_ax25.sax25_call))) {
@@ -514,12 +509,12 @@ void SeqPacket::listen(std::function<void(std::unique_ptr<SeqPacket>)> cb)
     }
 
     for (;;) {
-        struct full_sockaddr_ax25 peer {
-        };
+        struct full_sockaddr_ax25 peer {};
         socklen_t len = sizeof(peer);
         int fd = accept(sock_, reinterpret_cast<struct sockaddr*>(&peer), &len);
         if (fd == -1) {
             std::clog << "accept(): " << strerror(errno) << "\n";
+            sleep(1);
             continue;
         }
         set_parms(fd);
@@ -644,8 +639,7 @@ SignedSeqPacket::SignedSeqPacket(SeqPacket&& rhs,
                                  std::array<char, 64> priv,
                                  std::array<char, 32> pub)
     : SeqPacket(std::move(rhs)), my_priv_(priv), peer_pub_(pub)
-{
-}
+{}
 
 void SignedSeqPacket::listen(std::function<void(std::unique_ptr<SeqPacket>)> cb)
 {

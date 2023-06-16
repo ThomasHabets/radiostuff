@@ -22,7 +22,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: Not titled yet
+    title: AX.25 9600bps multimodem
     window_size: (1000,1000)
   states:
     bus_sink: false
@@ -61,7 +61,7 @@ blocks:
   id: variable_qtgui_entry
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: tabs@1
     label: ''
     type: int
     value: '12300'
@@ -88,7 +88,7 @@ blocks:
   id: variable_qtgui_entry
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 0,0
     label: ''
     type: int
     value: '144500000'
@@ -103,7 +103,7 @@ blocks:
   id: variable_qtgui_entry
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 0,2
     label: ''
     type: real
     value: '0.3'
@@ -111,7 +111,22 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1992, 228.0]
+    coordinate: [2016, 220.0]
+    rotation: 0
+    state: true
+- name: ogain
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: 0,1
+    label: ''
+    type: real
+    value: '0.3'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1704, 196.0]
     rotation: 0
     state: true
 - name: samp_rate
@@ -185,9 +200,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1264, 560.0]
+    coordinate: [1280, 560.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_throttle2_0
   id: blocks_throttle2
   parameters:
@@ -208,7 +223,7 @@ blocks:
     bus_structure: null
     coordinate: [1720, 268.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_throttle2_0_1
   id: blocks_throttle2
   parameters:
@@ -631,7 +646,7 @@ blocks:
     ctrlpanel: 'True'
     entags: 'True'
     grid: 'False'
-    gui_hint: 2,0,1,2
+    gui_hint: 'tabs@0: 2,0,1,2'
     label1: Signal 1
     label10: Signal 10
     label2: Signal 2
@@ -728,7 +743,7 @@ blocks:
     ctrlpanel: 'True'
     entags: 'True'
     grid: 'False'
-    gui_hint: 2,2,1,2
+    gui_hint: 'tabs@0: 2,2,1,2'
     label1: Signal 1
     label10: Signal 10
     label2: Signal 2
@@ -826,7 +841,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: ''
+    gui_hint: tabs@1
     int_max: '10'
     int_min: '-140'
     label1: ''
@@ -852,9 +867,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1936, 352.0]
+    coordinate: [1768, 420.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: qtgui_waterfall_sink_x_0_1
   id: qtgui_waterfall_sink_x
   parameters:
@@ -887,7 +902,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: 0,0,1,4
+    gui_hint: 'tabs@0: 0,0,1,4'
     int_max: '10'
     int_min: '-140'
     label1: ''
@@ -948,7 +963,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: ''
+    gui_hint: tabs@1
     int_max: '10'
     int_min: '-140'
     label1: ''
@@ -1009,7 +1024,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: ''
+    gui_hint: tabs@1
     int_max: '10'
     int_min: '-140'
     label1: ''
@@ -1070,7 +1085,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: 1,0
+    gui_hint: 'tabs@0: 1,0'
     int_max: '10'
     int_min: '-140'
     label1: ''
@@ -1131,7 +1146,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: 1,2
+    gui_hint: 'tabs@0: 1,2'
     int_max: '10'
     int_min: '-140'
     label1: ''
@@ -1192,7 +1207,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: 1,3
+    gui_hint: 'tabs@0: 1,3'
     int_max: '10'
     int_min: '-140'
     label1: ''
@@ -1253,7 +1268,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: 1,1
+    gui_hint: 'tabs@0: 1,1'
     int_max: '10'
     int_min: '-140'
     label1: ''
@@ -1302,6 +1317,40 @@ blocks:
     coordinate: [984, 92.0]
     rotation: 0
     state: enabled
+- name: tabs
+  id: qtgui_tab_widget
+  parameters:
+    alias: ''
+    comment: ''
+    gui_hint: ''
+    label0: RX
+    label1: TX
+    label10: Tab 10
+    label11: Tab 11
+    label12: Tab 12
+    label13: Tab 13
+    label14: Tab 14
+    label15: Tab 15
+    label16: Tab 16
+    label17: Tab 17
+    label18: Tab 18
+    label19: Tab 19
+    label2: Tab 2
+    label3: Tab 3
+    label4: Tab 4
+    label5: Tab 5
+    label6: Tab 6
+    label7: Tab 7
+    label8: Tab 8
+    label9: Tab 9
+    num_tabs: '2'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [264, 292.0]
+    rotation: 0
+    state: true
 - name: uhd_usrp_sink_0
   id: uhd_usrp_sink
   parameters:
@@ -1371,7 +1420,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: '0'
+    center_freq0: freq
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -1415,7 +1464,7 @@ blocks:
     comment: ''
     dev_addr: '""'
     dev_args: ''
-    gain0: '0'
+    gain0: ogain
     gain1: '0'
     gain10: '0'
     gain11: '0'
@@ -1447,7 +1496,7 @@ blocks:
     gain7: '0'
     gain8: '0'
     gain9: '0'
-    gain_type0: default
+    gain_type0: normalized
     gain_type1: default
     gain_type10: default
     gain_type11: default
@@ -1578,7 +1627,7 @@ blocks:
     bus_structure: null
     coordinate: [1704, 68.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: uhd_usrp_source_0
   id: uhd_usrp_source
   parameters:
@@ -2012,9 +2061,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1992, 76.0]
+    coordinate: [2016, 76.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: virtual_sink_0
   id: virtual_sink
   parameters:
@@ -2080,9 +2129,9 @@ connections:
 - [freq_xlating_fft_filter_ccc_0, '0', pfb_channelizer_ccf_0, '0']
 - [freq_xlating_fft_filter_ccc_0, '0', qtgui_waterfall_sink_x_0_1, '0']
 - [modem_ax9600_grsat_hier_rx_0, out, blocks_message_debug_0, print]
-- [modem_ax9600_grsat_hier_rx_0_0, out, blocks_message_debug_0, print]
-- [modem_ax9600_grsat_hier_rx_0_0_0, out, blocks_message_debug_0, print]
-- [modem_ax9600_grsat_hier_rx_0_1, out, blocks_message_debug_0, print]
+- [modem_ax9600_grsat_hier_rx_0, out, network_socket_pdu_0_0, pdus]
+- [modem_ax9600_grsat_hier_rx_0_0, out, network_socket_pdu_0_0, pdus]
+- [modem_ax9600_grsat_hier_rx_0_0_0, out, network_socket_pdu_0_0, pdus]
 - [modem_ax9600_grsat_hier_rx_0_1, out, network_socket_pdu_0_0, pdus]
 - [modem_ax9600_grsat_hier_tx_0, '0', pfb_synthesizer_ccf_1, '0']
 - [modem_ax9600_grsat_hier_tx_0, '0', qtgui_waterfall_sink_x_1_0, '0']
@@ -2104,6 +2153,7 @@ connections:
 - [rational_resampler_xxx_0, '0', virtual_sink_0, '0']
 - [uhd_usrp_source_0, '0', virtual_sink_1, '0']
 - [virtual_source_0, '0', blocks_throttle2_0, '0']
+- [virtual_source_0, '0', qtgui_waterfall_sink_x_0, '0']
 - [virtual_source_0, '0', uhd_usrp_sink_0, '0']
 - [virtual_source_1, '0', freq_xlating_fft_filter_ccc_0, '0']
 

@@ -79,7 +79,7 @@ blocks:
     gui_hint: 3,0
     label: ''
     type: int
-    value: '144500000'
+    value: '144400000'
   states:
     bus_sink: false
     bus_source: false
@@ -118,7 +118,7 @@ blocks:
   id: variable_qtgui_entry
   parameters:
     comment: ''
-    gui_hint: 3,3
+    gui_hint: 4,0
     label: ''
     type: int
     value: '100'
@@ -159,7 +159,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1248, 256.0]
+    coordinate: [1264, 232.0]
     rotation: 0
     state: enabled
 - name: blocks_throttle2_0
@@ -282,14 +282,14 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     mtu: '10000'
-    port: '52009'
+    port: '53001'
     tcp_no_delay: 'False'
     type: UDP_CLIENT
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1248, 356.0]
+    coordinate: [1240, 356.0]
     rotation: 0
     state: enabled
 - name: pfb_channelizer_ccf_0
@@ -1421,9 +1421,9 @@ connections:
 - [freq_xlating_fft_filter_ccc_0, '0', pfb_channelizer_ccf_0, '0']
 - [freq_xlating_fft_filter_ccc_0, '0', qtgui_waterfall_sink_x_0, '0']
 - [modem_ax9600_grsat_hier_rx_0, out, blocks_message_debug_0, print]
-- [modem_ax9600_grsat_hier_rx_0_0, out, blocks_message_debug_0, print]
-- [modem_ax9600_grsat_hier_rx_0_0_0, out, blocks_message_debug_0, print]
-- [modem_ax9600_grsat_hier_rx_0_1, out, blocks_message_debug_0, print]
+- [modem_ax9600_grsat_hier_rx_0, out, network_socket_pdu_0, pdus]
+- [modem_ax9600_grsat_hier_rx_0_0, out, network_socket_pdu_0, pdus]
+- [modem_ax9600_grsat_hier_rx_0_0_0, out, network_socket_pdu_0, pdus]
 - [modem_ax9600_grsat_hier_rx_0_1, out, network_socket_pdu_0, pdus]
 - [pfb_channelizer_ccf_0, '0', modem_ax9600_grsat_hier_rx_0, '0']
 - [pfb_channelizer_ccf_0, '0', qtgui_time_sink_x_0, '0']

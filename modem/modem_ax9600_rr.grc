@@ -91,7 +91,7 @@ blocks:
     gui_hint: 0,0
     label: ''
     type: int
-    value: '144500000'
+    value: '144400000'
   states:
     bus_sink: false
     bus_source: false
@@ -561,7 +561,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     mtu: '10000'
-    port: '52009'
+    port: '52002'
     tcp_no_delay: 'False'
     type: UDP_CLIENT
   states:

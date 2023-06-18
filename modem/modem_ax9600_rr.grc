@@ -189,6 +189,82 @@ blocks:
     coordinate: [32, 716.0]
     rotation: 0
     state: disabled
+- name: ax25_hier_rx_0
+  id: ax25_hier_rx
+  parameters:
+    affinity: ''
+    alias: ''
+    audio_rate: '12000'
+    bps: '1200'
+    comment: ''
+    gui_hint: tabs@0
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate//deci//4
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [952, 388.0]
+    rotation: 0
+    state: true
+- name: ax25_hier_rx_0_0
+  id: ax25_hier_rx
+  parameters:
+    affinity: ''
+    alias: ''
+    audio_rate: '12000'
+    bps: '1200'
+    comment: ''
+    gui_hint: tabs@0
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate//deci//4
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [952, 628.0]
+    rotation: 0
+    state: true
+- name: ax25_hier_rx_0_1
+  id: ax25_hier_rx
+  parameters:
+    affinity: ''
+    alias: ''
+    audio_rate: '12000'
+    bps: '1200'
+    comment: ''
+    gui_hint: tabs@0
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate//deci//4
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [952, 884.0]
+    rotation: 0
+    state: true
+- name: ax25_hier_rx_0_2
+  id: ax25_hier_rx
+  parameters:
+    affinity: ''
+    alias: ''
+    audio_rate: '12000'
+    bps: '1200'
+    comment: ''
+    gui_hint: tabs@0
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate//deci//4
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [952, 1220.0]
+    rotation: 0
+    state: true
 - name: blocks_message_debug_0
   id: blocks_message_debug
   parameters:
@@ -202,7 +278,7 @@ blocks:
     bus_structure: null
     coordinate: [1280, 560.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_throttle2_0
   id: blocks_throttle2
   parameters:
@@ -446,7 +522,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 484.0]
+    coordinate: [952, 564.0]
     rotation: 0
     state: enabled
 - name: modem_ax9600_grsat_hier_rx_0_0_0
@@ -463,7 +539,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 804.0]
+    coordinate: [952, 1060.0]
     rotation: 0
     state: enabled
 - name: modem_ax9600_grsat_hier_rx_0_1
@@ -480,7 +556,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 644.0]
+    coordinate: [952, 820.0]
     rotation: 0
     state: enabled
 - name: modem_ax9600_grsat_hier_tx_0
@@ -1111,7 +1187,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 388.0]
+    coordinate: [952, 468.0]
     rotation: 0
     state: true
 - name: qtgui_waterfall_sink_x_1_1
@@ -1172,7 +1248,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 708.0]
+    coordinate: [952, 964.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_1_1_0
@@ -1233,7 +1309,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 868.0]
+    coordinate: [952, 1124.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_1_2
@@ -1294,7 +1370,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 548.0]
+    coordinate: [952, 708.0]
     rotation: 0
     state: enabled
 - name: rational_resampler_xxx_0
@@ -2120,6 +2196,14 @@ blocks:
 connections:
 - [analog_const_source_x_0, '0', pfb_synthesizer_ccf_1, '3']
 - [analog_noise_source_x_0, '0', blocks_throttle2_0_1, '0']
+- [ax25_hier_rx_0, out, blocks_message_debug_0, print]
+- [ax25_hier_rx_0, out, network_socket_pdu_0_0, pdus]
+- [ax25_hier_rx_0_0, out, blocks_message_debug_0, print]
+- [ax25_hier_rx_0_0, out, network_socket_pdu_0_0, pdus]
+- [ax25_hier_rx_0_1, out, blocks_message_debug_0, print]
+- [ax25_hier_rx_0_1, out, network_socket_pdu_0_0, pdus]
+- [ax25_hier_rx_0_2, out, blocks_message_debug_0, print]
+- [ax25_hier_rx_0_2, out, network_socket_pdu_0_0, pdus]
 - [blocks_throttle2_0, '0', qtgui_waterfall_sink_x_0, '0']
 - [blocks_throttle2_0, '0', virtual_sink_1, '0']
 - [blocks_throttle2_0_1, '0', freq_xlating_fft_filter_ccc_0, '0']
@@ -2138,14 +2222,18 @@ connections:
 - [modem_ax9600_grsat_hier_tx_0_0, '0', pfb_synthesizer_ccf_1, '1']
 - [modem_ax9600_grsat_hier_tx_0_1, '0', pfb_synthesizer_ccf_1, '2']
 - [network_socket_pdu_0, pdus, epy_block_0, in]
+- [pfb_channelizer_ccf_0, '0', ax25_hier_rx_0, '0']
 - [pfb_channelizer_ccf_0, '0', modem_ax9600_grsat_hier_rx_0, '0']
 - [pfb_channelizer_ccf_0, '0', qtgui_time_sink_x_0, '0']
 - [pfb_channelizer_ccf_0, '0', qtgui_waterfall_sink_x_1_0_0, '0']
+- [pfb_channelizer_ccf_0, '1', ax25_hier_rx_0_0, '0']
 - [pfb_channelizer_ccf_0, '1', modem_ax9600_grsat_hier_rx_0_0, '0']
 - [pfb_channelizer_ccf_0, '1', qtgui_time_sink_x_0_0, '0']
 - [pfb_channelizer_ccf_0, '1', qtgui_waterfall_sink_x_1_2, '0']
+- [pfb_channelizer_ccf_0, '2', ax25_hier_rx_0_1, '0']
 - [pfb_channelizer_ccf_0, '2', modem_ax9600_grsat_hier_rx_0_1, '0']
 - [pfb_channelizer_ccf_0, '2', qtgui_waterfall_sink_x_1_1, '0']
+- [pfb_channelizer_ccf_0, '3', ax25_hier_rx_0_2, '0']
 - [pfb_channelizer_ccf_0, '3', modem_ax9600_grsat_hier_rx_0_0_0, '0']
 - [pfb_channelizer_ccf_0, '3', qtgui_waterfall_sink_x_1_1_0, '0']
 - [pfb_synthesizer_ccf_1, '0', qtgui_waterfall_sink_x_1, '0']

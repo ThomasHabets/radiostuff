@@ -72,7 +72,7 @@ void handle_get(SeqPacket* conn, const std::vector<std::string>& args)
             if (ferror(f)) {
                 const auto err = errno;
                 fclose(f);
-                throw std::system_error(errno, std::generic_category(), "reading stdin");
+                throw std::system_error(err, std::generic_category(), "reading stdin");
             }
         }
         std::clog << "Sending packet of size " << n << std::endl;

@@ -16,6 +16,7 @@
 #include <functional>
 #include <iostream>
 #include <mutex>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -126,7 +127,7 @@ void mainloop(SeqPacket* sock,
     }
 }
 
-std::string get_command(EditLine* el, size_t max)
+std::optional<std::string> get_command(EditLine* el, size_t max)
 {
     if (!el) {
         return xgetline(std::cin, max);
@@ -136,7 +137,7 @@ std::string get_command(EditLine* el, size_t max)
         int count = 0;
         const char* buf = el_gets(el, &count);
         if (!buf) {
-            return "";
+            return {};
         }
         std::string s = buf;
         while (!s.empty() && (s.back() == '\r' || s.back() == '\n')) {
@@ -226,8 +227,8 @@ int wrapmain(int argc, char** argv)
                 std::unique_lock<std::mutex> l(m);
                 input_cv.wait(l, [&cmd] { return cmd.empty(); });
             }
-            const auto line = get_command(el, sock->max_packet_size());
-            if (line == "" || line == "exit") {
+            const auto line = get_command(el, sock->max_packet_size()).value_or("exit");
+            if (line == "exit") {
                 break;
             }
             const bool continuation = false;

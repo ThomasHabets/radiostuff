@@ -639,7 +639,8 @@ SignedSeqPacket::SignedSeqPacket(SeqPacket&& rhs,
                                  std::array<char, 64> priv,
                                  std::array<char, 32> pub)
     : SeqPacket(std::move(rhs)), my_priv_(priv), peer_pub_(pub)
-{}
+{
+}
 
 void SignedSeqPacket::listen(std::function<void(std::unique_ptr<SeqPacket>)> cb)
 {
@@ -707,7 +708,6 @@ std::string SignedSeqPacket::read()
     if (full.empty()) {
         return "";
     }
-    const auto msg = full.substr(sig_size_);
     const auto sig = full.substr(0, sig_size_);
     if (!crypto::verify(full + nonce_peer_ + nonce_local_ + std::to_string(packet_good_),
                         peer_pub_)) {
@@ -716,7 +716,7 @@ std::string SignedSeqPacket::read()
                                  std::to_string(packet_good_) + ": " + str2hex(full));
     }
     packet_good_++;
-    return msg;
+    return full.substr(sig_size_);
 }
 
 std::string SignedSeqPacket::sign(const std::string& msg) const

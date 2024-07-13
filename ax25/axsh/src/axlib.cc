@@ -322,7 +322,7 @@ void populate_digis(struct full_sockaddr_ax25* sa, const std::vector<std::string
     }
 
     sa->fsa_ax25.sax25_ndigis = std::min(digis.size() + offset, s_t(AX25_MAX_DIGIS));
-    for (int i = 0; i < digis.size(); i++) {
+    for (s_t i = 0; i < digis.size(); i++) {
         if (-1 ==
             ax25_aton_entry(digis[i].c_str(),
                             reinterpret_cast<char*>(&sa->fsa_digipeater[i + offset]))) {

@@ -176,9 +176,19 @@ int wrapmain(int argc, char** argv)
         }
     }
 
-    if (optind + 1 != argc) {
-        fprintf(stderr, "Need dest\n");
-        exit(EXIT_FAILURE);
+    {
+        const auto remaining_args = argc - optind;
+        switch (remaining_args) {
+        case 0:
+            fprintf(stderr, "No destination address provided.\n");
+            exit(EXIT_FAILURE);
+        case 1:
+            // good.
+            break;
+        default:
+            fprintf(stderr, "Too many positional args on command line.\n");
+            exit(EXIT_FAILURE);
+        }
     }
     const std::string dst = argv[optind];
 

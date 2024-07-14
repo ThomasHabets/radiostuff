@@ -98,6 +98,7 @@ void mainloop(SeqPacket* sock,
                     break;
                 }
                 buf += data;
+                bool printed_anything = false;
                 for (;;) {
                     std::string line;
                     std::tie(line, buf) = splitline(buf);
@@ -108,9 +109,12 @@ void mainloop(SeqPacket* sock,
                     if (!ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws)) {
                         std::cout << "\r" << std::string(ws.ws_col - 1, ' ') << "\r";
                     }
+                    printed_anything = true;
                     std::cout << line << std::flush;
                 }
-                el_set(el, EL_REFRESH);
+                if (printed_anything) {
+                    el_set(el, EL_REFRESH);
+                }
             }
         }
 

@@ -51,9 +51,12 @@ int wrapmain(int argc, char** argv)
     DGram sock(copt.radio, copt.src, copt.path);
     std::clog << "Ready\n";
     for (;;) {
-        const auto packet = sock.recv();
-
-        std::clog << "Got packet src=" << packet.first << " data=<" << packet.second
-                  << ">\n";
+        if (const auto maybe_packet = sock.recv(); !maybe_packet.has_value()) {
+            std::clog << "Error reading packet: " << maybe_packet.error().what() << "\n";
+        } else {
+            const auto packet = maybe_packet.value();
+            std::clog << "Got packet src=" << packet.first << " data=<" << packet.second
+                      << ">\n";
+        }
     }
 }

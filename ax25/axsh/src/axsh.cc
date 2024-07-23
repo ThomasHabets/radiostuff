@@ -210,7 +210,12 @@ int wrapmain(int argc, char** argv)
         el_set(el, EL_HIST, history, hist);
     }
 
-    auto sock = SeqPacket::make_from_commonopts(copt);
+    auto maybe_sock = SeqPacket::make_from_commonopts(copt);
+    if (!maybe_sock.has_value()) {
+        std::clog << "Stack: " << maybe_sock.error() << "\n";
+        return 1;
+    }
+    auto sock = std::move(maybe_sock.value());
 
     std::clog << "Connecting...\n";
     const auto rc = sock->connect(dst);

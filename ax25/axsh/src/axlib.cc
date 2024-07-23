@@ -7,13 +7,34 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <cstring>
+#include <exception>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <stacktrace>
 #include <stdexcept>
 #include <thread>
+#include <utility>
 
 namespace axlib {
+
+std::string eptr_what(std::exception_ptr eptr)
+{
+    try {
+        rethrow_exception(eptr);
+    } catch (const std::exception& e) {
+        return e.what();
+    }
+    throw "can't happen";
+}
+
+std::ostream& operator<<(std::ostream& os, const Error& dt)
+{
+    os << dt.stacktrace; // << ' ' << dt.exception;
+    os << ' ';
+    os << eptr_what(dt.exception);
+    return os;
+}
 
 namespace {
 enum class coptval {
@@ -82,18 +103,30 @@ void common_init()
     }
 }
 
-std::unique_ptr<SeqPacket> SeqPacket::make_from_commonopts(const CommonOpts& copt)
+std::expected<std::unique_ptr<SeqPacket>, Error>
+SeqPacket::make_from_commonopts(const CommonOpts& copt)
 {
     if (copt.my_priv_provided != copt.peer_pub_provided) {
         throw std::runtime_error(
             "if priv key is provided, pubkey must be too. And vice versa");
     }
     std::unique_ptr<SeqPacket> sock;
-    if (copt.my_priv_provided) {
-        sock = std::make_unique<SignedSeqPacket>(
-            copt.radio, copt.src, copt.my_priv, copt.peer_pub, copt.path);
-    } else {
-        sock = std::make_unique<SeqPacket>(copt.radio, copt.src, copt.path);
+    try {
+        if (copt.my_priv_provided) {
+            sock = std::make_unique<SignedSeqPacket>(
+                copt.radio, copt.src, copt.my_priv, copt.peer_pub, copt.path);
+        } else {
+            std::expected<std::unique_ptr<SeqPacket>, Error> s =
+                SeqPacket::create(copt.radio, copt.src, copt.path)
+                    .or_else([](const Error& err)
+                                 -> std::expected<std::unique_ptr<SeqPacket>, Error> {
+                        rethrow_exception(err.exception);
+                        std::unreachable();
+                    });
+            sock = std::move(s.value());
+        }
+    } catch (const std::exception&) {
+        return std::unexpected(Error(std::current_exception()));
     }
     sock->set_extended_modulus(copt.extended_modulus);
     sock->set_window_size(copt.window);
@@ -312,7 +345,7 @@ void populate_digis(struct full_sockaddr_ax25* sa, const std::vector<std::string
 {
     using s_t = decltype(digis.size());
 
-    int offset = sa->fsa_ax25.sax25_ndigis;
+    const int offset = sa->fsa_ax25.sax25_ndigis;
 
     if (false) {
         std::clog << sa->fsa_ax25.sax25_ndigis << " digis before\n";
@@ -373,7 +406,7 @@ DGram::DGram(std::string radio, std::string mycall, std::vector<std::string> dig
     }
 }
 
-std::pair<std::string, std::string> DGram::recv()
+std::expected<std::pair<std::string, std::string>, std::runtime_error> DGram::recv()
 {
     struct full_sockaddr_ax25 sa {};
     socklen_t salen = sizeof(sa);
@@ -385,7 +418,8 @@ std::pair<std::string, std::string> DGram::recv()
                              reinterpret_cast<struct sockaddr*>(&sa),
                              &salen);
     if (rc == -1) {
-        throw std::system_error(errno, std::generic_category(), "recvfrom()");
+        return std::unexpected(
+            std::system_error(errno, std::generic_category(), "recvfrom()"));
     }
     return std::make_pair("TODO", std::string(buf.data(), buf.data() + rc));
 }

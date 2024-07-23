@@ -57,7 +57,7 @@ int wrapmain(int argc, char** argv)
     DGram sock(copt.radio, copt.src, copt.path);
     sock.write(dst, message);
     for (;;) {
-        const auto packet = sock.recv();
+        const auto packet = sock.recv().value();
         std::clog << "Got packet src=" << packet.first << " data=<" << packet.second
                   << ">\n";
     }

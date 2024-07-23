@@ -1,8 +1,11 @@
 // -*- c++ -*-
 #include <getopt.h>
+#include <expected>
 #include <fstream>
 #include <functional>
+#include <iostream>
 #include <memory>
+#include <stacktrace>
 #include <string>
 #include <vector>
 
@@ -27,6 +30,15 @@ public:
 private:
     int fd;
 };
+
+struct Error {
+    Error(std::exception_ptr e) : exception(e), stacktrace(std::stacktrace::current()) {}
+    std::exception_ptr exception;
+    std::stacktrace stacktrace;
+};
+
+
+std::ostream& operator<<(std::ostream& os, const Error& dt);
 
 struct CommonOpts {
     std::string src;
@@ -54,7 +66,7 @@ public:
     DGram(std::string radio,
           std::string mycall,
           std::vector<std::string> digipeaters = {});
-    std::pair<std::string, std::string> recv();
+    std::expected<std::pair<std::string, std::string>, std::runtime_error> recv();
     void write(const std::string& dst, const std::string& msg);
 
     static std::vector<struct option> common_long_opts();
@@ -71,6 +83,15 @@ protected:
 class SeqPacket
 {
 public:
+    static std::expected<std::unique_ptr<SeqPacket>, Error> create(
+        std::string radio, std::string mycall, std::vector<std::string> digipeaters = {})
+    {
+        try {
+            return std::make_unique<SeqPacket>(radio, mycall, digipeaters);
+        } catch (const std::exception& e) {
+            return std::unexpected(Error(std::current_exception()));
+        }
+    }
     SeqPacket(std::string radio,
               std::string mycall,
               std::vector<std::string> digipeaters = {});
@@ -108,7 +129,8 @@ public:
     static std::vector<struct option> common_long_opts();
     static bool common_opt(CommonOpts& o, int opt);
     static std::string common_usage();
-    static std::unique_ptr<SeqPacket> make_from_commonopts(const CommonOpts& opt);
+    static std::expected<std::unique_ptr<SeqPacket>, Error>
+    make_from_commonopts(const CommonOpts& opt);
 
 
 protected:
@@ -117,7 +139,8 @@ protected:
           radio_(std::move(radio)),
           mycall_(std::move(mycall)),
           peer_addr_(peer)
-    {}
+    {
+    }
     void set_parms(int fd);
     void copy_parms(SeqPacket& other) const noexcept;
 
@@ -151,7 +174,8 @@ public:
         : SeqPacket(std::move(radio), std::move(mycall), std::move(digipeaters)),
           my_priv_(priv),
           peer_pub_(pub)
-    {}
+    {
+    }
     void listen(std::function<void(std::unique_ptr<SeqPacket>)> cb) override;
     void write(const std::string& msg) override;
     std::string read() override;
